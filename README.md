@@ -339,5 +339,3 @@ zamanlı mesajlaşma, görsel yeniden boyutlandırma/optimizasyon, gerçek kur
 servisi, arama motoru (Elasticsearch/Postgres full-text), gettext'e geçiş
 (`.po`), SEO (meta etiket, sitemap, structured data), performans (önbellekleme),
 KVKK/GDPR uyum metinleri, mobil API.
-#   b a l k a n b a a z a r  
- 
