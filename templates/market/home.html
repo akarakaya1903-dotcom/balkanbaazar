@@ -1,0 +1,80 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.brand }} — {{ t.heroT }}{% endblock %}
+
+{% block content %}
+{% include "market/_herobanner.html" %}
+{% include "market/_banners.html" %}
+
+<div class="wrap">
+  <section class="sect">
+    <div class="rhead"><h2>{{ t.browse }}</h2><span class="cnt">{{ t.used }}</span></div>
+    <div class="cattiles">
+      {% for c in used_cats %}
+      <a class="cattile" href="{% url 'market:listings' %}?mode=used&amp;cat={{ c.slug }}">
+        <span class="ic">{{ c.icon }}</span>
+        <span>{% catname c lang %}<br><small style="color:var(--ink-3);font-weight:500">{{ c.n }} {{ t.listings_in }}</small></span></a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{{ t.all_l }}</h2>
+      <span class="cnt">{{ country.flag }} {{ country.name_local }}</span></div>
+    <div class="grid">
+      {% for item in fresh %}{% include "market/_card.html" %}{% empty %}
+      <div class="empty"><h3>{{ t.none }}</h3><p>{{ t.noneH }}</p></div>{% endfor %}
+    </div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>🔥 {{ t.trending }}</h2><a class="cnt" href="{% url 'market:trending' %}">{{ t.more }} →</a></div>
+    <div class="grid">{% for item in trending %}{% include "market/_card.html" %}{% endfor %}</div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{{ t.featured }}</h2>
+      <a class="cnt" href="{% url 'market:shops' %}">{{ t.more }} →</a></div>
+    <div class="rail">
+      {% for s in featured_shops %}
+      <a class="shop" href="{% url 'market:shop_detail' s.slug %}">
+        {% if s.logo %}<img class="avimg" src="{{ s.logo.url }}" alt="{{ s.name }}">{% else %}<div class="av" style="background:hsl({{ s.hue }} 42% 34%)">{{ s.name|slice:":1" }}</div>{% endif %}
+        <div class="nm">{{ s.name }} {% if s.verified %}<span class="vok">✔</span>{% endif %}</div>
+        <div class="ms"><span class="star">★</span> {{ s.rating }} · {{ s.product_count }} {{ t.products }}</div>
+        <div class="ms">{{ s.city.name }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{{ t.shops }}</h2><span class="cnt">{{ t.cat_all }}</span></div>
+    <div class="cattiles">
+      {% for c in shop_cats %}
+      <a class="cattile" href="{% url 'market:shops' %}?cat={{ c.slug }}">
+        <span class="ic">{{ c.icon }}</span>
+        <span>{% catname c lang %}<br><small style="color:var(--ink-3);font-weight:500">{{ c.n }} {{ t.shop_count }}</small></span></a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{{ t.all_p }}</h2><span class="cnt">{{ t.shops }}</span></div>
+    <div class="grid">
+      {% for item in products %}{% include "market/_card.html" %}{% endfor %}
+    </div>
+  </section>
+
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{{ t.countries }}</h2></div>
+    <div class="cattiles">
+      {% for s in country_stats %}
+      <a class="cattile" href="{% url 'market:set_country' s.country.code %}">
+        <span class="ic">{% include "market/_flag.html" with c=s.country %}</span>
+        <span>{% countryname s.country lang %}<br>
+          <small style="color:var(--ink-3);font-weight:500">{{ s.listings }} {{ t.listings_in }} · {{ s.shops }} {{ t.shops_in }}</small></span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

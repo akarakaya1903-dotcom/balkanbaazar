@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ t.apply_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap">
+  <div class="authbox wide">
+    <h1>{{ t.apply_t }}</h1>
+    <p class="lead">{{ t.apply_s }}</p>
+    <form method="post" novalidate>{% csrf_token %}
+      {% include "market/_form.html" %}
+      <button class="btn-sea" type="submit">{{ t.apply_send }}</button>
+    </form>
+  </div>
+  <aside class="authside">
+    <h3>{{ t.plT }}</h3>
+    <ul class="ticks">
+      <li>{{ t.p1 }} — {{ t.p1d }}</li>
+      <li>{{ t.p2 }} — 9 € {{ t.mo }}</li>
+      <li>{{ t.p3 }} — 29 € {{ t.mo }}</li>
+    </ul>
+    <p class="small">{{ t.plTime }}</p>
+    <div class="miniflags">
+      {% for c in countries %}{% include "market/_flag.html" with c=c %}{% endfor %}
+    </div>
+  </aside>
+</div></div>
+{% endblock %}

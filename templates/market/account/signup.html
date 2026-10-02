@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t.register }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap">
+  <div class="authbox">
+    <h1>{{ t.reg_t }}</h1>
+    <p class="lead">{{ t.reg_s }}</p>
+    <form method="post" novalidate>{% csrf_token %}
+      {% include "market/_form.html" %}
+      <button class="btn-sea" type="submit">{{ t.register }}</button>
+    </form>
+    <p class="authalt">{{ t.have_acc }} <a href="{% url 'market:login' %}">{{ t.signin }}</a></p>
+  </div>
+  <aside class="authside">
+    <h3>{{ t.openshop }}</h3>
+    <p>{{ t.plS }}</p>
+    <ul class="ticks">
+      <li>{{ t.p1 }} — {{ t.p1d }}</li>
+      <li>{{ t.p2 }} — 9 € {{ t.mo }}</li>
+      <li>{{ t.p3 }} — 29 € {{ t.mo }}</li>
+    </ul>
+    <a class="btn-line" href="{% url 'market:pricing' %}">{{ t.pricing }}</a>
+  </aside>
+</div></div>
+{% endblock %}

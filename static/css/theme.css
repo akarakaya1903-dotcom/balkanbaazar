@@ -1,0 +1,73 @@
+/* Canli tema katmani: app.css uzerine biner. Silersen site eski haline doner. */
+body{background:radial-gradient(900px 340px at 8% -4%,rgba(21,154,166,.14),transparent 62%),radial-gradient(800px 320px at 100% 0,rgba(228,161,59,.16),transparent 60%),var(--bg);background-attachment:fixed}
+header.top{box-shadow:0 4px 18px rgba(13,42,58,.10)}
+.btn-sea{background:linear-gradient(135deg,var(--sea-2),var(--sea));box-shadow:0 6px 16px rgba(16,112,126,.28);transition:transform .15s,box-shadow .15s}
+.btn-sea:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(16,112,126,.34)}
+.card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s}
+.card:hover{transform:translateY(-5px);box-shadow:0 14px 34px rgba(13,42,58,.16)}
+.hcat-card{box-shadow:0 10px 30px rgba(13,42,58,.10)}
+.hcat{padding:12px 10px;border-radius:14px;transition:transform .18s ease,background .18s}
+.hcat:hover{transform:translateY(-4px)}
+.hcat .ic{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--sea-2),var(--sea));box-shadow:0 8px 16px rgba(13,42,58,.20),inset 0 2px 0 rgba(255,255,255,.35);transition:transform .18s}
+.hcat:hover .ic{transform:scale(1.1) rotate(-4deg)}
+.hcat .ic svg{width:30px;height:30px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.hcat.more .ic{background:linear-gradient(135deg,#64748B,#334155)}
+.hcat.c-fashion .ic{background:linear-gradient(135deg,#F472B6,#DB2777)}
+.hcat.c-electronics .ic{background:linear-gradient(135deg,#38BDF8,#2563EB)}
+.hcat.c-beauty .ic{background:linear-gradient(135deg,#FB7185,#BE185D)}
+.hcat.c-home .ic{background:linear-gradient(135deg,#FBBF24,#D97706)}
+.hcat.c-auto .ic{background:linear-gradient(135deg,#60A5FA,#1D4ED8)}
+.hcat.c-realestate .ic{background:linear-gradient(135deg,#34D399,#047857)}
+.hcat.c-secondhand .ic{background:linear-gradient(135deg,#2DD4BF,#0F766E)}
+.hcat.c-sport .ic{background:linear-gradient(135deg,#FB923C,#EA580C)}
+.hcat.c-baby .ic{background:linear-gradient(135deg,#A78BFA,#6D28D9)}
+.hcat.c-services .ic{background:linear-gradient(135deg,#94A3B8,#475569)}
+.hcat.c-grocery .ic{background:linear-gradient(135deg,#A3E635,#4D7C0F)}
+.hcat.c-pets .ic{background:linear-gradient(135deg,#F59E0B,#B45309)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hcat-card,.card{animation:rise .5s ease both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.hcat.c-tourism .ic{background:linear-gradient(135deg,#22D3EE,#0369A1)}
+/* ===== Modern katman ===== */
+:root{--r:14px;--shadow:0 1px 2px rgba(13,42,58,.05),0 10px 30px rgba(13,42,58,.08)}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:-.005em}
+h1,h2,h3,.logo b,.pr{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif}
+header.top{background:color-mix(in srgb,var(--deep) 88%,transparent);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+.search{border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:3px}
+.search input{padding:10px 16px}
+.search button{border-radius:999px;margin:2px;background:linear-gradient(135deg,#F0BE63,var(--amber))}
+.pill,.ghost{border-radius:999px}
+.mode a.on{border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.rhead{margin-bottom:16px}
+.rhead h2{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
+.rhead h2::before{content:"";width:6px;height:22px;border-radius:4px;background:linear-gradient(var(--sea-2),var(--amber))}
+.rhead .cnt{background:var(--sea-soft);color:var(--sea);padding:4px 12px;border-radius:999px;font-weight:600}
+.grid{gap:18px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border-radius:18px;border-color:transparent;box-shadow:var(--shadow)}
+.thumbwrap{border-radius:0;aspect-ratio:1/1}
+.thumb{font-size:64px;background-image:radial-gradient(circle at 30% 20%,rgba(255,255,255,.55),transparent 55%),radial-gradient(circle at 80% 90%,rgba(0,0,0,.12),transparent 60%);text-shadow:0 8px 18px rgba(0,0,0,.25)}
+.thumbimg{transition:transform .45s ease}
+.card:hover .thumbimg{transform:scale(1.06)}
+.badge{border-radius:999px;padding:4px 10px;backdrop-filter:blur(6px);box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.cbody{padding:14px 15px 16px;gap:4px}
+.tt{font-size:14.5px;font-weight:600}
+.pr{font-size:19px;font-weight:800;margin-top:6px;background:linear-gradient(90deg,var(--sea),var(--sea-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mt{display:flex;justify-content:space-between;gap:8px;margin-top:8px;padding-top:9px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-3)}
+.quickadd{border-radius:50%;box-shadow:0 8px 18px rgba(16,112,126,.35)}
+.shop,.cattile{border-radius:18px;border-color:transparent;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+.shop:hover,.cattile:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(13,42,58,.16)}
+.sect{padding:30px 0}
+input,select,textarea{border-radius:12px}
+footer{background:linear-gradient(160deg,var(--deep),#0A1F2C);border-top:4px solid var(--amber)}
+
+/* Reklam kaydirici ve orta serit */
+.slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;border-radius:20px;margin:18px 0 6px;box-shadow:var(--shadow);scrollbar-width:none}
+.slider::-webkit-scrollbar{display:none}
+.slide{position:relative;flex:0 0 100%;scroll-snap-align:start;display:block;aspect-ratio:10/3;background:var(--sea-soft)}
+.slide img,.midbanners img{width:100%;height:100%;object-fit:cover;display:block}
+.midbanners{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}
+.midbanners a{position:relative;display:block;border-radius:16px;overflow:hidden;aspect-ratio:2/1;box-shadow:var(--shadow);transition:transform .2s}
+.midbanners a:hover{transform:translateY(-4px)}
+.adtag{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;padding:3px 9px;border-radius:999px;backdrop-filter:blur(4px)}
+@media (max-width:640px){.slide{aspect-ratio:16/9}}

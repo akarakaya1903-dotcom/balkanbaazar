@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ other.first_name|default:other.username }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <a href="{% url 'market:inbox' %}" style="color:var(--sea);font-weight:700;font-size:13px">← {{ t.back_inbox }}</a>
+  <div class="formcard" style="margin-top:12px">
+    <div class="rhead">
+      <h2>{{ other.first_name|default:other.username }}</h2>
+      {% if conversation.listing %}
+      <a class="cnt" href="{% url 'market:listing_detail' conversation.listing.pk conversation.listing.slug %}">
+        {{ t.about }}: {{ conversation.listing.title }}</a>
+      {% endif %}
+    </div>
+    <div class="thread">
+      {% for m in thread_messages %}
+      <div class="bubble {% if m.sender_id == request.user.id %}mine{% endif %}">
+        <p>{{ m.body }}</p><span>{{ m.created_at|date:"d.m H:i" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <form method="post" class="threadform">{% csrf_token %}
+      <textarea name="body" rows="2" placeholder="{{ t.msg_ph }}" required></textarea>
+      <button class="btn-sea" style="width:auto" type="submit">{{ t.send }}</button>
+    </form>
+  </div>
+</section></div>
+{% endblock %}

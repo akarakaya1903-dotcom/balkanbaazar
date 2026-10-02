@@ -1,0 +1,113 @@
+{% load static market_extras %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ t.brand }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar1">
+      <a class="logo" href="{% url 'market:home' %}">
+        <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M4 28 L13 14 L20 22 L27 9 L36 28 Z" fill="#E4A13B"/>
+          <path d="M4 28 L36 28 L36 32 L4 32 Z" fill="#159AA6"/>
+        </svg>
+        <span><b>{{ t.brand }}</b><small>SKOPJE · ÜSKÜP</small></span>
+      </a>
+      <form class="search" action="{% url 'market:listings' %}" method="get" role="search">
+        <input type="search" name="q" value="{{ f.q|default:'' }}" placeholder="{{ t.search_ph }}" aria-label="{{ t.search }}">
+        <input type="hidden" name="mode" value="{{ mode }}">
+        <button type="submit">{{ t.search }}</button>
+      </form>
+      <details class="hideS" style="position:relative">
+        <summary class="pill" style="list-style:none">{% include "market/_flag.html" with c=country %} {% countryname country lang %} ▾</summary>
+        <div class="dropdown wide">
+          {% for c in countries %}
+          <a href="{% url 'market:set_country' c.code %}">
+            {% include "market/_flag.html" with c=c %}<span>{% countryname c lang %}</span>
+            <span class="aux">{{ c.currency }}</span></a>
+          {% endfor %}
+        </div>
+      </details>
+      <details style="position:relative">
+        <summary class="pill" style="list-style:none">{{ lang|upper }} ▾</summary>
+        <div class="dropdown">
+          {% for code, name in languages %}
+          <a href="{% url 'market:set_lang' code %}"><span>{{ name }}</span>
+            <span class="aux">{{ code|upper }}</span></a>
+          {% endfor %}
+        </div>
+      </details>
+      <button class="pill" data-theme-toggle title="tema" aria-label="tema">◑</button>
+    </div>
+    <div class="bar2">
+      <nav class="mode">
+        <a href="{% url 'market:listings' %}?mode=used" class="{% if mode == 'used' %}on{% endif %}">{{ t.used }}<small>{{ t.usedS }}</small></a>
+        <a href="{% url 'market:listings' %}?mode=shop" class="{% if mode == 'shop' %}on{% endif %}">{{ t.shops }}<small>{{ t.shopsS }}</small></a>
+        <a href="{% url 'market:trending' %}">🔥 {{ t.trending }}</a>
+      </nav>
+      <div class="spacer"></div>
+      <a class="ghost hideS" href="{% url 'market:shops' %}">{{ t.shops }}</a>
+      {% if user.is_authenticated %}
+      <details style="position:relative">
+        <summary class="ghost" style="list-style:none">{{ user.first_name|default:user.username }} ▾</summary>
+        <div class="dropdown">
+          <a href="{% url 'market:panel' %}">{{ t.panel }}</a>
+          <a href="{% url 'market:panel_products' %}">{{ t.my_products }}</a>
+          {% if user.is_staff %}<a href="{% url 'market:staff_dashboard' %}">{{ t.manage }}
+            {% if pending_badge %}<span class="aux" style="color:var(--amber);font-weight:800">{{ pending_badge }}</span>{% endif %}
+          </a>{% endif %}
+          <form method="post" action="{% url 'market:logout' %}">{% csrf_token %}
+            <button type="submit" class="linkbtn">{{ t.signout }}</button></form>
+        </div>
+      </details>
+      <a class="solid" href="{% url 'market:panel_product_new' %}">{{ t.new_product }}</a>
+      {% else %}
+      <a class="ghost hideS" href="{% url 'market:login' %}">{{ t.signin }}</a>
+      <a class="ghost" href="{% url 'market:signup' %}">{{ t.register }}</a>
+      <a class="solid" href="{% url 'market:shop_apply' %}">{{ t.openshop }}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+{% block catstrip %}{% endblock %}
+{% if messages %}<div class="wrap"><div class="msgs">
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+</div></div>{% endif %}
+
+{% block content %}{% endblock %}
+
+<div class="curbar"><div class="wrap"><div class="curs">
+  {% for c in countries %}
+  <a class="cur {% if c.code == country.code %}on{% endif %}" href="{% url 'market:set_country' c.code %}">
+    {% include "market/_flag.html" with c=c %}
+    <span><b>{{ c.currency }} {{ c.symbol }}</b><span>{% countryname c lang %}</span></span>
+  </a>
+  {% endfor %}
+</div></div></div>
+
+<footer>
+  <div class="wrap">
+    <div class="fcols">
+      <div>
+        <h5>{{ t.brand }}</h5>
+        <p style="font-size:13px;opacity:.78;max-width:34ch">{{ t.hq }}</p>
+      </div>
+      <div><h5>{{ t.f1 }}</h5><ul>{% for x in t.f1l %}<li>{{ x }}</li>{% endfor %}</ul></div>
+      <div><h5>{{ t.f2 }}</h5><ul>{% for x in t.f2l %}<li>{{ x }}</li>{% endfor %}</ul></div>
+      <div><h5>{{ t.f3 }}</h5><ul>{% for c in countries %}<li><a href="{% url 'market:set_country' c.code %}">{% countryname c lang %}</a></li>{% endfor %}</ul></div>
+    </div>
+    <div class="fbot"><span>© 2026 Balkan Baazar DOOEL Skopje</span><span>{{ t.demo }}</span></div>
+  </div>
+</footer>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

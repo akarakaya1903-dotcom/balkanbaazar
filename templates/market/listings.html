@@ -1,0 +1,122 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{% if root %}{% catname root lang %}{% else %}{{ t.all_l }}{% endif %} — {{ t.brand }}{% endblock %}
+
+{% block catstrip %}{% include "market/_catnav.html" %}{% endblock %}
+
+{% block content %}
+<div class="wrap"><div class="main">
+  <aside class="side">
+    <div class="panel">
+      <h3>{% if root %}{{ t.subs }}{% else %}{{ t.cat }}{% endif %}</h3>
+      <ul class="subl">
+        {% if root %}
+          <li><a href="{% url 'market:listings' %}?mode={{ mode }}&amp;cat={{ root.slug }}"
+                 class="{% if not sub %}on{% endif %}">{{ t.all }}</a></li>
+          {% for s in subs %}
+          <li><a href="{% url 'market:listings' %}?mode={{ mode }}&amp;cat={{ root.slug }}&amp;sub={{ s.slug }}"
+                 class="{% if sub and sub.pk == s.pk %}on{% endif %}">{% catname s lang %}<span class="ct">{{ s.n }}</span></a></li>
+          {% endfor %}
+        {% else %}
+          {% for c in roots %}
+          <li><a href="{% url 'market:listings' %}?mode={{ mode }}&amp;cat={{ c.slug }}">{{ c.icon }} {% catname c lang %}<span class="ct">›</span></a></li>
+          {% endfor %}
+        {% endif %}
+      </ul>
+    </div>
+
+    <form class="panel" method="get" action="{% url 'market:listings' %}">
+      <h3>{{ t.filters }}</h3>
+      <div class="pb">
+        <input type="hidden" name="mode" value="{{ mode }}">
+        {% if root %}<input type="hidden" name="cat" value="{{ root.slug }}">{% endif %}
+        {% if sub %}<input type="hidden" name="sub" value="{{ sub.slug }}">{% endif %}
+        <input type="hidden" name="q" value="{{ f.q }}">
+        <label class="field"><span>{{ t.price }} ({{ country.currency }})</span>
+          <span class="two">
+            <input type="number" name="min" min="0" value="{{ f.min }}" placeholder="min">
+            <input type="number" name="max" min="0" value="{{ f.max }}" placeholder="max">
+          </span>
+        </label>
+        <label class="field"><span>{{ t.city }}</span>
+          <select name="city">
+            <option value="">{{ t.allcity }}</option>
+            {% for c in cities %}<option value="{{ c.name }}" {% if f.city == c.name %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+          </select>
+        </label>
+        {% if mode == 'used' %}
+        <label class="field"><span>{{ t.cond }}</span>
+          <select name="cond">
+            <option value="">{{ t.anyc }}</option>
+            <option value="new" {% if f.cond == 'new' %}selected{% endif %}>{{ t.cnew }}</option>
+            <option value="used" {% if f.cond == 'used' %}selected{% endif %}>{{ t.cused }}</option>
+          </select>
+        </label>
+        {% endif %}
+        <label class="field"><span>{{ t.deliv }}</span>
+          <select name="deliv">
+            <option value="">{{ t.anyd }}</option>
+            <option value="ship" {% if f.deliv == 'ship' %}selected{% endif %}>{{ t.ship }}</option>
+            <option value="hand" {% if f.deliv == 'hand' %}selected{% endif %}>{{ t.hand }}</option>
+          </select>
+        </label>
+        <input type="hidden" name="sort" value="{{ f.sort }}">
+        <button class="btn-sea" type="submit">{{ t.apply }}</button>
+        <a class="btn-line" style="margin-top:8px"
+           href="{% url 'market:listings' %}?mode={{ mode }}{% if root %}&amp;cat={{ root.slug }}{% endif %}">{{ t.clear }}</a>
+      </div>
+    </form>
+  </aside>
+
+  <main>
+    {% if featured_shops %}
+    <div class="rhead"><h2>{{ t.featured }}</h2></div>
+    <div class="rail">
+      {% for s in featured_shops %}
+      <a class="shop" href="{% url 'market:shop_detail' s.slug %}">
+        {% if s.logo %}<img class="avimg" src="{{ s.logo.url }}" alt="{{ s.name }}">{% else %}<div class="av" style="background:hsl({{ s.hue }} 42% 34%)">{{ s.name|slice:":1" }}</div>{% endif %}
+        <div class="nm">{{ s.name }} {% if s.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %}</div>
+        <div class="ms"><span class="star">★</span> {{ s.rating }} · {{ s.product_count }} {{ t.products }}</div>
+        <div class="ms">{{ s.city.name }}</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="rhead">
+      <h2>{% if root %}{% catname root lang %}{% if sub %} · {% catname sub lang %}{% endif %}
+          {% else %}{% if mode == 'shop' %}{{ t.all_p }}{% else %}{{ t.all_l }}{% endif %}{% endif %}</h2>
+      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {{ country.name_local }}</span>
+      <form method="get" action="{% url 'market:listings' %}">
+        <input type="hidden" name="mode" value="{{ mode }}">
+        {% if root %}<input type="hidden" name="cat" value="{{ root.slug }}">{% endif %}
+        {% if sub %}<input type="hidden" name="sub" value="{{ sub.slug }}">{% endif %}
+        <input type="hidden" name="q" value="{{ f.q }}">
+        <input type="hidden" name="city" value="{{ f.city }}">
+        <input type="hidden" name="cond" value="{{ f.cond }}">
+        <input type="hidden" name="deliv" value="{{ f.deliv }}">
+        <input type="hidden" name="min" value="{{ f.min }}">
+        <input type="hidden" name="max" value="{{ f.max }}">
+        <select name="sort" onchange="this.form.submit()" aria-label="{{ t.sort }}">
+          <option value="new" {% if f.sort == 'new' %}selected{% endif %}>{{ t.s_new }}</option>
+          <option value="lo" {% if f.sort == 'lo' %}selected{% endif %}>{{ t.s_lo }}</option>
+          <option value="hi" {% if f.sort == 'hi' %}selected{% endif %}>{{ t.s_hi }}</option>
+          <option value="pop" {% if f.sort == 'pop' %}selected{% endif %}>{{ t.s_pop }}</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="grid">
+      {% for item in page_obj %}{% include "market/_card.html" %}{% empty %}
+      <div class="empty"><h3>{{ t.none }}</h3><p>{{ t.noneH }}</p></div>{% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pager">
+      {% if page_obj.has_previous %}<a href="{% qs page=page_obj.previous_page_number %}">{{ t.prev }}</a>{% endif %}
+      <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="{% qs page=page_obj.next_page_number %}">{{ t.next }}</a>{% endif %}
+    </div>
+    {% endif %}
+  </main>
+</div></div>
+{% endblock %}

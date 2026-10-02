@@ -1,0 +1,86 @@
+/* Ozel yonetim paneli — koyu kenar cubugu + acik calisma alani. Ayni marka renkleri. */
+.staffbody{background:var(--bg)}
+.stf-shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+@media(max-width:860px){.stf-shell{grid-template-columns:1fr}}
+
+.stf-side{background:var(--deep);color:#CFDBE1;display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh}
+@media(max-width:860px){.stf-side{position:static;height:auto}}
+.stf-brand{display:flex;align-items:center;gap:9px;padding:18px 18px 14px;color:#fff}
+.stf-brand span{font-family:Archivo;font-weight:800;font-size:16px;line-height:1.15}
+.stf-brand small{display:block;font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.08em}
+.stf-nav{display:grid;padding:6px 10px;gap:2px;flex:1}
+.stf-nav a{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:8px;
+  font-size:13.5px;font-weight:600;color:#B9C6CE;position:relative}
+.stf-nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.stf-nav a.on{background:var(--sea);color:#fff}
+.stf-nav .ic{font-size:15px;width:18px;text-align:center;opacity:.9}
+.stf-sep{height:1px;background:rgba(255,255,255,.1);margin:8px 6px}
+.badgeN{margin-left:auto;background:var(--amber);color:#3A2708;font-size:10.5px;font-weight:800;
+  border-radius:99px;padding:1px 7px}
+.stf-user{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 18px;border-top:1px solid rgba(255,255,255,.1);font-size:13px}
+.stf-user button{background:none;border:0;color:var(--amber);font-weight:700;font-size:12.5px}
+
+.stf-main{padding:26px 30px 50px;max-width:1180px}
+@media(max-width:700px){.stf-main{padding:18px 16px 40px}}
+.stf-head{margin-bottom:20px}
+.stf-head h1{font-size:23px;font-weight:800}
+.stf-head p{color:var(--ink-3);margin-top:4px;font-size:13.5px}
+.stf-msgs{margin-bottom:16px}
+
+.stf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:760px){.stf-stats{grid-template-columns:repeat(2,1fr)}}
+.stf-stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+.stf-stat.hi{border-color:var(--amber);background:var(--amber-soft)}
+.stf-stat b{display:block;font-family:Archivo;font-size:26px;font-weight:800}
+.stf-stat span{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.stf-stat a{display:inline-block;margin-top:6px;font-size:12px;color:var(--sea);font-weight:700}
+
+.stf-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.stf-cols{grid-template-columns:1fr}}
+.stf-card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+.stf-cardhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.stf-cardhead h2{font-size:14.5px;font-weight:700}
+.stf-cardhead a{font-size:12px;color:var(--sea);font-weight:700}
+.stf-row{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.stf-row:last-child{border-bottom:0}
+.stf-row b{display:block;font-size:13.5px}
+.stf-row span{display:block;color:var(--ink-3);font-size:11.5px}
+.stf-empty{color:var(--ink-3);font-size:13px;padding:16px 0;text-align:center}
+
+.stf-tabs{display:flex;gap:6px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.stf-tabs a{padding:8px 14px;border-radius:99px;font-size:13px;font-weight:700;color:var(--ink-2);
+  border:1px solid var(--line);background:var(--card)}
+.stf-tabs a.on{background:var(--sea);color:#fff;border-color:var(--sea)}
+.stf-search,.stf-filters{margin-left:auto;display:flex;gap:8px}
+.stf-search input,.stf-filters input,.stf-filters select{padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:var(--card);font-size:13px}
+.stf-filters{margin:0 0 16px}
+
+.stf-table{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow-x:auto}
+.stf-table table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
+.stf-table th{text-align:left;font-size:11px;text-transform:none;color:var(--ink-3);
+  padding:11px 14px;border-bottom:1px solid var(--line);font-weight:700}
+.stf-table td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.stf-table tr:last-child td{border-bottom:0}
+.stf-table small{color:var(--ink-3)}
+.stf-table select{padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-size:12px}
+
+.stf-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.stf-btn:hover{border-color:var(--sea);color:var(--sea)}
+.stf-btn.ok{background:#E9F3EA;border-color:var(--olive);color:var(--olive)}
+.stf-btn.danger{background:#FBEAE3;border-color:#9C3C1B;color:#9C3C1B}
+.stf-rowact{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
+.stf-inline{display:inline-block}
+.stf-rejectbox summary{list-style:none;cursor:pointer}
+.stf-rejectbox summary::-webkit-details-marker{display:none}
+.stf-rejectform{position:absolute;z-index:60;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:10px;box-shadow:var(--shadow);margin-top:6px;display:grid;gap:8px;width:220px}
+.stf-rejectform textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px;font:inherit;resize:vertical}
+.stf-tag{display:inline-block;background:var(--bg);border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.stf-tag.ok{background:#E9F3EA;color:var(--olive)}
+.stf-tag.danger{background:#FBEAE3;color:#9C3C1B}
+.stf-rateinput{width:90px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}

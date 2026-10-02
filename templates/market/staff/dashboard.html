@@ -1,0 +1,46 @@
+{% extends "base_staff.html" %}
+{% block title %}{{ t.mg_dash }}{% endblock %}
+{% block stfcontent %}
+<div class="stf-head">
+  <h1>{{ t.mg_welcome }}, {{ user.first_name|default:user.username }}</h1>
+  <p>{{ t.brand }} — {{ t.manage }}</p>
+</div>
+
+<div class="stf-stats">
+  <div class="stf-stat hi">
+    <b>{{ pending_count }}</b><span>{{ t.mg_pending_apps }}</span>
+    {% if pending_count %}<a href="{% url 'market:staff_applications' %}">{{ t.mg_view }} →</a>{% endif %}
+  </div>
+  <div class="stf-stat"><b>{{ shop_count }}</b><span>{{ t.mg_total_shops }}</span></div>
+  <div class="stf-stat"><b>{{ listing_count }}</b><span>{{ t.mg_total_listings }}</span></div>
+  <div class="stf-stat"><b>{{ user_count }}</b><span>{{ t.mg_total_users }}</span></div>
+</div>
+
+<div class="stf-cols">
+  <section class="stf-card">
+    <div class="stf-cardhead"><h2>{{ t.mg_recent_apps }}</h2>
+      <a href="{% url 'market:staff_applications' %}">{{ t.mg_all }} →</a></div>
+    {% for a in recent_apps %}
+    <div class="stf-row">
+      <div><b>{{ a.shop_name }}</b><span>{{ a.applicant.username }} · {{ a.country.name_tr }}</span></div>
+      <div class="stf-rowact">
+        <form method="post" action="{% url 'market:staff_app_approve' a.pk %}"
+              onsubmit="return confirm('{{ t.mg_confirm_approve }}')">{% csrf_token %}
+          <button class="stf-btn ok">{{ t.mg_approve }}</button></form>
+      </div>
+    </div>
+    {% empty %}<p class="stf-empty">{{ t.mg_no_pending }}</p>{% endfor %}
+  </section>
+
+  <section class="stf-card">
+    <div class="stf-cardhead"><h2>{{ t.mg_recent_shops }}</h2>
+      <a href="{% url 'market:staff_shops' %}">{{ t.mg_all }} →</a></div>
+    {% for s in recent_shops %}
+    <div class="stf-row">
+      <div><b>{{ s.name }}</b><span>{{ s.owner.username|default:"—" }} · {{ s.country.name_tr }}</span></div>
+      <span class="stf-tag">{{ s.get_plan_display }}</span>
+    </div>
+    {% empty %}<p class="stf-empty">{{ t.mg_empty }}</p>{% endfor %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ t.order_paid }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect" style="text-align:center">
+  <div class="formcard" style="max-width:480px;margin:0 auto;text-align:left">
+    <h1>{{ t.order_paid }}</h1>
+    <p class="lead">{{ t.order_thanks }}</p>
+    <dl class="kv"><dt>{{ t.order_no }}</dt><dd>#{{ order.pk }}</dd>
+      <dt>{{ t.total }}</dt><dd>€ {{ order.total_eur|floatformat:0 }}</dd></dl>
+    <a class="btn-sea" style="display:block;text-align:center;margin-top:10px" href="{% url 'market:my_orders' %}">{{ t.my_orders_t }}</a>
+  </div>
+</section></div>
+{% endblock %}

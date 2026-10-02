@@ -1,0 +1,43 @@
+{% load market_extras %}
+{# Ana ekran banner'i: 8 ulkeyi temsil eden gorsel serit. Tum metinler t sozlugunden gelir. #}
+<section class="banner" aria-label="{{ t.banner_t }}">
+  <svg class="bsky" viewBox="0 0 1200 320" preserveAspectRatio="none" aria-hidden="true">
+    <circle cx="960" cy="86" r="42" fill="#E4A13B" opacity=".5"/>
+    <path d="M0 320 L0 210 L120 140 L220 200 L330 110 L430 190 L540 128 L660 210 L780 150 L900 220 L1010 160 L1110 214 L1200 168 L1200 320 Z" fill="#0A2230" opacity=".45"/>
+    <path d="M0 320 L0 250 L110 200 L230 258 L340 206 L470 262 L590 212 L700 266 L830 216 L950 268 L1070 222 L1200 264 L1200 320 Z" fill="#0A2230" opacity=".3"/>
+  </svg>
+
+  <div class="wrap banner-in">
+    <p class="beyebrow">{{ t.brand }} · Skopje</p>
+    <h1>{{ t.banner_t }}</h1>
+    <p class="blead">{{ t.banner_s }}</p>
+
+    <div class="flagstrip" role="list">
+      {% for c in countries %}
+      <a role="listitem" class="flagcard {% if c.code == country.code %}on{% endif %}"
+         href="{% url 'market:set_country' c.code %}" title="{% countryname c lang %}">
+        {% include "market/_flag.html" with c=c %}
+        <span class="fname">{% countryname c lang %}</span>
+        <span class="fcur">{{ c.currency }} {{ c.symbol }}</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="bcta">
+      {% if user.is_authenticated %}<a class="solid" href="{% url 'market:my_listing_new' %}">{{ t.post }}</a>
+      {% else %}<a class="solid" href="{% url 'market:login' %}">{{ t.post }}</a>{% endif %}
+      <a class="ghost" href="{% url 'market:shop_apply' %}">{{ t.openshop }}</a>
+    </div>
+
+    <div class="bstats">
+      <div><b>{{ total_listings }}</b><span>{{ t.s1 }}</span></div>
+      <div><b>{{ total_shops }}</b><span>{{ t.s2 }}</span></div>
+      <div><b>8</b><span>{{ t.s3 }}</span></div>
+      <div><b>10</b><span>{{ t.s4 }}</span></div>
+    </div>
+  </div>
+
+  <svg class="ridge" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 120 L0 96 L100 66 L200 98 L300 58 L400 92 L500 62 L610 100 L710 70 L820 102 L920 68 L1020 96 L1120 64 L1200 92 L1200 120 Z" fill="var(--bg)"/>
+  </svg>
+</section>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ shop.name }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <section class="sect">
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
+      {% if shop.logo %}<img class="avimg" style="width:56px;height:56px;border-radius:13px" src="{{ shop.logo.url }}" alt="{{ shop.name }}">{% else %}<div class="av" style="width:56px;height:56px;border-radius:13px;font-size:24px;background:hsl({{ shop.hue }} 42% 34%)">{{ shop.name|slice:":1" }}</div>{% endif %}
+      <div>
+        <h1 style="font-size:22px">{{ shop.name }} {% if shop.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %}</h1>
+        <div style="color:var(--ink-3);font-size:13px">
+          <span class="star">★</span> {{ shop.rating }} · {{ shop.sales }} {{ t.s1 }} ·
+          {{ shop.country.flag }} {{ shop.city.name }}</div>
+        <div style="color:var(--ink-3);font-size:12.5px">
+          {{ shop.get_plan_display }} · {{ shop.months_open }} ay ·
+          {% if shop.monthly_fee_eur %}{{ shop.monthly_fee_eur }} € {{ t.mo }}{% else %}{{ t.p1d }}{% endif %}</div>
+      </div>
+    </div>
+    <div class="grid">
+      {% for item in page_obj %}{% include "market/_card.html" %}{% empty %}
+      <div class="empty"><h3>{{ t.none }}</h3></div>{% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="pager">
+      {% if page_obj.has_previous %}<a href="{% qs page=page_obj.previous_page_number %}">{{ t.prev }}</a>{% endif %}
+      <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="{% qs page=page_obj.next_page_number %}">{{ t.next }}</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

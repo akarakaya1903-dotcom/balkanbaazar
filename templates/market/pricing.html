@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ t.pricing }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <section class="sect">
+    <div class="sect-h"><h2>{{ t.plT }}</h2><p>{{ t.plS }}</p></div>
+    <div class="plans">
+      <div class="plan">
+        <div class="ph">{{ t.p1 }}</div>
+        <div class="amt">{{ t.p1d }}</div>
+        <ul>{% for x in t.p1f %}<li>{{ x }}</li>{% endfor %}</ul>
+        <a class="cta" href="{% url 'market:shops' %}">{{ t.start }}</a>
+      </div>
+      <div class="plan hi">
+        <div class="ph">{{ t.p2 }}</div>
+        <div class="amt">{{ mid_price }} € <small>{{ t.mo }}</small></div>
+        <ul>{% for x in t.p2f %}<li>{{ x }}</li>{% endfor %}</ul>
+        <a class="cta" href="{% url 'market:shops' %}">{{ t.start }}</a>
+      </div>
+      <div class="plan">
+        <div class="ph">{{ t.p3 }}</div>
+        <div class="amt">{{ full_price }} € <small>{{ t.mo }}</small></div>
+        <ul>{% for x in t.p3f %}<li>{{ x }}</li>{% endfor %}</ul>
+        <a class="cta" href="{% url 'market:shops' %}">{{ t.start }}</a>
+      </div>
+    </div>
+    <p class="timeline">{{ t.plTime }}</p>
+  </section>
+</div>
+{% endblock %}

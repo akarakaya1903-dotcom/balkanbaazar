@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t.billing }} — {{ shop.name }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="panelgrid">
+  {% include "market/panel/_nav.html" with section='billing' %}
+  <main>
+    <div class="rhead"><h2>{{ t.billing }}</h2>
+      <span class="cnt">{{ shop.months_open }} {{ t.months_open }}</span></div>
+    <div class="plans">
+      <div class="plan {% if not shop.monthly_fee_eur %}hi{% endif %}">
+        <div class="ph">{{ t.p1 }}</div><div class="amt">{{ t.p1d }}</div>
+        <ul>{% for x in t.p1f %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+      <div class="plan {% if shop.monthly_fee_eur == 9 %}hi{% endif %}">
+        <div class="ph">{{ t.p2 }}</div><div class="amt">9 € <small>{{ t.mo }}</small></div>
+        <ul>{% for x in t.p2f %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+      <div class="plan {% if shop.monthly_fee_eur == 29 %}hi{% endif %}">
+        <div class="ph">{{ t.p3 }}</div><div class="amt">29 € <small>{{ t.mo }}</small></div>
+        <ul>{% for x in t.p3f %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+    <p class="timeline">{{ t.plTime }}</p>
+    <p class="small" style="text-align:center">{{ t.note }}</p>
+  </main>
+</div></div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% load market_extras %}
+{% banners "home_hero" as slides %}
+{% if slides %}
+<div class="wrap"><div class="slider" id="slider">
+  {% for b in slides %}<a class="slide" href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><img src="{{ b.image.url }}" alt="{{ b.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"><span class="adtag">{{ t.ad_label }}</span></a>{% endfor %}
+</div></div>
+<script>(function(){var s=document.getElementById("slider");if(!s||s.children.length<2)return;setInterval(function(){var w=s.clientWidth;s.scrollLeft+w>=s.scrollWidth-4?s.scrollTo({left:0,behavior:"smooth"}):s.scrollBy({left:w,behavior:"smooth"});},4500);})();</script>
+{% endif %}
+{% banners "home_mid" as mid %}
+{% if mid %}<div class="wrap"><div class="midbanners">
+  {% for b in mid|slice:":3" %}<a href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><img src="{{ b.image.url }}" alt="{{ b.title }}" loading="lazy"><span class="adtag">{{ t.ad_label }}</span></a>{% endfor %}
+</div></div>{% endif %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ item.title }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="crumbs">
+    <a href="{% url 'market:home' %}">{{ t.brand }}</a> ›
+    <a href="{% url 'market:listings' %}?mode={{ item.mode }}&amp;cat={{ item.parent_category.slug }}">{% catname item.parent_category lang %}</a> ›
+    {% catname item.category lang %}
+  </div>
+
+  <section class="sect">
+    <div class="detg">
+      {% if item.image %}<img class="dheroimg" src="{{ item.image.url }}" alt="{{ item.title }}">
+      {% else %}<div class="dhero" style="{{ item.hue|tile }}">{{ item.icon }}</div>{% endif %}
+      {% if item.gallery.all %}
+      <div class="dgallery">
+        {% for g in item.gallery.all %}<img src="{{ g.image.url }}" alt="">{% endfor %}
+      </div>
+      {% endif %}
+      <div>
+        {% if item.is_boosted %}<span class="badge boost" style="position:static;display:inline-block;margin-bottom:8px">★ {{ t.featured_badge }}</span>{% endif %}
+        <h1 style="font-size:24px">{{ item.title }}</h1>
+        <div class="dprice" style="margin-top:10px">{% price item country %}</div>
+        {% if country.currency != 'EUR' %}<div class="eur">≈ {% eur item %}</div>{% endif %}
+        {% if item.mode == 'shop' and item.review_count %}
+        <p style="color:var(--ink-3);font-size:13px"><span class="star">★</span> {{ item.avg_rating }} ({{ item.review_count }} {{ t.reviews_n }})</p>
+        {% endif %}
+        {% if item.mode == 'shop' and item.track_stock and not item.variants.exists %}
+        <p class="stockline {% if item.in_stock %}ok{% else %}out{% endif %}">
+          {% if item.in_stock %}{{ item.stock }} {{ t.in_stock_n }}{% else %}{{ t.out_of_stock }}{% endif %}</p>
+        {% endif %}
+        <dl class="kv">
+          <dt>{{ t.cat }}</dt><dd>{% catname item.parent_category lang %} › {% catname item.category lang %}</dd>
+          <dt>{{ t.loc }}</dt><dd>{{ item.country.flag }} {{ item.city.name }}</dd>
+          {% if item.mode == 'used' %}
+          <dt>{{ t.cond_l }}</dt><dd>{% if item.condition == 'new' %}{{ t.cnew }}{% else %}{{ t.cused }}{% endif %}</dd>
+          {% endif %}
+          <dt>{{ t.deliv }}</dt>
+          <dd>{% if item.delivery == 'ship' %}{{ t.ship }}{% else %}{{ t.hand }}{% endif %}{% if item.free_shipping %} · {{ t.free }}{% endif %}</dd>
+          <dt>{{ t.seller }}</dt>
+          <dd>{% if item.shop %}<a href="{% url 'market:shop_detail' item.shop.slug %}">{{ item.shop.name }}</a>{% else %}{{ item.seller_name }}{% endif %}</dd>
+          <dt>{{ t.date }}</dt><dd>{{ item.created_at|date:"d.m.Y" }}</dd>
+        </dl>
+        <p style="color:var(--ink-2)">{{ item.description }}</p>
+        <div class="dact">
+          {% if item.mode == 'shop' %}
+            {% if item.variants.exists %}
+            <form method="post" action="{% url 'market:cart_add' item.pk %}" style="display:flex;gap:8px;flex:1 0 100%">
+              {% csrf_token %}
+              <select name="variant" required style="flex:1;border:1px solid var(--line);border-radius:9px;padding:0 10px">
+                <option value="">{{ t.choose_variant }}</option>
+                {% for v in item.variants.all %}
+                <option value="{{ v.pk }}" {% if v.stock <= 0 %}disabled{% endif %}>
+                  {{ v.name }} {% if v.price_delta_eur %}({{ v.price_delta_eur }} €){% endif %}
+                  {% if v.stock <= 0 %} — {{ t.out_of_stock }}{% endif %}</option>
+                {% endfor %}
+              </select>
+              <button class="b1" type="submit" style="flex:0 0 auto">{{ t.cart }}</button>
+            </form>
+            {% elif item.in_stock %}
+            <form method="post" action="{% url 'market:cart_add' item.pk %}" style="flex:1">
+              {% csrf_token %}<button class="b1" type="submit" style="width:100%">{{ t.cart }}</button></form>
+            {% else %}
+            <span class="b1" style="opacity:.5;pointer-events:none">{{ t.out_of_stock }}</span>
+            {% endif %}
+            <a class="b2" href="{% url 'market:shop_detail' item.shop.slug %}">{{ t.vis }}</a>
+          {% else %}
+            {% if item.seller_phone %}<a class="b1" href="tel:{{ item.seller_phone }}">{{ t.call }}</a>
+            {% else %}<span class="b1" style="opacity:.5;pointer-events:none">{{ t.call }}</span>{% endif %}
+          {% endif %}
+          {% if user.is_authenticated %}
+          <a class="b2" href="{% url 'market:start_conversation' item.pk %}">{{ t.msg }}</a>
+          <form method="post" action="{% url 'market:favorite_toggle_listing' item.pk %}" style="flex:0 0 auto">
+            {% csrf_token %}<button class="b2" type="submit" style="padding:12px 16px">
+              {% if is_fav %}♥{% else %}♡{% endif %}</button></form>
+          {% else %}
+          <a class="b2" href="{% url 'market:login' %}">{{ t.msg }}</a>
+          {% endif %}
+        </div>
+        {% if user.is_authenticated and item.owner == user or item.shop and item.shop.owner == user %}
+        <a class="btn-line" style="display:block;text-align:center;margin-top:10px;border-color:var(--amber);color:#8A5A0E"
+           href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>
+        {% endif %}
+        <div class="note">{{ t.note }}</div>
+      </div>
+    </div>
+  </section>
+
+  {% if similar %}
+  <section class="sect" style="padding-top:0">
+    <div class="rhead"><h2>{% catname item.category lang %}</h2></div>
+    <div class="grid">{% for item in similar %}{% include "market/_card.html" %}{% endfor %}</div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

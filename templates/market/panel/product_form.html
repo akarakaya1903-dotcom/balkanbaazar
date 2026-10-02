@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{% if item %}{{ t.edit }}{% else %}{{ t.new_product }}{% endif %} — {{ shop.name }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="panelgrid">
+  {% include "market/panel/_nav.html" with section='new' %}
+  <main>
+    <div class="rhead"><h2>{% if item %}{{ t.edit }}{% else %}{{ t.new_product }}{% endif %}</h2></div>
+    <div class="formcard">
+      <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+        {% if item and item.image %}
+        <div class="imgpreview"><img src="{{ item.image.url }}" alt=""></div>
+        {% endif %}
+        {% include "market/_form.html" %}
+
+        <h3 class="gtitle">{{ t.gallery }}</h3>
+        <p class="small">{{ t.galleryH }}</p>
+        {{ formset.management_form }}
+        <div class="gallerygrid">
+          {% for gform in formset %}
+          <div class="gcell">
+            {% if gform.instance.image %}<img src="{{ gform.instance.image.url }}" alt="">{% endif %}
+            {{ gform.id }}
+            {{ gform.image }}
+            {% if gform.instance.pk %}
+            <label class="gdel">{{ gform.DELETE }} {{ t.delete }}</label>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <h3 class="gtitle">{{ t.variants_t }}</h3>
+        <p class="small">{{ t.variants_h }}</p>
+        {{ variant_formset.management_form }}
+        <div class="tablewrap" style="margin:8px 0 16px">
+          <table class="ptable"><thead><tr>
+            <th>{{ t.variant_name }}</th><th>{{ t.variant_delta }}</th><th>{{ t.variant_stock }}</th><th></th>
+          </tr></thead><tbody>
+          {% for vf in variant_formset %}
+          <tr>
+            <td>{{ vf.id }}{{ vf.name }}</td><td>{{ vf.price_delta_eur }}</td><td>{{ vf.stock }}</td>
+            <td>{% if vf.instance.pk %}<label style="font-size:11.5px">{{ vf.DELETE }} {{ t.delete }}</label>{% endif %}</td>
+          </tr>
+          {% endfor %}
+          </tbody></table>
+        </div>
+
+        <div class="formact">
+          <button class="btn-sea" type="submit">{{ t.save }}</button>
+          <a class="btn-line" href="{% url 'market:panel_products' %}">{{ t.cancel }}</a>
+        </div>
+      </form>
+      <p class="small">{{ t.note }}</p>
+    </div>
+  </main>
+</div></div>
+{% endblock %}

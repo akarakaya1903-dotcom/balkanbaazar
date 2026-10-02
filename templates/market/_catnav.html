@@ -1,0 +1,31 @@
+{% load market_extras %}
+{# Gelismis kategori seridi: her kategori ustune gelince alt kategorileri acilir. #}
+<nav class="catstrip" aria-label="{{ t.cat_all }}">
+  <div class="wrap">
+    <div class="catrow">
+      <a href="{{ nav_base }}" class="{% if not root %}on{% endif %}">{{ t.all }}</a>
+      {% for c in nav_cats %}
+      <div class="catitem">
+        <a href="{{ nav_base }}{% if nav_sep %}{{ nav_sep }}{% endif %}cat={{ c.slug }}"
+           class="{% if root and root.pk == c.pk %}on{% endif %}">
+          <span class="ci">{{ c.icon }}</span>{% catname c lang %}
+          {% if c.n %}<span class="cn">{{ c.n }}</span>{% endif %}
+        </a>
+        {% if c.children.all %}
+        <div class="mega">
+          <div class="megahead">
+            <span>{% catname c lang %}</span>
+            <a href="{{ nav_base }}{% if nav_sep %}{{ nav_sep }}{% endif %}cat={{ c.slug }}">{{ t.all }} →</a>
+          </div>
+          <div class="megagrid">
+            {% for s in c.children.all %}
+            <a href="{% url 'market:listings' %}?mode={{ nav_mode }}&amp;cat={{ c.slug }}&amp;sub={{ s.slug }}">{% catname s lang %}</a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</nav>

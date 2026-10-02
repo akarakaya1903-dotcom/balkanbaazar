@@ -1,0 +1,574 @@
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
+from django.utils.text import slugify
+
+
+class Mode(models.TextChoices):
+    USED = "used", "Ikinci el"
+    SHOP = "shop", "Magaza"
+
+
+class Country(models.Model):
+    """8 Balkan ulkesi. Para birimi ve kur burada tutulur."""
+    code = models.CharField(max_length=2, primary_key=True)
+    name_local = models.CharField(max_length=60)
+    name_tr = models.CharField(max_length=60)
+    name_en = models.CharField(max_length=60)
+    flag = models.CharField(max_length=8)
+    lang = models.CharField(max_length=5, default="en")
+    currency = models.CharField(max_length=3)
+    symbol = models.CharField(max_length=6)
+    rate_per_eur = models.DecimalField(max_digits=12, decimal_places=4, default=1)
+    order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "code"]
+        verbose_name_plural = "countries"
+
+    def __str__(self):
+        return f"{self.flag} {self.name_local}"
+
+    def display_name(self, lang="tr"):
+        """Ulke adini secili dile gore dondurur."""
+        if lang == "tr":
+            return self.name_tr
+        if lang == "en":
+            return self.name_en
+        return self.name_local
+
+    def to_local(self, eur):
+        return float(eur) * float(self.rate_per_eur)
+
+    def format_price(self, eur):
+        value = self.to_local(eur)
+        text = f"{value:,.0f}".replace(",", ".")
+        if self.currency == "EUR":
+            return f"€ {text}"
+        return f"{text} {self.symbol}"
+
+
+class City(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="cities")
+    name = models.CharField(max_length=80)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+        unique_together = [("country", "name")]
+        verbose_name_plural = "cities"
+
+    def __str__(self):
+        return f"{self.name} ({self.country_id})"
+
+
+class Category(models.Model):
+    """Ana kategori ve alt kategori ayni modelde (parent ile)."""
+    mode = models.CharField(max_length=8, choices=Mode.choices)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children"
+    )
+    slug = models.SlugField(max_length=80)
+    icon = models.CharField(max_length=8, blank=True)
+    names = models.JSONField(default=dict, help_text='{"tr": "...", "en": "...", ...}')
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        unique_together = [("mode", "parent", "slug")]
+        verbose_name_plural = "categories"
+
+    def __str__(self):
+        return f"[{self.mode}] {self.name('tr')}"
+
+    def name(self, lang="tr"):
+        return self.names.get(lang) or self.names.get("en") or self.slug
+
+    @property
+    def is_root(self):
+        return self.parent_id is None
+
+
+class ShopPlan(models.TextChoices):
+    TRIAL = "trial", "Ilk 3 ay ucretsiz"
+    MID = "mid", "9 EUR / ay"
+    FULL = "full", "29 EUR / ay"
+
+
+class Shop(models.Model):
+    owner = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="shops"
+    )
+    name = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140, unique=True, blank=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="shops")
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="shops"
+    )
+    logo = models.ImageField(upload_to="shops/", blank=True, null=True)
+    about = models.TextField(blank=True)
+    hue = models.PositiveSmallIntegerField(default=190)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=5)
+    sales = models.PositiveIntegerField(default=0)
+    verified = models.BooleanField(default=False)
+    plan = models.CharField(max_length=8, choices=ShopPlan.choices, default=ShopPlan.TRIAL)
+    opened_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-verified", "-rating", "name"]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(f"{self.name}-{self.country_id}")
+            self.slug = base[:140]
+        super().save(*args, **kwargs)
+
+    @property
+    def months_open(self):
+        delta = timezone.now() - self.opened_at
+        return delta.days // 30
+
+    @property
+    def monthly_fee_eur(self):
+        """Hibrit fiyatlandirma: 0-3 ay bedava, 4-9 ay 9 EUR, sonrasi 29 EUR."""
+        m = self.months_open
+        if m < settings.SHOP_PLAN_FREE_MONTHS:
+            return 0
+        if m < settings.SHOP_PLAN_MID_UNTIL_MONTH:
+            return settings.SHOP_PLAN_MID_PRICE_EUR
+        return settings.SHOP_PLAN_FULL_PRICE_EUR
+
+    @property
+    def product_count(self):
+        return self.listings.count()
+
+
+class Condition(models.TextChoices):
+    NEW = "new", "Sifir"
+    USED = "used", "Ikinci el"
+
+
+class Delivery(models.TextChoices):
+    SHIP = "ship", "Kargo"
+    HAND = "hand", "Elden teslim"
+
+
+class Listing(models.Model):
+    """Hem ikinci el ilani hem magaza urunu."""
+    mode = models.CharField(max_length=8, choices=Mode.choices, db_index=True)
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, blank=True)
+    description = models.TextField(blank=True)
+    price_eur = models.DecimalField(max_digits=12, decimal_places=2)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="listings")
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, related_name="listings",
+        help_text="Alt kategori secilir",
+    )
+    shop = models.ForeignKey(
+        Shop, null=True, blank=True, on_delete=models.CASCADE, related_name="listings"
+    )
+    owner = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="my_listings",
+        help_text="Bireysel (ikinci el) ilanin sahibi",
+    )
+    image = models.ImageField(upload_to="listings/", blank=True, null=True)
+    featured_until = models.DateTimeField(null=True, blank=True, db_index=True)
+    track_stock = models.BooleanField(default=False, help_text="Acilirsa stok adedi tukeninceye kadar satisa acik kalir")
+    stock = models.PositiveIntegerField(null=True, blank=True, help_text="track_stock acikken gecerli")
+    seller_name = models.CharField(max_length=80, blank=True)
+    seller_phone = models.CharField(max_length=32, blank=True)
+    condition = models.CharField(max_length=8, choices=Condition.choices, default=Condition.USED)
+    delivery = models.CharField(max_length=8, choices=Delivery.choices, default=Delivery.HAND)
+    free_shipping = models.BooleanField(default=False)
+    icon = models.CharField(max_length=8, blank=True)
+    hue = models.PositiveSmallIntegerField(default=190)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=5)
+    favorites = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["mode", "country", "category"])]
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)[:220] or "ilan"
+        super().save(*args, **kwargs)
+
+    @property
+    def parent_category(self):
+        return self.category.parent or self.category
+
+    def local_price(self, country=None):
+        return (country or self.country).format_price(self.price_eur)
+
+    @property
+    def age_days(self):
+        return (timezone.now() - self.created_at).days
+
+    @property
+    def is_boosted(self):
+        return bool(self.featured_until and self.featured_until >= timezone.now())
+
+    @property
+    def in_stock(self):
+        if not self.track_stock:
+            return True
+        if self.variants.exists():
+            return any(v.stock > 0 for v in self.variants.all())
+        return (self.stock or 0) > 0
+
+    @property
+    def avg_rating(self):
+        agg = self.reviews.aggregate(a=models.Avg("rating"))["a"]
+        return round(agg, 1) if agg else None
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
+
+
+class ApplicationStatus(models.TextChoices):
+    PENDING = "pending", "Beklemede"
+    APPROVED = "approved", "Onaylandi"
+    REJECTED = "rejected", "Reddedildi"
+
+
+class ShopApplication(models.Model):
+    """Magaza acma basvurusu. Onaylaninca Shop kaydi olusur."""
+    applicant = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="shop_applications"
+    )
+    shop_name = models.CharField(max_length=120)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True,
+        limit_choices_to={"mode": Mode.SHOP, "parent__isnull": True},
+    )
+    contact_name = models.CharField(max_length=120)
+    email = models.EmailField()
+    phone = models.CharField(max_length=32, blank=True)
+    tax_number = models.CharField(max_length=40, blank=True)
+    website = models.URLField(blank=True)
+    about = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=10, choices=ApplicationStatus.choices, default=ApplicationStatus.PENDING
+    )
+    staff_note = models.TextField(blank=True)
+    shop = models.OneToOneField(
+        Shop, null=True, blank=True, on_delete=models.SET_NULL, related_name="application"
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.shop_name} ({self.get_status_display()})"
+
+    def approve(self):
+        """Basvuruyu onayla: magazayi olustur, ilk 3 ay ucretsiz paketle baslat."""
+        if self.shop:
+            return self.shop
+        shop = Shop.objects.create(
+            owner=self.applicant, name=self.shop_name, country=self.country,
+            city=self.city, category=self.category, about=self.about,
+            plan=ShopPlan.TRIAL, opened_at=timezone.now(), rating=5, hue=190,
+        )
+        self.shop = shop
+        self.status = ApplicationStatus.APPROVED
+        self.save(update_fields=["shop", "status"])
+        return shop
+
+
+class ListingImage(models.Model):
+    """Bir urune ait ek gorseller (kapak disinda)."""
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="gallery")
+    image = models.ImageField(upload_to="listings/gallery/")
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.listing_id} - #{self.order}"
+
+
+# ---------------------------------------------------------------------------
+# Siparis / sepet
+# ---------------------------------------------------------------------------
+class OrderStatus(models.TextChoices):
+    PENDING = "pending", "Beklemede"
+    PAID = "paid", "Odendi"
+    CANCELLED = "cancelled", "Iptal"
+
+
+class Order(models.Model):
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, related_name="orders")
+    status = models.CharField(max_length=10, choices=OrderStatus.choices, default=OrderStatus.PENDING)
+    total_eur = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    full_name = models.CharField(max_length=120, blank=True)
+    address = models.CharField(max_length=240, blank=True)
+    phone = models.CharField(max_length=32, blank=True)
+    stripe_session_id = models.CharField(max_length=200, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    coupon = models.ForeignKey("Coupon", null=True, blank=True, on_delete=models.SET_NULL)
+    discount_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"#{self.pk} — {self.buyer}"
+
+    @property
+    def is_shipped(self):
+        return self.items.exists() and all(it.shipped_at for it in self.items.all())
+
+    @property
+    def can_cancel(self):
+        return self.status == OrderStatus.PAID and not any(it.shipped_at for it in self.items.all())
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    listing = models.ForeignKey(Listing, null=True, blank=True, on_delete=models.SET_NULL)
+    variant = models.ForeignKey(
+        "ListingVariant", null=True, blank=True, on_delete=models.SET_NULL, related_name="order_items"
+    )
+    shop = models.ForeignKey(Shop, null=True, blank=True, on_delete=models.SET_NULL)
+    title = models.CharField(max_length=200)
+    variant_name = models.CharField(max_length=60, blank=True)
+    price_eur = models.DecimalField(max_digits=12, decimal_places=2)
+    qty = models.PositiveSmallIntegerField(default=1)
+    carrier = models.CharField(max_length=60, blank=True)
+    tracking_number = models.CharField(max_length=80, blank=True)
+    shipped_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def line_total_eur(self):
+        return self.price_eur * self.qty
+
+
+# ---------------------------------------------------------------------------
+# Mesajlasma
+# ---------------------------------------------------------------------------
+class Conversation(models.Model):
+    listing = models.ForeignKey(
+        Listing, null=True, blank=True, on_delete=models.SET_NULL, related_name="conversations"
+    )
+    participant_a = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conv_a")
+    participant_b = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conv_b")
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        unique_together = [("listing", "participant_a", "participant_b")]
+
+    def other(self, user):
+        return self.participant_b if user == self.participant_a else self.participant_a
+
+    def last_message(self):
+        return self.messages.order_by("-created_at").first()
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["created_at"]
+
+
+class BoostStatus(models.TextChoices):
+    PENDING = "pending", "Beklemede"
+    PAID = "paid", "Odendi"
+
+
+class Boost(models.Model):
+    """Ilan/urun one cikarma satin alimi (ucretli vitrin)."""
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="boosts")
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="boosts")
+    days = models.PositiveSmallIntegerField()
+    price_eur = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=10, choices=BoostStatus.choices, default=BoostStatus.PENDING)
+    stripe_session_id = models.CharField(max_length=200, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Boost #{self.pk} — {self.listing.title} ({self.days}g)"
+
+    def apply(self):
+        """Odeme onaylaninca ilanin vitrin suresini uzatir."""
+        from datetime import timedelta
+        base = self.listing.featured_until
+        start = base if base and base > timezone.now() else timezone.now()
+        self.listing.featured_until = start + timedelta(days=self.days)
+        self.listing.save(update_fields=["featured_until"])
+        self.status = BoostStatus.PAID
+        self.paid_at = timezone.now()
+        self.save(update_fields=["status", "paid_at"])
+
+
+# ---------------------------------------------------------------------------
+# Varyant (beden / renk vb.)
+# ---------------------------------------------------------------------------
+class ListingVariant(models.Model):
+    """Bir urunun beden/renk gibi secenekleri, her birinin kendi stogu."""
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="variants")
+    name = models.CharField(max_length=60, help_text="orn. 'Kırmızı / M'")
+    price_delta_eur = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+                                          help_text="Ana fiyata eklenir/cikarilir, orn. -2.00")
+    stock = models.PositiveIntegerField(default=0)
+    sku = models.CharField(max_length=40, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.listing.title} — {self.name}"
+
+    @property
+    def final_price_eur(self):
+        return self.listing.price_eur + self.price_delta_eur
+
+
+# ---------------------------------------------------------------------------
+# Favoriler
+# ---------------------------------------------------------------------------
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
+    listing = models.ForeignKey(Listing, null=True, blank=True, on_delete=models.CASCADE, related_name="favorited_by")
+    shop = models.ForeignKey(Shop, null=True, blank=True, on_delete=models.CASCADE, related_name="favorited_by")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "listing"], name="uniq_fav_listing",
+                                    condition=models.Q(listing__isnull=False)),
+            models.UniqueConstraint(fields=["user", "shop"], name="uniq_fav_shop",
+                                    condition=models.Q(shop__isnull=False)),
+        ]
+
+
+# ---------------------------------------------------------------------------
+# Degerlendirme / yorum (yalniz onaylanmis satin alimdan)
+# ---------------------------------------------------------------------------
+class Review(models.Model):
+    order_item = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name="review")
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="reviews")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.listing.title} — {self.rating}★"
+
+
+# ---------------------------------------------------------------------------
+# Kupon
+# ---------------------------------------------------------------------------
+class Coupon(models.Model):
+    code = models.CharField(max_length=30, unique=True)
+    shop = models.ForeignKey(Shop, null=True, blank=True, on_delete=models.CASCADE, related_name="coupons",
+                             help_text="Bossa tum magazalarda gecerli")
+    percent_off = models.PositiveSmallIntegerField(null=True, blank=True, help_text="orn. 20 -> %20 indirim")
+    amount_off_eur = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    valid_until = models.DateTimeField(null=True, blank=True)
+    max_uses = models.PositiveIntegerField(null=True, blank=True)
+    used_count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def is_valid(self):
+        if not self.active:
+            return False
+        if self.valid_until and self.valid_until < timezone.now():
+            return False
+        if self.max_uses and self.used_count >= self.max_uses:
+            return False
+        return True
+
+    def discount_for(self, subtotal_eur):
+        if self.percent_off:
+            return subtotal_eur * self.percent_off / 100
+        if self.amount_off_eur:
+            return min(self.amount_off_eur, subtotal_eur)
+        return 0
+
+
+class SiteSettings(models.Model):
+    """Tek kayitlik site ayarlari (admin panelinden duzenlenir)."""
+    hero_image = models.ImageField(
+        "Ana sayfa banner gorseli", upload_to="site/", blank=True, null=True,
+        help_text="Bos birakilirsa varsayilan cizim banner kullanilir. Genis (en az 1600 px) bir fotograf onerilir.",
+    )
+
+    class Meta:
+        verbose_name = "Site ayari"
+        verbose_name_plural = "Site ayarlari"
+
+    def __str__(self):
+        return "Site ayarlari"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+class Banner(models.Model):
+    """Reklam / kampanya banner'i (Trendyol tarzi kaydirici ve orta serit)."""
+    PLACES = [("home_hero", "Ana sayfa ust kaydirici (1400x420 onerilir)"),
+              ("home_mid", "Ana sayfa orta serit (600x300 onerilir, en fazla 3)")]
+    title = models.CharField("Baslik", max_length=120)
+    advertiser = models.CharField("Reklamveren", max_length=120, blank=True)
+    image = models.ImageField("Gorsel", upload_to="banners/")
+    link_url = models.CharField("Tiklayinca gidilecek adres", max_length=300, blank=True)
+    place = models.CharField("Alan", max_length=12, choices=PLACES, default="home_hero")
+    order = models.PositiveSmallIntegerField("Sira", default=0)
+    is_active = models.BooleanField("Yayinda", default=True)
+    starts_at = models.DateTimeField("Baslangic", null=True, blank=True)
+    ends_at = models.DateTimeField("Bitis", null=True, blank=True)
+    clicks = models.PositiveIntegerField("Tiklama", default=0, editable=False)
+
+    class Meta:
+        ordering = ["place", "order", "-id"]
+        verbose_name = "Reklam banner"
+        verbose_name_plural = "Reklam bannerlari"
+
+    def __str__(self):
+        return f"{self.title} ({self.get_place_display()})"

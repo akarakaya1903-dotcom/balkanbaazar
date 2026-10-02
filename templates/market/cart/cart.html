@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.cart_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="rhead"><h2>{{ t.cart_t }}</h2></div>
+  {% if out_of_stock %}
+  <div class="paynote demo"><span class="ic">⚠</span>
+    <div><b>{{ t.out_of_stock }}</b><p>{% for o in out_of_stock %}{{ o.title }}{% if not forloop.last %}, {% endif %}{% endfor %}</p></div></div>
+  {% endif %}
+  {% if lines %}
+  <div class="tablewrap">
+    <table class="ptable">
+      <thead><tr><th></th><th>{{ t.qty }}</th><th>{{ t.price }}</th><th></th></tr></thead>
+      <tbody>
+      {% for l in lines %}
+      <tr>
+        <td>
+          <a href="{% url 'market:listing_detail' l.item.pk l.item.slug %}" style="display:flex;gap:10px;align-items:center">
+            {% if l.item.image %}<img src="{{ l.item.image.url }}" style="width:44px;height:44px;object-fit:cover;border-radius:8px">
+            {% else %}<div style="width:44px;height:44px;border-radius:8px;{{ l.item.hue|tile }};display:grid;place-items:center">{{ l.item.icon }}</div>{% endif %}
+            <span><b>{{ l.item.title }}</b>{% if l.variant %}<br><small>{{ l.variant.name }}</small>{% endif %}<br><small>{{ l.item.shop.name }}</small></span>
+          </a>
+        </td>
+        <td>
+          <form method="post" action="{% url 'market:cart_set_qty' l.key %}" class="two" style="max-width:90px">
+            {% csrf_token %}<input type="number" name="qty" min="1" max="20" value="{{ l.qty }}" onchange="this.form.submit()">
+          </form>
+        </td>
+        <td>€ {{ l.line_total|floatformat:0 }}<br><small>€ {{ l.unit_price|floatformat:0 }} × {{ l.qty }}</small></td>
+        <td><a href="{% url 'market:cart_remove' l.key %}" style="color:#9C3C1B;font-weight:700;font-size:13px">{{ t.remove }}</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="planbox" style="margin-top:16px">
+    <div><span class="lbl">{{ t.total }}</span><b>€ {{ total|floatformat:0 }}</b></div>
+    <a class="btn-sea" style="width:auto;margin-left:auto;padding:11px 24px" href="{% url 'market:checkout' %}">{{ t.checkout }}</a>
+  </div>
+  {% else %}
+  <div class="empty"><h3>{{ t.cart_empty }}</h3><p>{{ t.cart_emptyH }}</p>
+    <a class="btn-line" style="max-width:220px;margin:0 auto;display:block;text-align:center" href="{% url 'market:listings' %}?mode=shop">{{ t.continue_shopping }}</a></div>
+  {% endif %}
+</section></div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t.delete }} — {{ item.title }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="formcard" style="max-width:480px;margin:0 auto">
+    <h2>{{ t.sure_delete }}</h2>
+    <p class="lead">{{ item.title }}</p>
+    <form method="post">{% csrf_token %}
+      <div class="formact">
+        <button class="btn-danger" type="submit">{{ t.delete }}</button>
+        <a class="btn-line" href="{% url 'market:my_listings' %}">{{ t.cancel }}</a>
+      </div>
+    </form>
+  </div>
+</section></div>
+{% endblock %}

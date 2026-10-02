@@ -1,0 +1,29 @@
+{% extends "base_staff.html" %}{% load market_extras %}
+{% block title %}{{ t.mg_countries }}{% endblock %}
+{% block stfcontent %}
+<div class="stf-head"><h1>{{ t.mg_countries }}</h1></div>
+<form method="post" class="stf-table">{% csrf_token %}
+  <table>
+    <thead><tr>
+      <th></th><th>{{ t.mg_country }}</th><th>{{ t.curT }}</th><th>{{ t.mg_rate }}</th>
+      <th>{{ t.mg_shops }}</th><th>{{ t.mg_listings }}</th>
+    </tr></thead>
+    <tbody>
+    {% for c in countries %}
+    <tr>
+      <td>{% include "market/_flag.html" with c=c %}</td>
+      <td><b>{{ c.name_tr }}</b><br><small>{{ c.name_local }}</small></td>
+      <td>{{ c.currency }} {{ c.symbol }}</td>
+      <td>
+        {% if c.currency == 'EUR' %}<span class="stf-tag">1.0000</span>
+        {% else %}<input type="text" name="rate_{{ c.code }}" value="{{ c.rate_per_eur }}" class="stf-rateinput">{% endif %}
+      </td>
+      <td>{{ c.n_shops }}</td>
+      <td>{{ c.n_listings }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="formact" style="padding:14px"><button class="btn-sea" style="width:auto" type="submit">{{ t.mg_save_rates }}</button></div>
+</form>
+{% endblock %}

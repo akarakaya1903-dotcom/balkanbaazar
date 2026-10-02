@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.checkout_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="detg">
+    <div class="formcard">
+      <h1>{{ t.checkout_t }}</h1>
+      <form method="post" novalidate>{% csrf_token %}
+        <label class="field"><span>{{ t.full_name }}</span><input name="full_name" value="{{ request.user.get_full_name }}" required></label>
+        <label class="field"><span>{{ t.address }}</span><input name="address" required></label>
+        <label class="field"><span>{{ t.phone }}</span><input name="phone"></label>
+        <label class="field"><span>{{ t.coupon_t }}</span>
+          <input name="coupon_code" value="{{ coupon_code }}" placeholder="{{ t.coupon_ph }}"></label>
+        {% if coupon %}<p class="small" style="color:var(--olive)">✔ {{ coupon.code }} — € {{ discount|floatformat:0 }} {{ t.coupon_applied }}</p>{% endif %}
+
+        {% if stripe_ready %}
+        <div class="paynote stripe"><span class="ic">🔒</span>
+          <div><b>{{ t.pay_stripe_t }}</b><p>{{ t.pay_stripe_s }}</p></div></div>
+        {% else %}
+        <div class="paynote demo"><span class="ic">🧪</span>
+          <div><b>{{ t.pay_demo_t }}</b><p>{{ t.payment_note }}</p></div></div>
+        {% endif %}
+        <button class="btn-sea" type="submit">{{ t.pay_now }} — € {{ final_total|floatformat:0 }}</button>
+      </form>
+    </div>
+    <aside class="authside">
+      <h3>{{ t.order_items }}</h3>
+      {% for l in lines %}
+      <div class="stf-row" style="border-color:rgba(255,255,255,.2)">
+        <div><b>{{ l.item.title }}</b>{% if l.variant %} <span>· {{ l.variant.name }}</span>{% endif %}<span>{{ l.qty }} × € {{ l.unit_price|floatformat:0 }}</span></div>
+        <b>€ {{ l.line_total|floatformat:0 }}</b>
+      </div>
+      {% endfor %}
+      {% if discount %}
+      <div class="stf-row" style="border-color:rgba(255,255,255,.2)"><span>{{ t.coupon_t }}</span><b>− € {{ discount|floatformat:0 }}</b></div>
+      {% endif %}
+      <div class="stf-row" style="border:0;padding-top:12px"><b>{{ t.total }}</b><b>€ {{ final_total|floatformat:0 }}</b></div>
+    </aside>
+  </div>
+</section></div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.panel }} — {{ shop.name }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="panelgrid">
+  {% include "market/panel/_nav.html" with section='dash' %}
+  <main>
+    <div class="rhead"><h2>{{ t.dash }}</h2><span class="cnt">{{ shop.name }}</span></div>
+    <div class="stats4">
+      <div class="statbox"><b>{{ product_count }}</b><span>{{ t.stat_products }}</span></div>
+      <div class="statbox"><b>{{ active_count }}</b><span>{{ t.stat_active }}</span></div>
+      <div class="statbox"><b>{{ total_views }}</b><span>{{ t.stat_views }}</span></div>
+      <div class="statbox"><b>{{ total_favs }}</b><span>{{ t.stat_favs }}</span></div>
+    </div>
+
+    <div class="planbox">
+      <div>
+        <span class="lbl">{{ t.current_plan }}</span>
+        <b>{% if shop.monthly_fee_eur %}{{ shop.monthly_fee_eur }} € {{ t.mo }}{% else %}{{ t.p1d }}{% endif %}</b>
+        <span class="lbl">{{ shop.months_open }} {{ t.months_open }}</span>
+      </div>
+      <a class="btn-line" href="{% url 'market:panel_billing' %}">{{ t.billing }}</a>
+    </div>
+
+    <div class="rhead" style="margin-top:22px"><h2>{{ t.my_products }}</h2>
+      <a class="cnt" href="{% url 'market:panel_products' %}">{{ t.more }} →</a></div>
+    <div class="grid">
+      {% for item in recent %}{% include "market/_card.html" %}{% empty %}
+      <div class="empty"><h3>{{ t.no_products }}</h3><p>{{ t.no_productsH }}</p>
+        <a class="btn-sea" style="max-width:220px;margin:0 auto;display:block;text-align:center"
+           href="{% url 'market:panel_product_new' %}">{{ t.new_product }}</a></div>
+      {% endfor %}
+    </div>
+  </main>
+</div></div>
+{% endblock %}

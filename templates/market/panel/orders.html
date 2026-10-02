@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t.incoming_orders }} — {{ shop.name }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="panelgrid">
+  {% include "market/panel/_nav.html" with section='orders' %}
+  <main>
+    <div class="rhead"><h2>{{ t.incoming_orders }}</h2></div>
+    <div class="tablewrap">
+      <table class="ptable">
+        <thead><tr><th>{{ t.mg_since }}</th><th></th><th>{{ t.qty }}</th><th>{{ t.total }}</th><th>{{ t.mg_action }}</th></tr></thead>
+        <tbody>
+        {% for it in items %}
+        <tr>
+          <td>#{{ it.order.pk }}<br><small>{{ it.order.created_at|date:"d.m.Y" }}</small></td>
+          <td><b>{{ it.title }}</b>{% if it.variant_name %}<br><small>{{ it.variant_name }}</small>{% endif %}
+            <br><small>{{ it.order.full_name }} · {{ it.order.phone }}</small></td>
+          <td>{{ it.qty }}</td>
+          <td>€ {{ it.line_total_eur|floatformat:0 }}</td>
+          <td>
+            {% if it.shipped_at %}
+            <span class="ok">✔ {{ t.shipped }}</span><br><small>{{ it.carrier }} {{ it.tracking_number }}</small>
+            {% else %}
+            <form method="post" action="{% url 'market:panel_order_ship' it.pk %}" style="display:flex;gap:6px;flex-wrap:wrap">
+              {% csrf_token %}
+              <input name="carrier" placeholder="{{ t.carrier }}" style="width:110px;padding:6px;border:1px solid var(--line);border-radius:6px">
+              <input name="tracking_number" placeholder="{{ t.tracking_no }}" style="width:120px;padding:6px;border:1px solid var(--line);border-radius:6px">
+              <button class="stf-btn ok" type="submit">{{ t.mark_shipped }}</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--ink-3)">{{ t.mg_empty }}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div></div>
+{% endblock %}

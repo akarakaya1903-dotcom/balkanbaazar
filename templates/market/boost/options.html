@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.boost_t }} — {{ listing.title }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="formcard" style="max-width:640px;margin:0 auto">
+    <h1>★ {{ t.boost_t }}</h1>
+    <p class="lead">{{ t.boost_s }} — <b>{{ listing.title }}</b></p>
+    {% if listing.is_boosted %}
+    <div class="paynote stripe"><span class="ic">★</span>
+      <div><b>{{ t.featured_badge }}</b><p>{{ t.boost_until }}: {{ listing.featured_until|date:"d.m.Y H:i" }}</p></div></div>
+    {% endif %}
+    <div class="plans" style="grid-template-columns:repeat(3,1fr);margin-top:16px">
+      {% for pkg in packages %}
+      <form method="post" action="{% url 'market:boost_checkout' listing.pk %}" class="plan {% if forloop.counter == 2 %}hi{% endif %}">
+        {% csrf_token %}<input type="hidden" name="days" value="{{ pkg.days }}">
+        <div class="ph">{{ pkg.days }} {{ t.boost_days }}</div>
+        <div class="amt">€ {{ pkg.price_eur }}</div>
+        <ul><li>{{ t.boost_feat1 }}</li><li>{{ t.boost_feat2 }}</li></ul>
+        <button class="cta" type="submit" style="border:0;cursor:pointer">{{ t.boost_pick }}</button>
+      </form>
+      {% endfor %}
+    </div>
+    <p class="small" style="margin-top:14px">{{ t.payment_note }}</p>
+    <a class="btn-line" style="margin-top:10px" href="{% url 'market:listing_detail' listing.pk listing.slug %}">{{ t.cancel }}</a>
+  </div>
+</section></div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t.shop_set }} — {{ shop.name }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="panelgrid">
+  {% include "market/panel/_nav.html" with section='settings' %}
+  <main>
+    <div class="rhead"><h2>{{ t.shop_set }}</h2></div>
+    <div class="formcard">
+      <form method="post" novalidate>{% csrf_token %}
+        {% include "market/_form.html" %}
+        <div class="formact"><button class="btn-sea" type="submit">{{ t.save }}</button></div>
+      </form>
+    </div>
+  </main>
+</div></div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t.my_orders_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="rhead"><h2>{{ t.my_orders_t }}</h2></div>
+  {% for o in orders %}
+  <div class="formcard" style="margin-bottom:12px">
+    <div class="rhead" style="margin-bottom:6px"><b>#{{ o.pk }}</b>
+      <span class="cnt">{{ o.created_at|date:"d.m.Y H:i" }}</span>
+      <span class="stf-tag {% if o.status == 'paid' %}ok{% elif o.status == 'cancelled' %}danger{% endif %}" style="margin-left:auto">{{ o.get_status_display }}</span></div>
+    {% for it in o.items.all %}
+    <div class="stf-row">
+      <div>
+        <b>{{ it.title }}</b>{% if it.variant_name %} <span>· {{ it.variant_name }}</span>{% endif %}
+        <span>{{ it.qty }} × € {{ it.price_eur|floatformat:0 }}</span>
+        {% if it.shipped_at %}<span style="color:var(--olive)">✔ {{ t.shipped }} — {{ it.carrier }} {{ it.tracking_number }}</span>
+        {% else %}<span>{{ t.not_shipped }}</span>{% endif %}
+      </div>
+      {% if o.status == 'paid' and it.listing %}
+        {% if it.review %}<span class="stf-tag ok">★ {{ t.reviewed }}</span>
+        {% else %}<a class="stf-btn" href="{% url 'market:review_create' it.pk %}">{{ t.write_review }}</a>{% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+    <div class="stf-row" style="border:0">
+      <b>{{ t.total }}</b>
+      <span style="display:flex;gap:10px;align-items:center">
+        <b>€ {{ o.total_eur|floatformat:0 }}</b>
+        {% if o.can_cancel %}
+        <form method="post" action="{% url 'market:order_cancel' o.pk %}" onsubmit="return confirm('{{ t.sure_cancel }}')">
+          {% csrf_token %}<button class="stf-btn danger">{{ t.cancel_order }}</button></form>
+        {% endif %}
+      </span>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty"><h3>{{ t.orders_empty }}</h3></div>
+  {% endfor %}
+</section></div>
+{% endblock %}

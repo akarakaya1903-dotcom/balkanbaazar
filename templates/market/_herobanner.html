@@ -1,0 +1,100 @@
+{% load market_extras %}
+{# Ana sayfa banner'i: logo, harita+bayrak pin'leri, iki CTA, imza yazisi. #}
+<section class="hero2">
+  {% if site_settings and site_settings.hero_image %}
+  <img class="hero2-bg" src="{{ site_settings.hero_image.url }}" alt="" style="object-fit:cover">
+  <div class="hero2-veil" aria-hidden="true"></div>
+  {% else %}
+  <svg class="hero2-bg" viewBox="0 0 1400 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#EAF6F8"/><stop offset="55%" stop-color="#CDEAEF"/>
+        <stop offset="100%" stop-color="#AEDCE4"/>
+      </linearGradient>
+      <linearGradient id="mtn1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8FB9C4"/><stop offset="100%" stop-color="#6FA3B0"/>
+      </linearGradient>
+      <linearGradient id="mtn2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5C8C99"/><stop offset="100%" stop-color="#3F6E7A"/>
+      </linearGradient>
+      <linearGradient id="riv" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#BFE6EC"/><stop offset="100%" stop-color="#8FCBD6"/>
+      </linearGradient>
+    </defs>
+    <rect width="1400" height="520" fill="url(#sky)"/>
+    <path d="M0 260 L120 180 L260 240 L420 150 L600 230 L760 160 L940 235 L1120 170 L1280 225 L1400 190 L1400 300 L0 300 Z" fill="url(#mtn1)" opacity=".8"/>
+    <path d="M0 300 L150 240 L320 290 L500 220 L680 280 L860 215 L1040 285 L1220 225 L1400 270 L1400 340 L0 340 Z" fill="url(#mtn2)" opacity=".9"/>
+    <path d="M0 520 L0 360 C200 330 260 400 460 370 C660 340 720 410 940 380 C1140 355 1220 400 1400 370 L1400 520 Z" fill="url(#riv)"/>
+    <g opacity=".5" fill="#fff"><circle cx="220" cy="110" r="34"/><circle cx="270" cy="120" r="26"/><circle cx="180" cy="125" r="22"/>
+      <circle cx="1170" cy="90" r="30"/><circle cx="1215" cy="100" r="22"/><circle cx="1130" cy="105" r="20"/></g>
+    <g opacity=".28" stroke="#fff" stroke-width="6" fill="none">
+      <path d="M180 420 q60 -70 130 0 q60 -70 130 0"/>
+    </g>
+  </svg>
+  {% endif %}
+
+  <div class="wrap hero2-in">
+    <div class="hero2-left">
+      <div class="hero2-logo">
+        <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true">
+          <defs><linearGradient id="bagg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--sea-2)"/><stop offset="100%" stop-color="var(--deep-2)"/>
+          </linearGradient></defs>
+          <rect x="8" y="16" width="38" height="32" rx="9" fill="url(#bagg)"/>
+          <path d="M18 20 v-3 a9 9 0 0 1 18 0 v3" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <text x="27" y="39" font-family="Archivo,sans-serif" font-weight="800" font-size="20" fill="#fff" text-anchor="middle">B</text>
+        </svg>
+        <span class="hero2-word"><b>{{ t.brand_word1 }}</b><b class="c2">{{ t.brand_word2 }}</b></span>
+      </div>
+      <p class="hero2-sub">{{ t.brand_tag }}</p>
+
+      <h1 class="hero2-h1">{{ t.heroT1 }}<br><span>{{ t.heroT2 }}</span></h1>
+      <p class="hero2-p">{{ t.heroP }}</p>
+
+      <div class="hero2-cta">
+        <a class="cta-blue" href="{% url 'market:listings' %}?mode=shop"><span>🛒</span>{{ t.cta_shop }}</a>
+        <a class="cta-outline" href="{% url 'market:shop_apply' %}"><span>🏪</span>{{ t.openshop }}</a>
+      </div>
+
+      <div class="hero2-stats">
+        <div><b>{{ total_listings }}</b><span>{{ t.s1 }}</span></div>
+        <div><b>{{ total_shops }}</b><span>{{ t.s2 }}</span></div>
+        <div><b>8</b><span>{{ t.s3 }}</span></div>
+        <div><b>10</b><span>{{ t.s4 }}</span></div>
+      </div>
+    </div>
+
+    <div class="hero2-right">
+      <svg class="mapblob" viewBox="0 0 420 420" aria-hidden="true">
+        <defs><linearGradient id="blobg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="var(--sea-2)"/><stop offset="100%" stop-color="var(--deep)"/>
+        </linearGradient></defs>
+        <path d="M130 30 C190 10 250 25 275 60 C310 55 345 75 350 110
+                 C390 120 405 160 385 190 C400 220 390 260 360 270
+                 C365 300 340 330 305 330 C300 360 270 385 235 375
+                 C210 400 165 400 145 375 C110 385 80 365 78 335
+                 C45 330 25 300 35 265 C10 245 8 205 35 180
+                 C25 150 45 115 80 105 C85 75 105 45 130 30 Z"
+              fill="url(#blobg)" opacity=".16"/>
+        <path d="M130 30 C190 10 250 25 275 60 C310 55 345 75 350 110
+                 C390 120 405 160 385 190 C400 220 390 260 360 270
+                 C365 300 340 330 305 330 C300 360 270 385 235 375
+                 C210 400 165 400 145 375 C110 385 80 365 78 335
+                 C45 330 25 300 35 265 C10 245 8 205 35 180
+                 C25 150 45 115 80 105 C85 75 105 45 130 30 Z"
+              fill="none" stroke="var(--sea)" stroke-width="2" stroke-dasharray="3 5" opacity=".5"/>
+      </svg>
+      <div class="pins">
+        {% for c in countries %}
+        <a class="pin p{{ forloop.counter }}" href="{% url 'market:set_country' c.code %}" title="{% countryname c lang %}">
+          <span class="pinflag">{% include "market/_flag.html" with c=c %}</span>
+          <span class="pintip">{% countryname c lang %}</span>
+        </a>
+        {% endfor %}
+      </div>
+      <p class="signature">{{ t.signature }}</p>
+    </div>
+  </div>
+</section>
+
+{% include "market/_home_categories.html" %}

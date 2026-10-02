@@ -1,0 +1,59 @@
+{% extends "base_staff.html" %}
+{% block title %}{{ t.mg_shops }}{% endblock %}
+{% block stfcontent %}
+<div class="stf-head"><h1>{{ t.mg_shops }}</h1></div>
+
+<form class="stf-filters" method="get">
+  <select name="country" onchange="this.form.submit()">
+    <option value="">{{ t.mg_all }}</option>
+    {% for c in countries %}<option value="{{ c.code }}" {% if country == c.code %}selected{% endif %}>{{ c.name_tr }}</option>{% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ q }}" placeholder="{{ t.mg_search }}">
+  <button class="stf-btn" type="submit">{{ t.apply }}</button>
+</form>
+
+<div class="stf-table">
+  <table>
+    <thead><tr>
+      <th></th><th>{{ t.mg_owner }}</th><th>{{ t.mg_country }}</th><th>{{ t.mg_plan }}</th>
+      <th>{{ t.stat_products }}</th><th>{{ t.verified }}</th><th>{{ t.mg_action }}</th>
+    </tr></thead>
+    <tbody>
+    {% for s in page_obj %}
+    <tr>
+      <td><a href="{% url 'market:shop_detail' s.slug %}" target="_blank"><b>{{ s.name }}</b></a><br>
+        <small>{{ s.city.name }}</small></td>
+      <td>{{ s.owner.username|default:"—" }}</td>
+      <td>{{ s.country.name_tr }}</td>
+      <td>
+        <form method="post" action="{% url 'market:staff_shop_plan' s.pk %}" class="stf-inline">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <select name="plan" onchange="this.form.submit()">
+            <option value="trial" {% if s.plan == 'trial' %}selected{% endif %}>{{ t.p1d }}</option>
+            <option value="mid" {% if s.plan == 'mid' %}selected{% endif %}>9 € {{ t.mo }}</option>
+            <option value="full" {% if s.plan == 'full' %}selected{% endif %}>29 € {{ t.mo }}</option>
+          </select>
+        </form>
+      </td>
+      <td>{{ s.n_listings }}</td>
+      <td>
+        <form method="post" action="{% url 'market:staff_shop_verify' s.pk %}">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="stf-btn {% if s.verified %}ok{% endif %}">
+            {% if s.verified %}✔ {{ t.verified }}{% else %}{{ t.mg_verify }}{% endif %}</button>
+        </form>
+      </td>
+      <td><a class="stf-btn" href="{% url 'market:shop_detail' s.slug %}" target="_blank">{{ t.mg_view }}</a></td>
+    </tr>
+    {% empty %}<tr><td colspan="7" class="stf-empty">{{ t.mg_empty }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="pager">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">{{ t.prev }}</a>{% endif %}
+  <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">{{ t.next }}</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

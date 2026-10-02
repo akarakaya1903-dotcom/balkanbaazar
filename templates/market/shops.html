@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.shops }} — {{ t.brand }}{% endblock %}
+{% block catstrip %}{% include "market/_catnav.html" %}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <section class="sect">
+    <div class="rhead"><h2>{{ t.shops }}</h2>
+      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {{ country.name_local }}</span></div>
+    <div class="rail">
+      {% for s in page_obj %}
+      <a class="shop" href="{% url 'market:shop_detail' s.slug %}">
+        {% if s.logo %}<img class="avimg" src="{{ s.logo.url }}" alt="{{ s.name }}">{% else %}<div class="av" style="background:hsl({{ s.hue }} 42% 34%)">{{ s.name|slice:":1" }}</div>{% endif %}
+        <div class="nm">{{ s.name }} {% if s.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %}</div>
+        <div class="ms"><span class="star">★</span> {{ s.rating }} · {{ s.product_count }} {{ t.products }}</div>
+        <div class="ms">{{ s.city.name }} · {{ s.get_plan_display }}</div>
+      </a>
+      {% empty %}
+      <div class="empty"><h3>{{ t.none }}</h3><p>{{ t.noneH }}</p></div>
+      {% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="pager">
+      {% if page_obj.has_previous %}<a href="{% qs page=page_obj.previous_page_number %}">{{ t.prev }}</a>{% endif %}
+      <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="{% qs page=page_obj.next_page_number %}">{{ t.next }}</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.favorites_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="rhead"><h2>{{ t.favorites_t }}</h2></div>
+  <div class="grid">
+    {% for item in listings %}{% include "market/_card.html" %}{% endfor %}
+  </div>
+  {% if shops %}
+  <div class="rhead" style="margin-top:22px"><h2>{{ t.shops }}</h2></div>
+  <div class="rail">
+    {% for s in shops %}
+    <a class="shop" href="{% url 'market:shop_detail' s.slug %}">
+      {% if s.logo %}<img class="avimg" src="{{ s.logo.url }}" alt="{{ s.name }}">
+      {% else %}<div class="av" style="background:hsl({{ s.hue }} 42% 34%)">{{ s.name|slice:":1" }}</div>{% endif %}
+      <div class="nm">{{ s.name }}</div><div class="ms">{{ s.city.name }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if not listings and not shops %}
+  <div class="empty"><h3>{{ t.no_favorites }}</h3></div>
+  {% endif %}
+</section></div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base_staff.html" %}
+{% block title %}{{ t.mg_apps }}{% endblock %}
+{% block stfcontent %}
+<div class="stf-head"><h1>{{ t.mg_apps }}</h1></div>
+
+<div class="stf-tabs">
+  <a href="?status=pending" class="{% if status == 'pending' %}on{% endif %}">{{ t.pending }} ({{ counts.pending }})</a>
+  <a href="?status=approved" class="{% if status == 'approved' %}on{% endif %}">{{ t.approved }} ({{ counts.approved }})</a>
+  <a href="?status=rejected" class="{% if status == 'rejected' %}on{% endif %}">{{ t.rejected }} ({{ counts.rejected }})</a>
+  <form class="stf-search" method="get">
+    <input type="hidden" name="status" value="{{ status }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ t.mg_search }}">
+  </form>
+</div>
+
+<div class="stf-table">
+  <table>
+    <thead><tr>
+      <th>{{ t.shop_name }}</th><th>{{ t.mg_applicant }}</th><th>{{ t.mg_country }}</th>
+      <th>{{ t.cat }}</th><th>{{ t.mg_since }}</th><th>{{ t.mg_action }}</th>
+    </tr></thead>
+    <tbody>
+    {% for a in page_obj %}
+    <tr>
+      <td><b>{{ a.shop_name }}</b>{% if a.website %}<br><small>{{ a.website }}</small>{% endif %}</td>
+      <td>{{ a.contact_name }}<br><small>{{ a.email }}</small></td>
+      <td>{{ a.country.name_tr }}</td>
+      <td>{{ a.category.name|default:"—" }}</td>
+      <td>{{ a.created_at|date:"d.m.Y" }}</td>
+      <td class="stf-rowact">
+        {% if a.status == 'pending' %}
+        <form method="post" action="{% url 'market:staff_app_approve' a.pk %}"
+              onsubmit="return confirm('{{ t.mg_confirm_approve }}')">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="stf-btn ok">{{ t.mg_approve }}</button></form>
+        <details class="stf-rejectbox">
+          <summary class="stf-btn danger">{{ t.mg_reject }}</summary>
+          <form method="post" action="{% url 'market:staff_app_reject' a.pk %}" class="stf-rejectform">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <textarea name="note" placeholder="{{ t.mg_note_ph }}" rows="2"></textarea>
+            <button class="stf-btn danger" type="submit">{{ t.mg_reject }}</button>
+          </form>
+        </details>
+        {% else %}
+        <span class="stf-tag {% if a.status == 'approved' %}ok{% else %}danger{% endif %}">
+          {% if a.status == 'approved' %}{{ t.approved }}{% else %}{{ t.rejected }}{% endif %}</span>
+        {% if a.staff_note %}<br><small>{{ a.staff_note }}</small>{% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}<tr><td colspan="6" class="stf-empty">{{ t.mg_empty }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="pager">
+  {% if page_obj.has_previous %}<a href="?status={{ status }}&amp;page={{ page_obj.previous_page_number }}">{{ t.prev }}</a>{% endif %}
+  <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?status={{ status }}&amp;page={{ page_obj.next_page_number }}">{{ t.next }}</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

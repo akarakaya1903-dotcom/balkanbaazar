@@ -1,0 +1,26 @@
+{% load market_extras %}
+<div class="card cardwrap">
+<a href="{% url 'market:listing_detail' item.pk item.slug %}">
+  <div class="thumbwrap">
+    {% if item.image %}
+    <img class="thumbimg" src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+    {% else %}
+    <div class="thumb" style="{{ item.hue|tile }}">{{ item.icon }}</div>
+    {% endif %}
+    {% if item.is_boosted %}<span class="badge boost">★ {{ t.featured_badge }}</span>
+    {% elif item.free_shipping %}<span class="badge g">{{ t.free }}</span>
+    {% elif item.mode == 'used' and item.condition == 'new' %}<span class="badge o">{{ t.cnew }}</span>{% endif %}
+  </div>
+  <div class="cbody">
+    <span class="tt">{{ item.title }}</span>
+    <span class="pr">{% price item country %}</span>
+    {% if country.currency != 'EUR' %}<span class="eur">≈ {% eur item %}</span>{% endif %}
+    <span class="mt"><span>{{ item.city.name }}</span>
+      <span>{% if item.mode == 'shop' %}<span class="star">★</span> {{ item.rating }}{% else %}{{ item.age_days }}d{% endif %}</span></span>
+  </div>
+</a>
+{% if item.mode == 'shop' and user.is_authenticated and not item.variants.exists %}
+<form method="post" action="{% url 'market:cart_add' item.pk %}" class="quickaddform">
+  {% csrf_token %}<button class="quickadd" type="submit" title="{{ t.cart }}">🛒</button></form>
+{% endif %}
+</div>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load market_extras %}
+{% block title %}{{ t.apply_ok }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap">
+  <div class="authbox">
+    <h1>{{ t.apply_ok }}</h1>
+    <p class="lead">{{ t.apply_okS }}</p>
+    <dl class="kv">
+      <dt>{{ t.shop_name }}</dt><dd>{{ application.shop_name }}</dd>
+      <dt>{{ t.s3 }}</dt><dd>{% countryname application.country lang %}</dd>
+      <dt>{{ t.status }}</dt>
+      <dd>{% if application.status == 'pending' %}{{ t.pending }}
+          {% elif application.status == 'approved' %}{{ t.approved }}
+          {% else %}{{ t.rejected }}{% endif %}</dd>
+      <dt>{{ t.date }}</dt><dd>{{ application.created_at|date:"d.m.Y H:i" }}</dd>
+    </dl>
+    <a class="btn-line" href="{% url 'market:panel' %}">{{ t.open_panel }}</a>
+  </div>
+</div></div>
+{% endblock %}

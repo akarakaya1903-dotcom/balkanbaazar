@@ -1,0 +1,58 @@
+{% extends "base_staff.html" %}{% load market_extras %}
+{% block title %}{{ t.mg_listings }}{% endblock %}
+{% block stfcontent %}
+<div class="stf-head"><h1>{{ t.mg_listings }}</h1></div>
+
+<form class="stf-filters" method="get">
+  <select name="mode" onchange="this.form.submit()">
+    <option value="">{{ t.mg_all }}</option>
+    <option value="used" {% if mode == 'used' %}selected{% endif %}>{{ t.used }}</option>
+    <option value="shop" {% if mode == 'shop' %}selected{% endif %}>{{ t.shops }}</option>
+  </select>
+  <select name="country" onchange="this.form.submit()">
+    <option value="">{{ t.mg_country }}</option>
+    {% for c in countries %}<option value="{{ c.code }}" {% if country == c.code %}selected{% endif %}>{{ c.name_tr }}</option>{% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ q }}" placeholder="{{ t.mg_search }}">
+  <button class="stf-btn" type="submit">{{ t.apply }}</button>
+</form>
+
+<div class="stf-table">
+  <table>
+    <thead><tr>
+      <th></th><th>{{ t.cat }}</th><th>{{ t.price }}</th><th>{{ t.mg_country }}</th>
+      <th>{{ t.status }}</th><th>{{ t.mg_action }}</th>
+    </tr></thead>
+    <tbody>
+    {% for item in page_obj %}
+    <tr>
+      <td><a href="{% url 'market:listing_detail' item.pk item.slug %}" target="_blank"><b>{{ item.title }}</b></a><br>
+        <small>{% if item.mode == 'shop' %}{{ item.shop.name }}{% else %}{{ item.seller_name }}{% endif %}</small></td>
+      <td>{{ item.category.name|default:"—" }}</td>
+      <td>€ {{ item.price_eur|floatformat:0 }}</td>
+      <td>{{ item.country.name_tr }}</td>
+      <td>{% if item.is_active %}<span class="stf-tag ok">{{ t.stat_active }}</span>{% else %}<span class="stf-tag danger">—</span>{% endif %}</td>
+      <td class="stf-rowact">
+        <form method="post" action="{% url 'market:staff_listing_toggle' item.pk %}">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="stf-btn">{% if item.is_active %}{{ t.mg_deactivate }}{% else %}{{ t.mg_activate }}{% endif %}</button>
+        </form>
+        <form method="post" action="{% url 'market:staff_listing_delete' item.pk %}"
+              onsubmit="return confirm('{{ t.sure_delete }}')">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="stf-btn danger">{{ t.delete }}</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}<tr><td colspan="6" class="stf-empty">{{ t.mg_empty }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="pager">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">{{ t.prev }}</a>{% endif %}
+  <span>{{ t.page }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">{{ t.next }}</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
