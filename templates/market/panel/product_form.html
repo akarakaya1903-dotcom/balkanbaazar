@@ -17,7 +17,7 @@
         {{ formset.management_form }}
         <div class="gallerygrid">
           {% for gform in formset %}
-          <div class="gcell">
+          <div class="gcell" data-new="{% if gform.instance.pk %}0{% else %}1{% endif %}">
             {% if gform.instance.image %}<img src="{{ gform.instance.image.url }}" alt="">{% endif %}
             {{ gform.id }}
             {{ gform.image }}
@@ -27,6 +27,27 @@
           </div>
           {% endfor %}
         </div>
+        <div class="small" style="margin-top:8px">{{ t.photo_rule }} <b>{{ min_images }}–{{ max_images }}</b> <span id="photoCount"></span></div>
+        <input type="file" id="multiPhotos" accept="image/*" multiple hidden>
+        <button class="btn-sea" type="button" id="pickPhotos" style="margin-top:6px">{{ t.pick_photos }}</button>
+        <button class="btn-line" type="button" id="addPhoto" style="margin-top:6px">+ {{ t.add_photo }}</button>
+        <script>
+        (function(){
+          var cells=[].slice.call(document.querySelectorAll('.gcell[data-new="1"]')),add=document.getElementById("addPhoto"),
+              pick=document.getElementById("pickPhotos"),multi=document.getElementById("multiPhotos"),shown=3;
+          function render(){cells.forEach(function(c,i){c.style.display=i<shown?"":"none";});add.style.display=shown>=cells.length?"none":"";}
+          add.addEventListener("click",function(){shown+=1;render();});
+          pick.addEventListener("click",function(){multi.click();});
+          multi.addEventListener("change",function(){
+            var files=[].slice.call(multi.files),free=cells.filter(function(c){var f=c.querySelector("input[type=file]");return f&&!f.files.length;}),i=0;
+            files.forEach(function(file){var c=free[i];if(!c){return;}var inp=c.querySelector("input[type=file]"),dt=new DataTransfer();dt.items.add(file);inp.files=dt.files;i++;});
+            if(i){shown=Math.max(shown,cells.indexOf(free[i-1])+1);}
+            document.getElementById("photoCount").textContent="("+i+")";render();
+          });
+          render();
+        })();
+        </script>
+
 
         <h3 class="gtitle">{{ t.variants_t }}</h3>
         <p class="small">{{ t.variants_h }}</p>

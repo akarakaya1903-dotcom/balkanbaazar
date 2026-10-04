@@ -152,3 +152,7 @@ BOOST_PACKAGES = [
     {"days": 7, "price_eur": 5},
     {"days": 30, "price_eur": 15},
 ]
+
+# Ilan basina fotograf siniri (kapak dahil toplam)
+MIN_LISTING_IMAGES = int(os.environ.get("MIN_LISTING_IMAGES", "20"))
+MAX_LISTING_IMAGES = int(os.environ.get("MAX_LISTING_IMAGES", "50"))

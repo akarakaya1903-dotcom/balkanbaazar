@@ -85,7 +85,7 @@ cat > /etc/nginx/sites-available/balkanbaazar <<'NGINX_EOF'
 server {
     listen 80;
     server_name __DOMAIN__ www.__DOMAIN__;
-    client_max_body_size 20M;
+    client_max_body_size 100M;
 
     location / {
         proxy_pass http://127.0.0.1:8000;

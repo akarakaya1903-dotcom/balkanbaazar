@@ -16,7 +16,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from . import emails
-from .forms import CouponForm, IndividualListingForm, ListingImageFormSet, ReviewForm
+from .forms import (CouponForm, IndividualListingForm, ListingImageFormSet, ReviewForm,
+                    photo_count_error)
 from .models import (Boost, BoostStatus, Conversation, Coupon, Country, Favorite,
                      Listing, ListingImage, ListingVariant, Message, Mode, Order,
                      OrderItem, OrderStatus, Review, Shop)
@@ -51,7 +52,12 @@ def my_listing_form(request, pk=None):
     formset = ListingImageFormSet(
         request.POST or None, request.FILES or None, queryset=gallery_qs, prefix="gallery"
     )
+    photo_err = None
     if request.method == "POST" and form.is_valid() and formset.is_valid():
+        photo_err = photo_count_error(form, formset)
+        if photo_err:
+            messages.error(request, photo_err)
+    if request.method == "POST" and photo_err is None and form.is_valid() and formset.is_valid():
         saved = form.save(owner=request.user)
         for img in formset.save(commit=False):
             img.listing = saved

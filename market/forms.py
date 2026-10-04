@@ -1,3 +1,4 @@
+from django.conf import settings
 # -*- coding: utf-8 -*-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -103,7 +104,7 @@ class ListingImageForm(forms.ModelForm):
 
 
 ListingImageFormSet = forms.modelformset_factory(
-    ListingImage, form=ListingImageForm, extra=3, can_delete=True
+    ListingImage, form=ListingImageForm, extra=49, max_num=49, validate_max=True, can_delete=True
 )
 
 
@@ -165,3 +166,18 @@ class CouponForm(forms.Form):
 class ShipmentForm(forms.Form):
     carrier = forms.CharField(max_length=60, required=False)
     tracking_number = forms.CharField(max_length=80, required=False)
+
+
+def photo_count_error(form, formset):
+    """Kapak dahil toplam fotograf sayisi MIN/MAX araligi disindaysa hata metni dondurur."""
+    n = 1 if form.cleaned_data.get("image") else 0
+    for f in formset.forms:
+        cd = getattr(f, "cleaned_data", None) or {}
+        if cd and not cd.get("DELETE") and cd.get("image"):
+            n += 1
+    lo, hi = settings.MIN_LISTING_IMAGES, settings.MAX_LISTING_IMAGES
+    if n < lo:
+        return f"En az {lo} fotograf yuklemelisin (kapak dahil, su an {n})."
+    if n > hi:
+        return f"En fazla {hi} fotograf yukleyebilirsin (su an {n})."
+    return None

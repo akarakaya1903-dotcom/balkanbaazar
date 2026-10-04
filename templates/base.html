@@ -65,7 +65,7 @@
         <summary class="ghost" style="list-style:none">{{ user.first_name|default:user.username }} ▾</summary>
         <div class="dropdown">
           <a href="{% url 'market:panel' %}">{{ t.panel }}</a>
-          <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }}</a>
+          <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }}{% if unread_messages %} <span class="ubadge">{{ unread_messages }}</span>{% endif %}</a>
           <a href="{% url 'market:profile' %}">{{ t.profile }}</a>
           <a href="{% url 'market:panel_products' %}">{{ t.my_products }}</a>
           {% if user.is_staff %}<a href="{% url 'market:staff_dashboard' %}">{{ t.manage }}
@@ -122,7 +122,7 @@
   <a href="{% url 'market:home' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>{{ t.nav_home }}</span></a>
   <a href="{% url 'market:listings' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>{{ t.nav_browse }}</span></a>
   <a class="sell" href="{% url 'market:my_listing_new' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>{{ t.nav_sell }}</span></a>
-  <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span></a>
+  <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span>{% if unread_messages %}<i class="ubadge">{{ unread_messages }}</i>{% endif %}</a>
   <a href="{% if user.is_authenticated %}{% url 'market:profile' %}{% else %}{% url 'market:login' %}{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>{{ t.nav_me }}</span></a>
 </nav>
 </body>

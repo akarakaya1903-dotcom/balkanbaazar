@@ -1,7 +1,7 @@
 from django.conf import settings
 
 from .i18n import LANGUAGES, T
-from .models import ApplicationStatus, Country, ShopApplication, SiteSettings, DailyStat
+from .models import ApplicationStatus, Country, ShopApplication, SiteSettings, DailyStat, Message
 
 
 def site_context(request):
@@ -45,7 +45,21 @@ def site_context(request):
         visit_stats = cache.get_or_set("visit_stats", _stats, 60)
     except Exception:
         visit_stats = None
+    unread = 0
+    try:
+        u = request.user
+        if u.is_authenticated:
+            from django.db.models import Q
+            unread = (Message.objects.filter(is_read=False)
+                      .filter(Q(conversation__participant_a=u) | Q(conversation__participant_b=u))
+                      .exclude(sender=u).count())
+    except Exception:
+        unread = 0
+    from django.conf import settings as _s
     return {
+        "unread_messages": unread,
+        "min_images": _s.MIN_LISTING_IMAGES,
+        "max_images": _s.MAX_LISTING_IMAGES,
         "visit_stats": visit_stats,
         "site_settings": site_settings,
         "t": T[lang],

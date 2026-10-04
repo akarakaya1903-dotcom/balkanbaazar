@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from . import emails
-from .forms import (ListingImageFormSet, ProductForm, ShipmentForm,
+from .forms import (ListingImageFormSet, photo_count_error, ProductForm, ShipmentForm,
                     ShopApplicationForm, ShopSettingsForm, SignUpForm, VariantFormSet)
 from .models import (ApplicationStatus, Listing, ListingImage, ListingVariant,
                      OrderItem, Shop, ShopApplication)
@@ -101,7 +101,12 @@ def panel_product_form(request, pk=None):
     )
     variant_qs = ListingVariant.objects.filter(listing=item) if item else ListingVariant.objects.none()
     variant_formset = VariantFormSet(request.POST or None, queryset=variant_qs, prefix="variant")
+    photo_err = None
     if request.method == "POST" and form.is_valid() and formset.is_valid() and variant_formset.is_valid():
+        photo_err = photo_count_error(form, formset)
+        if photo_err:
+            messages.error(request, photo_err)
+    if request.method == "POST" and photo_err is None and form.is_valid() and formset.is_valid() and variant_formset.is_valid():
         saved_item = form.save()
         images = formset.save(commit=False)
         for img in images:
