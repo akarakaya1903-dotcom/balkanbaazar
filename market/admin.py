@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (ApplicationStatus, Boost, Category, City, Conversation, Coupon,
                      Country, Favorite, Listing, ListingImage, ListingVariant, Message,
-                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page)
+                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat)
 
 
 @admin.register(Country)
@@ -149,3 +149,12 @@ class PageAdmin(admin.ModelAdmin):
     list_display = ("title", "group", "order", "is_published")
     list_editable = ("order", "is_published")
     prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(DailyStat)
+class DailyStatAdmin(admin.ModelAdmin):
+    list_display = ("day", "visitors", "pageviews")
+    readonly_fields = ("day", "visitors", "pageviews")
+
+    def has_add_permission(self, request):
+        return False

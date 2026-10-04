@@ -13,13 +13,39 @@
 
   <section class="sect">
     <div class="detg">
-      {% if item.image %}<img class="dheroimg" src="{{ item.image.url }}" alt="{{ item.title }}">
-      {% else %}<div class="dhero" style="{{ item.hue|tile }}">{{ item.icon }}</div>{% endif %}
-      {% if item.gallery.all %}
-      <div class="dgallery">
-        {% for g in item.gallery.all %}<img src="{{ g.image.url }}" alt="">{% endfor %}
+      {% if item.image or item.gallery.all %}
+      <div class="gal" id="gal">
+        <div class="gal-main" id="galMain">
+          {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% endif %}
+          {% for g in item.gallery.all %}<img src="{{ g.image.url }}" alt="{{ item.title }}" loading="lazy">{% endfor %}
+        </div>
+        <button class="gal-nav prev" type="button" aria-label="Previous">&#8249;</button>
+        <button class="gal-nav next" type="button" aria-label="Next">&#8250;</button>
+        <span class="gal-count" id="galCount"></span>
+        <div class="gal-thumbs" id="galThumbs">
+          {% if item.image %}<button type="button"><img src="{{ item.image.url }}" alt=""></button>{% endif %}
+          {% for g in item.gallery.all %}<button type="button"><img src="{{ g.image.url }}" alt="" loading="lazy"></button>{% endfor %}
+        </div>
       </div>
-      {% endif %}
+      <script>
+      (function(){
+        var main=document.getElementById("galMain"),thumbs=document.querySelectorAll("#galThumbs button"),
+            count=document.getElementById("galCount"),n=main.children.length,cur=0,timer=null;
+        function show(i,smooth){cur=(i+n)%n;main.scrollTo({left:cur*main.clientWidth,behavior:smooth===false?"auto":"smooth"});mark();}
+        function mark(){thumbs.forEach(function(t,k){t.classList.toggle("on",k===cur);});count.textContent=(cur+1)+" / "+n;}
+        function stop(){if(timer){clearInterval(timer);timer=null;}}
+        thumbs.forEach(function(t,k){t.addEventListener("click",function(){stop();show(k);});});
+        document.querySelector(".gal-nav.prev").addEventListener("click",function(){stop();show(cur-1);});
+        document.querySelector(".gal-nav.next").addEventListener("click",function(){stop();show(cur+1);});
+        main.addEventListener("scroll",function(){var i=Math.round(main.scrollLeft/main.clientWidth);if(i!==cur){cur=i;mark();}});
+        main.addEventListener("touchstart",stop,{passive:true});
+        main.addEventListener("mouseenter",stop);
+        mark();
+        if(n>1){document.querySelectorAll(".gal-nav,.gal-count").forEach(function(e){e.style.display="";});timer=setInterval(function(){show(cur+1);},4000);}
+        else{document.getElementById("galThumbs").style.display="none";}
+      })();
+      </script>
+      {% else %}<div class="dhero" style="{{ item.hue|tile }}">{{ item.icon }}</div>{% endif %}
       <div>
         {% if item.is_boosted %}<span class="badge boost" style="position:static;display:inline-block;margin-bottom:8px">★ {{ t.featured_badge }}</span>{% endif %}
         <h1 style="font-size:24px">{{ item.title }}</h1>

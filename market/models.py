@@ -597,3 +597,18 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DailyStat(models.Model):
+    """Gunluk tekil ziyaretci ve sayfa goruntuleme sayaci (kisisel veri tutmaz)."""
+    day = models.DateField("Gun", unique=True)
+    visitors = models.PositiveIntegerField("Tekil ziyaretci", default=0)
+    pageviews = models.PositiveIntegerField("Sayfa goruntuleme", default=0)
+
+    class Meta:
+        ordering = ["-day"]
+        verbose_name = "Gunluk istatistik"
+        verbose_name_plural = "Gunluk istatistikler"
+
+    def __str__(self):
+        return f"{self.day}: {self.visitors}"

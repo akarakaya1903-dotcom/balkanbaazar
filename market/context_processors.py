@@ -1,7 +1,7 @@
 from django.conf import settings
 
 from .i18n import LANGUAGES, T
-from .models import ApplicationStatus, Country, ShopApplication, SiteSettings
+from .models import ApplicationStatus, Country, ShopApplication, SiteSettings, DailyStat
 
 
 def site_context(request):
@@ -34,7 +34,19 @@ def site_context(request):
         site_settings = SiteSettings.objects.first()
     except Exception:  # tablo henuz olusturulmadiysa (migrate oncesi) site yine acilsin
         site_settings = None
+    try:
+        from django.core.cache import cache
+        from django.db.models import Sum
+        from django.utils import timezone
+        def _stats():
+            today = DailyStat.objects.filter(day=timezone.localdate()).first()
+            total = DailyStat.objects.aggregate(s=Sum("visitors"))["s"] or 0
+            return {"today": today.visitors if today else 0, "total": total}
+        visit_stats = cache.get_or_set("visit_stats", _stats, 60)
+    except Exception:
+        visit_stats = None
     return {
+        "visit_stats": visit_stats,
         "site_settings": site_settings,
         "t": T[lang],
         "pending_badge": pending_badge,

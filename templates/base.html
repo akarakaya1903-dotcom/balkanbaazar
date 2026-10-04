@@ -75,10 +75,12 @@
             <button type="submit" class="linkbtn">{{ t.signout }}</button></form>
         </div>
       </details>
+      <a class="ghost" href="{% url 'market:my_listing_new' %}">{{ t.post }}</a>
       <a class="solid" href="{% url 'market:panel_product_new' %}">{{ t.new_product }}</a>
       {% else %}
       <a class="ghost hideS" href="{% url 'market:login' %}">{{ t.signin }}</a>
       <a class="ghost" href="{% url 'market:signup' %}">{{ t.register }}</a>
+      <a class="ghost" href="{% url 'market:my_listing_new' %}">{{ t.post }}</a>
       <a class="solid" href="{% url 'market:shop_apply' %}">{{ t.openshop }}</a>
       {% endif %}
     </div>
@@ -112,7 +114,7 @@
       {% footer_pages "f2" as p2 %}{% if p2 %}<div><h5>{{ t.f2 }}</h5><ul>{% for p in p2 %}<li><a href="{% url 'market:page' p.slug %}">{{ p.title }}</a></li>{% endfor %}</ul></div>{% endif %}
       <div><h5>{{ t.f3 }}</h5><ul>{% for c in countries %}<li><a href="{% url 'market:set_country' c.code %}">{% countryname c lang %}</a></li>{% endfor %}</ul></div>
     </div>
-    <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span></div>
+    <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span>{% if visit_stats %}<span>{{ t.visits_today }}: <b>{{ visit_stats.today }}</b> · {{ t.visits_total }}: <b>{{ visit_stats.total }}</b></span>{% endif %}</div>
   </div>
 </footer>
 <script src="{% static 'js/app.js' %}"></script>
