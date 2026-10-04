@@ -71,3 +71,35 @@ footer{background:linear-gradient(160deg,var(--deep),#0A1F2C);border-top:4px sol
 .midbanners a:hover{transform:translateY(-4px)}
 .adtag{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;padding:3px 9px;border-radius:999px;backdrop-filter:blur(4px)}
 @media (max-width:640px){.slide{aspect-ratio:16/9}}
+
+/* ===== Telefon duzeni ===== */
+@media (max-width:920px){
+  .hero2-in{padding:26px 16px 22px}
+}
+@media (max-width:640px){
+  .bar1{flex-wrap:wrap;gap:8px;padding:8px 0}
+  .logo{order:1;flex:1 1 auto;min-width:0}
+  .logo b,.logo small{white-space:nowrap}
+  .logo b{font-size:17px}
+  .bar1>details,.bar1>.pill{order:2}
+  .search{order:3;flex:1 1 100%;min-width:0}
+  .search input{font-size:16px;padding:11px 14px}
+  .pill{white-space:nowrap;padding:7px 11px}
+  .bar2{gap:6px;padding-bottom:8px}
+  .bar2 .spacer{display:none}
+  .mode{width:100%}
+  .mode a{flex:1;text-align:center;padding:7px 4px;font-size:13px}
+  .mode small{font-size:10px}
+  .bar2>.ghost,.bar2>.solid{flex:1;text-align:center;white-space:nowrap}
+  .hero2-logo svg{width:44px;height:44px}
+  .hero2-h1{font-size:30px}
+  .hero2-cta{gap:10px}
+  .hero2-cta a{flex:1 1 100%;justify-content:center}
+  .hero2-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .hero2-stats b{font-size:20px}
+  .hero2-stats span{font-size:10.5px}
+  .rhead h2{font-size:19px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .cbody{padding:11px 11px 13px}
+  .pr{font-size:17px}
+}
