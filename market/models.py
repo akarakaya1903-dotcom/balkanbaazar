@@ -538,6 +538,12 @@ class SiteSettings(models.Model):
         help_text="Bos birakilirsa varsayilan cizim banner kullanilir. Genis (en az 1600 px) bir fotograf onerilir.",
     )
 
+    company_name = models.CharField("Sirket adi", max_length=160, blank=True,
+                                    help_text="Alt bilgide (c) satirinda gorunur.")
+    address = models.TextField("Adres", blank=True)
+    email = models.EmailField("E-posta", blank=True)
+    phone = models.CharField("Telefon", max_length=40, blank=True)
+
     class Meta:
         verbose_name = "Site ayari"
         verbose_name_plural = "Site ayarlari"
@@ -572,3 +578,22 @@ class Banner(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_place_display()})"
+
+
+class Page(models.Model):
+    """Alt bilgideki sayfalar: Hakkimizda, Iletisim, Kullanim kosullari vb."""
+    GROUPS = [("f1", "Kurumsal sutunu"), ("f2", "Yardim sutunu")]
+    title = models.CharField("Baslik", max_length=120)
+    slug = models.SlugField("Adres (slug)", max_length=140, unique=True)
+    body = models.TextField("Icerik", help_text="Duz metin. Bos satir yeni paragraf olur.")
+    group = models.CharField("Alt bilgide yeri", max_length=2, choices=GROUPS, default="f1")
+    order = models.PositiveSmallIntegerField("Sira", default=0)
+    is_published = models.BooleanField("Yayinda", default=True)
+
+    class Meta:
+        ordering = ["group", "order", "title"]
+        verbose_name = "Sayfa"
+        verbose_name_plural = "Sayfalar"
+
+    def __str__(self):
+        return self.title

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Sifre degisti — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap"><div class="authbox">
+<h1>Şifren değiştirildi</h1>
+<p class="authalt"><a class="btn-sea" href="{% url 'market:login' %}">Giriş yap</a></p>
+</div></div></div>
+{% endblock %}

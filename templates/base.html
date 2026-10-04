@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{% block title %}{{ t.brand }}{% endblock %}</title>
+<meta name="description" content="{% block meta_desc %}{{ t.banner_s }}{% endblock %}">
+<meta property="og:site_name" content="{{ t.brand }}"><meta property="og:type" content="website">
+<meta property="og:title" content="{% block og_title %}{{ t.brand }}{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}{{ t.banner_s }}{% endblock %}">
+<link rel="canonical" href="https://balkanbaazar.com{{ request.path }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
@@ -60,6 +65,8 @@
         <summary class="ghost" style="list-style:none">{{ user.first_name|default:user.username }} ▾</summary>
         <div class="dropdown">
           <a href="{% url 'market:panel' %}">{{ t.panel }}</a>
+          <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }}</a>
+          <a href="{% url 'market:profile' %}">{{ t.profile }}</a>
           <a href="{% url 'market:panel_products' %}">{{ t.my_products }}</a>
           {% if user.is_staff %}<a href="{% url 'market:staff_dashboard' %}">{{ t.manage }}
             {% if pending_badge %}<span class="aux" style="color:var(--amber);font-weight:800">{{ pending_badge }}</span>{% endif %}
@@ -99,15 +106,22 @@
     <div class="fcols">
       <div>
         <h5>{{ t.brand }}</h5>
-        <p style="font-size:13px;opacity:.78;max-width:34ch">{{ t.hq }}</p>
+        <p style="font-size:13px;opacity:.78;max-width:34ch">{% if site_settings %}{{ site_settings.address|linebreaksbr }}{% if site_settings.email %}<br><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>{% endif %}{% if site_settings.phone %}<br>{{ site_settings.phone }}{% endif %}{% endif %}</p>
       </div>
-      <div><h5>{{ t.f1 }}</h5><ul>{% for x in t.f1l %}<li>{{ x }}</li>{% endfor %}</ul></div>
-      <div><h5>{{ t.f2 }}</h5><ul>{% for x in t.f2l %}<li>{{ x }}</li>{% endfor %}</ul></div>
+      {% footer_pages "f1" as p1 %}{% if p1 %}<div><h5>{{ t.f1 }}</h5><ul>{% for p in p1 %}<li><a href="{% url 'market:page' p.slug %}">{{ p.title }}</a></li>{% endfor %}</ul></div>{% endif %}
+      {% footer_pages "f2" as p2 %}{% if p2 %}<div><h5>{{ t.f2 }}</h5><ul>{% for p in p2 %}<li><a href="{% url 'market:page' p.slug %}">{{ p.title }}</a></li>{% endfor %}</ul></div>{% endif %}
       <div><h5>{{ t.f3 }}</h5><ul>{% for c in countries %}<li><a href="{% url 'market:set_country' c.code %}">{% countryname c lang %}</a></li>{% endfor %}</ul></div>
     </div>
-    <div class="fbot"><span>© 2026 Balkan Baazar DOOEL Skopje</span><span>{{ t.demo }}</span></div>
+    <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span></div>
   </div>
 </footer>
 <script src="{% static 'js/app.js' %}"></script>
+<nav class="bnav" aria-label="Menu">
+  <a href="{% url 'market:home' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>{{ t.nav_home }}</span></a>
+  <a href="{% url 'market:listings' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>{{ t.nav_browse }}</span></a>
+  <a class="sell" href="{% url 'market:my_listing_new' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>{{ t.nav_sell }}</span></a>
+  <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span></a>
+  <a href="{% if user.is_authenticated %}{% url 'market:profile' %}{% else %}{% url 'market:login' %}{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>{{ t.nav_me }}</span></a>
+</nav>
 </body>
 </html>

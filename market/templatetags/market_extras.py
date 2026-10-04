@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import urlencode
 
-from market.models import Banner
+from market.models import Banner, Page
 
 register = template.Library()
 
@@ -61,4 +61,12 @@ def banners(place):
                     .filter(Q(starts_at__isnull=True) | Q(starts_at__lte=now))
                     .filter(Q(ends_at__isnull=True) | Q(ends_at__gte=now))[:8])
     except Exception:  # migrate calistirilmadiysa site yine acilsin
+        return []
+
+
+@register.simple_tag
+def footer_pages(group):
+    try:
+        return list(Page.objects.filter(group=group, is_published=True))
+    except Exception:
         return []

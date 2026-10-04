@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (ApplicationStatus, Boost, Category, City, Conversation, Coupon,
                      Country, Favorite, Listing, ListingImage, ListingVariant, Message,
-                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner)
+                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page)
 
 
 @admin.register(Country)
@@ -142,3 +142,10 @@ class BannerAdmin(admin.ModelAdmin):
     list_display = ("title", "advertiser", "place", "order", "is_active", "starts_at", "ends_at", "clicks")
     list_editable = ("order", "is_active")
     list_filter = ("place", "is_active")
+
+
+@admin.register(Page)
+class PageAdmin(admin.ModelAdmin):
+    list_display = ("title", "group", "order", "is_published")
+    list_editable = ("order", "is_published")
+    prepopulated_fields = {"slug": ("title",)}

@@ -8,6 +8,7 @@
       {% include "market/_form.html" %}
       <button class="btn-sea" type="submit">{{ t.signin }}</button>
     </form>
+    <p class="authalt"><a href="{% url 'market:password_reset' %}">{{ t.forgot }}</a></p>
     <p class="authalt">{{ t.no_acc }} <a href="{% url 'market:signup' %}">{{ t.register }}</a></p>
   </div>
   <aside class="authside">

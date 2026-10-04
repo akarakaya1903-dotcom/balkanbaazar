@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 from .i18n import T
-from .models import Banner, Category, City, Country, Favorite, Listing, Mode, Shop
+from .models import Banner, Page, Category, City, Country, Favorite, Listing, Mode, Shop
 
 
 def _current(request):
@@ -97,6 +97,11 @@ def _trending_qs(country):
 def trending(request):
     lang, country = _current(request)
     return render(request, "market/trending.html", {"items": _trending_qs(country)[:48]})
+
+
+def page_detail(request, slug):
+    page = get_object_or_404(Page, slug=slug, is_published=True)
+    return render(request, "market/page.html", {"page": page})
 
 
 def banner_go(request, pk):

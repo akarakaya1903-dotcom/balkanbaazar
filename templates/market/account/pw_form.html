@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Sifre sifirla — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap"><div class="authbox">
+<h1>Şifre sıfırla</h1>
+<p class="small">Kayıtlı e-posta adresini yaz, sana şifre sıfırlama bağlantısı gönderelim.</p>
+<form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">Bağlantı gönder</button></form>
+</div></div></div>
+{% endblock %}

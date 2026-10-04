@@ -179,3 +179,21 @@ def panel_order_ship(request, item_id):
             emails.notify_order_shipped(item)
             messages.success(request, "Kargo bilgisi kaydedildi.")
     return redirect("market:panel_orders")
+
+
+@login_required
+def profile(request):
+    from django import forms
+    from django.contrib.auth import get_user_model
+
+    class ProfileForm(forms.ModelForm):
+        class Meta:
+            model = get_user_model()
+            fields = ["first_name", "last_name", "email"]
+
+    form = ProfileForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profil guncellendi.")
+        return redirect("market:profile")
+    return render(request, "market/account/profile.html", {"form": form})

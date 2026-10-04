@@ -1,0 +1,6 @@
+Merhaba,
+
+Sifreni sifirlamak icin su baglantiya tikla:
+{{ protocol }}://{{ domain }}{% url 'market:password_reset_confirm' uidb64=uid token=token %}
+
+Bu istegi sen yapmadiysan bu e-postayi yok sayabilirsin.

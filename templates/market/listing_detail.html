@@ -1,4 +1,7 @@
 {% extends "base.html" %}{% load market_extras %}
+{% block meta_desc %}{{ item.title }} — {{ item.description|truncatechars:150 }}{% endblock %}
+{% block og_title %}{{ item.title }}{% endblock %}
+{% block og_desc %}{{ item.description|truncatechars:150 }}{% endblock %}
 {% block title %}{{ item.title }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap">
@@ -81,7 +84,6 @@
         <a class="btn-line" style="display:block;text-align:center;margin-top:10px;border-color:var(--amber);color:#8A5A0E"
            href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>
         {% endif %}
-        <div class="note">{{ t.note }}</div>
       </div>
     </div>
   </section>

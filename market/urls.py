@@ -1,5 +1,5 @@
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, reverse_lazy
 
 from . import views, views_account, views_market, views_staff
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("ilanlar/", views.listings, name="listings"),
     path("trend/", views.trending, name="trending"),
+    path("sayfa/<slug:slug>/", views.page_detail, name="page"),
     path("r/<int:pk>/", views.banner_go, name="banner_go"),
     path("ilan/<int:pk>/<slug:slug>/", views.listing_detail, name="listing_detail"),
     path("magazalar/", views.shops, name="shops"),
@@ -22,6 +23,20 @@ urlpatterns = [
          name="login"),
     path("uyelik/cikis/", auth_views.LogoutView.as_view(next_page="market:home"),
          name="logout"),
+
+    path("uyelik/profil/", views_account.profile, name="profile"),
+    path("uyelik/sifre-sifirla/", auth_views.PasswordResetView.as_view(
+        template_name="market/account/pw_form.html",
+        email_template_name="market/account/pw_email.txt",
+        subject_template_name="market/account/pw_subject.txt",
+        success_url=reverse_lazy("market:password_reset_done")), name="password_reset"),
+    path("uyelik/sifre-sifirla/gonderildi/", auth_views.PasswordResetDoneView.as_view(
+        template_name="market/account/pw_done.html"), name="password_reset_done"),
+    path("uyelik/sifre-sifirla/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="market/account/pw_confirm.html",
+        success_url=reverse_lazy("market:password_reset_complete")), name="password_reset_confirm"),
+    path("uyelik/sifre-sifirla/tamam/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="market/account/pw_complete.html"), name="password_reset_complete"),
 
     # magaza basvurusu
     path("magaza-basvuru/", views_account.shop_apply, name="shop_apply"),
