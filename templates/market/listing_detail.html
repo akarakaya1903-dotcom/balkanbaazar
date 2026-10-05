@@ -52,6 +52,7 @@
       <div>
         {% if item.is_boosted %}<span class="badge boost" style="position:static;display:inline-block;margin-bottom:8px">★ {{ t.featured_badge }}</span>{% endif %}
         <h1 style="font-size:24px">{{ item.title }}</h1>
+        {% if item.owner and not item.shop %}<div style="margin:2px 0 8px;font-size:13px"><a href="{% url 'market:seller_profile' item.owner.pk %}" style="color:var(--sea);font-weight:600">👤 {{ item.owner.first_name|default:item.owner.username }}</a></div>{% endif %}
         <div class="dprice" style="margin-top:10px">{% price item country %}</div>
         {% if country.currency != 'EUR' %}<div class="eur">≈ {% eur item %}</div>{% endif %}
         {% if item.mode == 'shop' and item.review_count %}

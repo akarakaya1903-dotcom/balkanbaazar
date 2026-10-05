@@ -3,6 +3,8 @@
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
 <h1>{{ t.profile }}</h1>
+{% if not verified %}<div class="note" style="margin-bottom:12px">E-posta adresin henüz doğrulanmadı. İlan verebilmek için doğrulaman gerekiyor.
+  <form method="post" action="{% url 'market:resend_verification' %}" style="margin-top:8px">{% csrf_token %}<button class="btn-line" type="submit">Doğrulama e-postasını gönder</button></form></div>{% endif %}
 <form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">Kaydet</button></form>
 <p class="authalt"><a href="{% url 'market:password_change' %}">Şifremi değiştir</a></p>
 </div><p class="authalt"><a href="{% url 'market:delete_account' %}" style="color:#C0392B">Hesabımı sil</a></p>

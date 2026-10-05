@@ -76,6 +76,11 @@ def google_callback(request):
         user.set_unusable_password()
         user.save()
         created = True
+    from .models import UserProfile
+    prof, _ = UserProfile.objects.get_or_create(user=user)
+    if not prof.email_verified:
+        prof.email_verified = True
+        prof.save(update_fields=["email_verified"])
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     if created:
         emails.notify_staff_new_user(user)

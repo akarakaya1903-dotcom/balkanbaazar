@@ -21,6 +21,7 @@
         <a class="btn-line" style="flex:1;padding:7px" href="{% url 'market:my_listing_edit' item.pk %}">{{ t.edit }}</a>
         <a class="btn-line" style="flex:1;padding:7px;color:#9C3C1B;border-color:#9C3C1B"
            href="{% url 'market:my_listing_delete' item.pk %}">{{ t.delete }}</a>
+        {% if not item.is_active and not item.pending_review %}<form method="post" action="{% url 'market:renew_listing' item.pk %}" style="flex:1 0 100%">{% csrf_token %}<button class="btn-sea" type="submit" style="width:100%;padding:7px">↻ {{ t.renew }}</button></form>{% endif %}
         <a class="btn-line" style="flex:1 0 100%;padding:7px;color:#8A5A0E;border-color:var(--amber)"
            href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>
       </div>

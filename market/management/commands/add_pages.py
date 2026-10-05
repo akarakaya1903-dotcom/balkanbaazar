@@ -43,7 +43,7 @@ PAGES = [
   "Çerez Politikası",
   "f2",
   4,
-  "Son güncelleme: 5 Ekim 2026\n\nÇerez, tarayıcında saklanan küçük bir metin dosyasıdır. Balkan Baazar şunları kullanır:\n\n- Oturum çerezi: giriş yapmış kalmanı sağlar.\n- Güvenlik çerezi (CSRF): formların güvenle gönderilmesini sağlar.\n- Tercih çerezleri: seçtiğin ülke ve dili hatırlar.\n- Ziyaretçi sayacı çerezi: siteyi günde kaç kişinin ziyaret ettiğini, kimliğini belirlemeden anonim olarak saymak için 24 saat geçerli bir çerez bırakır.\n- Çerez bildirimi tercihin tarayıcının yerel depolamasında saklanır.\n\nGoogle ile giriş yaparsan Google kendi çerezlerini kullanabilir; bunlar Google'ın politikalarına tabidir.\n\nÇerezleri tarayıcı ayarlarından silebilir veya engelleyebilirsin; bu durumda giriş yapma gibi bazı özellikler çalışmayabilir.\n\nSorular için: [[email]]"
+  "Son güncelleme: 5 Ekim 2026\n\nÇerez, tarayıcında saklanan küçük bir metin dosyasıdır. Balkan Baazar şunları kullanır:\n\n- Oturum çerezi: giriş yapmış kalmanı sağlar.\n- Güvenlik çerezi (CSRF): formların güvenle gönderilmesini sağlar.\n- Tercih çerezleri: seçtiğin ülke ve dili hatırlar.\n- Ziyaretçi sayacı çerezi: siteyi günde kaç kişinin ziyaret ettiğini, kimliğini belirlemeden anonim olarak saymak için 24 saat geçerli bir çerez bırakır.\n- Çerez bildirimi tercihin tarayıcının yerel depolamasında saklanır.\n\nZiyaret istatistikleri için Google Analytics etkinse Google anonim istatistik çerezleri bırakabilir. Google ile giriş yaparsan Google kendi çerezlerini kullanabilir; bunlar Google'ın politikalarına tabidir.\n\nÇerezleri tarayıcı ayarlarından silebilir veya engelleyebilirsin; bu durumda giriş yapma gibi bazı özellikler çalışmayabilir.\n\nSorular için: [[email]]"
  ]
 ]
 

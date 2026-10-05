@@ -15,6 +15,8 @@
 <meta property="og:image" content="https://balkanbaazar.com{% static 'img/logo-512.png' %}">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Balkan Baazar","url":"https://balkanbaazar.com","logo":"https://balkanbaazar.com{% static 'img/logo-512.png' %}"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Balkan Baazar","alternateName":["BalkanBaazar","balkanbaazar.com"],"url":"https://balkanbaazar.com/"}</script>
+{% if site_settings and site_settings.analytics_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.analytics_id }}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","{{ site_settings.analytics_id }}");</script>{% endif %}
 <link rel="canonical" href="https://balkanbaazar.com{{ request.path }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

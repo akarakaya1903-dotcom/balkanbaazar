@@ -159,6 +159,36 @@ class Delivery(models.TextChoices):
     HAND = "hand", "Elden teslim"
 
 
+def _shrink(fieldfile, max_side=1600, quality=82):
+    """Yuklenen fotografi sunucuda kucultur ve JPEG olarak yeniden sikistirir. Hata olursa orijinali birakir."""
+    try:
+        import os
+        from io import BytesIO
+
+        from django.core.files.base import ContentFile
+        from PIL import Image, ImageOps
+        fieldfile.seek(0)
+        im = ImageOps.exif_transpose(Image.open(fieldfile))
+        if im.mode in ("RGBA", "LA", "P"):
+            im = im.convert("RGBA")
+            bg = Image.new("RGB", im.size, (255, 255, 255))
+            bg.paste(im, mask=im.split()[-1])
+            im = bg
+        else:
+            im = im.convert("RGB")
+        im.thumbnail((max_side, max_side), Image.LANCZOS)
+        buf = BytesIO()
+        im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+        name = os.path.splitext(os.path.basename(fieldfile.name))[0] + ".jpg"
+        return ContentFile(buf.getvalue(), name=name)
+    except Exception:
+        try:
+            fieldfile.seek(0)
+        except Exception:
+            pass
+        return fieldfile
+
+
 class Listing(models.Model):
     """Hem ikinci el ilani hem magaza urunu."""
     mode = models.CharField(max_length=8, choices=Mode.choices, db_index=True)
@@ -208,6 +238,8 @@ class Listing(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)[:220] or "ilan"
+        if self.image and not getattr(self.image, "_committed", True):
+            self.image = _shrink(self.image)
         super().save(*args, **kwargs)
 
     @property
@@ -305,6 +337,11 @@ class ListingImage(models.Model):
 
     class Meta:
         ordering = ["order", "id"]
+
+    def save(self, *args, **kwargs):
+        if self.image and not getattr(self.image, "_committed", True):
+            self.image = _shrink(self.image)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.listing_id} - #{self.order}"
@@ -547,6 +584,8 @@ class SiteSettings(models.Model):
                                        help_text="Basligin altindaki tanitim yazisi, 150-160 karakter ideal.")
     moderate_new_listings = models.BooleanField("Yeni bireysel ilanlar yonetici onayindan gecsin", default=False,
                                                 help_text="Acikken yeni ilanlar yayina girmeden once Ilanlar listesinde 'Onay bekliyor' olarak gorunur.")
+    analytics_id = models.CharField("Google Analytics olcum kimligi", max_length=30, blank=True,
+                                    help_text="Ornek: G-XXXXXXXXXX. Bos birakirsan analiz kodu eklenmez.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
                                     help_text="Alt bilgide (c) satirinda gorunur.")
     address = models.TextField("Adres", blank=True)
@@ -638,3 +677,19 @@ class ListingReport(models.Model):
 
     def __str__(self):
         return f"#{self.pk} {self.listing_id}"
+
+
+class UserProfile(models.Model):
+    """Uyeye ait ek bilgiler (su an: e-posta dogrulama durumu)."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    email_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user} ({'dogrulandi' if self.email_verified else 'dogrulanmadi'})"
+
+
+def email_is_verified(user):
+    if user.is_staff:
+        return True
+    prof = UserProfile.objects.filter(user=user).first()
+    return bool(prof and prof.email_verified)

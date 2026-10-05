@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ seller.first_name|default:seller.username }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
+    <div class="av" style="width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--sea);color:#fff;font-size:22px;font-weight:700">{{ seller.first_name|default:seller.username|slice:":1"|upper }}</div>
+    <div><h1 style="font-size:22px">{{ seller.first_name|default:seller.username }}</h1>
+      <div style="color:var(--ink-3);font-size:13px">{{ t.seller_page }} · {{ t.member_since }}: {{ seller.date_joined|date:"d.m.Y" }} · {{ t.active_ads }}: {{ page_obj.paginator.count }}</div></div>
+  </div>
+  <div class="grid">{% for item in page_obj %}{% include "market/_card.html" %}{% empty %}<div class="empty"><h3>{{ t.none }}</h3></div>{% endfor %}</div>
+  {% if page_obj.has_other_pages %}<div class="pager">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">{{ t.prev }}</a>{% endif %}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">{{ t.next }}</a>{% endif %}</div>{% endif %}
+</section></div>
+{% endblock %}

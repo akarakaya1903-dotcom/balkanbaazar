@@ -45,6 +45,10 @@ def my_listings(request):
 def my_listing_form(request, pk=None):
     country = _current_country(request)
     item = get_object_or_404(Listing, pk=pk, owner=request.user) if pk else None
+    from .models import email_is_verified
+    if not pk and not email_is_verified(request.user):
+        messages.error(request, "Ilan vermek icin once e-postani dogrulaman gerekiyor.")
+        return redirect("market:profile")
     from . import antispam
     if request.method == "POST" and not pk and antispam.looks_like_bot(request):
         messages.error(request, "Form gonderilemedi, sayfayi yenileyip tekrar dene.")
@@ -615,3 +619,23 @@ def report_listing(request, pk):
         else:
             messages.error(request, "Lutfen sikayet metnini yaz.")
     return redirect("market:listing_detail", pk=item.pk, slug=item.slug)
+
+
+@login_required
+def renew_listing(request, pk):
+    item = get_object_or_404(Listing, pk=pk, owner=request.user)
+    if request.method == "POST":
+        item.is_active = True
+        item.pending_review = False
+        item.created_at = timezone.now()
+        item.save(update_fields=["is_active", "pending_review", "created_at"])
+        messages.success(request, "Ilan yenilendi.")
+    return redirect("market:my_listings")
+
+
+def seller_profile(request, pk):
+    from django.core.paginator import Paginator
+    seller = get_object_or_404(User, pk=pk, is_active=True)
+    qs = Listing.objects.filter(owner=seller, is_active=True, shop__isnull=True).select_related("city")
+    page = Paginator(qs, 24).get_page(request.GET.get("page"))
+    return render(request, "market/seller.html", {"seller": seller, "page_obj": page})

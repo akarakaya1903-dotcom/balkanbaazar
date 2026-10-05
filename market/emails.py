@@ -231,3 +231,19 @@ def notify_staff_pending_listing(listing):
     _send(f"Onay bekleyen ilan: {listing.title}",
           f"Yeni bir ilan onay bekliyor.\n\nBaslik: {listing.title}\nFiyat: {listing.price_eur}\n\nOnaylamak icin: {_site('/admin/market/listing/?pending_review__exact=1')}",
           settings.STAFF_NOTIFY_EMAILS)
+
+
+def verification_link(user):
+    from django.core import signing
+    token = signing.dumps({"u": user.pk, "e": user.email}, salt="bb-verify")
+    return _site(f"/uyelik/dogrula/{token}/")
+
+
+def send_verification(user):
+    if not user.email:
+        return
+    link = verification_link(user)
+    _send("Balkan Baazar - E-postani dogrula / Verify your email",
+          f"Merhaba,\n\nE-posta adresini dogrulamak icin su baglantiya tikla (3 gun gecerli):\n{link}\n\n"
+          f"Hi,\n\nPlease verify your email address with this link (valid for 3 days):\n{link}\n",
+          user.email)

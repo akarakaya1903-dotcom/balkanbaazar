@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Uyelik, magaza basvurusu ve satici paneli."""
 from django.contrib import messages
-from django.contrib.auth import login, views as auth_views
+from django.contrib.auth import get_user_model, login, views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.urls import reverse_lazy
@@ -29,7 +29,8 @@ def signup(request):
         login(request, user)
         emails.notify_staff_new_user(user)
         emails.welcome_user(user)
-        messages.success(request, "Hesabin hazir.")
+        emails.send_verification(user)
+        messages.success(request, "Hesabin hazir. E-postani dogrulamak icin gelen kutuna bak.")
         return redirect("market:panel")
     return render(request, "market/account/signup.html", {"form": form})
 
@@ -208,7 +209,8 @@ def profile(request):
         form.save()
         messages.success(request, "Profil guncellendi.")
         return redirect("market:profile")
-    return render(request, "market/account/profile.html", {"form": form})
+    from .models import email_is_verified
+    return render(request, "market/account/profile.html", {"form": form, "verified": email_is_verified(request.user)})
 
 
 class PwResetConfirm(auth_views.PasswordResetConfirmView):
@@ -261,3 +263,27 @@ def delete_account(request):
         messages.success(request, "Hesabin silindi.")
         return redirect("market:home")
     return render(request, "market/account/delete_account.html", {"has_pw": user.has_usable_password()})
+
+
+def verify_email(request, token):
+    from django.core import signing
+    from .models import UserProfile
+    try:
+        data = signing.loads(token, salt="bb-verify", max_age=3 * 86400)
+        user = get_user_model().objects.get(pk=data["u"], email=data["e"])
+    except Exception:
+        messages.error(request, "Dogrulama baglantisi gecersiz ya da suresi dolmus.")
+        return redirect("market:profile" if request.user.is_authenticated else "market:login")
+    prof, _ = UserProfile.objects.get_or_create(user=user)
+    prof.email_verified = True
+    prof.save(update_fields=["email_verified"])
+    messages.success(request, "E-postan dogrulandi.")
+    return redirect("market:profile" if request.user.is_authenticated else "market:login")
+
+
+@login_required
+def resend_verification(request):
+    if request.method == "POST":
+        emails.send_verification(request.user)
+        messages.success(request, "Dogrulama e-postasi gonderildi.")
+    return redirect("market:profile")
