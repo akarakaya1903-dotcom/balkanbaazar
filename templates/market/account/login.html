@@ -8,6 +8,7 @@
       {% include "market/_form.html" %}
       <button class="btn-sea" type="submit">{{ t.signin }}</button>
     </form>
+    {% if google_enabled %}<div style="margin:14px 0;text-align:center"><a class="btn-line gbtn" href="{% url 'market:google_login' %}"><b style="font-size:18px;font-family:Arial,sans-serif"><span style="color:#4285F4">G</span></b> {{ t.google_cta }}</a></div>{% endif %}
     <p class="authalt"><a href="{% url 'market:password_reset' %}">{{ t.forgot }}</a></p>
     <p class="authalt">{{ t.no_acc }} <a href="{% url 'market:signup' %}">{{ t.register }}</a></p>
   </div>

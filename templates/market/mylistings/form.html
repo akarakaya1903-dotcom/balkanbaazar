@@ -28,16 +28,42 @@
       <button class="btn-line" type="button" id="addPhoto" style="margin-top:6px">+ {{ t.add_photo }}</button>
       <script>
       (function(){
-        var cells=[].slice.call(document.querySelectorAll('.gcell[data-new="1"]')),add=document.getElementById("addPhoto"),
-            pick=document.getElementById("pickPhotos"),multi=document.getElementById("multiPhotos"),shown=3;
+        var cells=[].slice.call(document.querySelectorAll('.gcell[data-new="1"]')),
+            add=document.getElementById("addPhoto"),pick=document.getElementById("pickPhotos"),
+            multi=document.getElementById("multiPhotos"),info=document.getElementById("photoCount"),
+            form=multi.closest("form"),cover=form.querySelector('input[type=file][name="image"]'),
+            hasOld=document.querySelectorAll('.gcell[data-new="0"]').length>0,
+            coverOld=!!(cover&&cover.closest("label")&&cover.closest("label").querySelector("a")),
+            MIN={{ min_images }},MAX={{ max_images }},shown=3;
         function render(){cells.forEach(function(c,i){c.style.display=i<shown?"":"none";});add.style.display=shown>=cells.length?"none":"";}
+        function shrink(file){return new Promise(function(res){
+          if(!/^image\//.test(file.type)||!window.createImageBitmap){return res(file);}
+          createImageBitmap(file).then(function(b){
+            var sc=Math.min(1,1600/Math.max(b.width,b.height)),cv=document.createElement("canvas");
+            cv.width=Math.round(b.width*sc);cv.height=Math.round(b.height*sc);
+            cv.getContext("2d").drawImage(b,0,0,cv.width,cv.height);
+            cv.toBlob(function(bl){res(bl?new File([bl],file.name.replace(/\.\w+$/,"")+".jpg",{type:"image/jpeg"}):file);},"image/jpeg",0.82);
+          }).catch(function(){res(file);});});}
+        function put(inp,file){var dt=new DataTransfer();dt.items.add(file);inp.files=dt.files;}
         add.addEventListener("click",function(){shown+=1;render();});
         pick.addEventListener("click",function(){multi.click();});
         multi.addEventListener("change",function(){
-          var files=[].slice.call(multi.files),free=cells.filter(function(c){var f=c.querySelector("input[type=file]");return f&&!f.files.length;}),i=0;
-          files.forEach(function(file){var c=free[i];if(!c){return;}var inp=c.querySelector("input[type=file]"),dt=new DataTransfer();dt.items.add(file);inp.files=dt.files;i++;});
-          if(i){shown=Math.max(shown,cells.indexOf(free[i-1])+1);}
-          document.getElementById("photoCount").textContent="("+i+")";render();
+          var files=[].slice.call(multi.files).slice(0,MAX);if(!files.length){return;}
+          info.textContent=" ...";pick.disabled=true;
+          Promise.all(files.map(shrink)).then(function(out){
+            var i=0;
+            if(cover&&!coverOld&&!cover.files.length&&out.length){put(cover,out[0]);i=1;}
+            var free=cells.filter(function(c){var f=c.querySelector("input[type=file]");return f&&!f.files.length;}),n=0;
+            for(;i<out.length&&n<free.length;i++,n++){put(free[n].querySelector("input[type=file]"),out[i]);}
+            if(n){shown=Math.max(shown,cells.indexOf(free[n-1])+1);}
+            info.textContent=" ("+out.length+")";pick.disabled=false;render();
+          });
+        });
+        form.addEventListener("submit",function(e){
+          if(hasOld||coverOld){return;}
+          var total=(cover&&cover.files.length?1:0);
+          cells.forEach(function(c){var f=c.querySelector("input[type=file]");if(f&&f.files.length){total++;}});
+          if(total<MIN||total>MAX){e.preventDefault();alert(total+" / "+MIN+"–"+MAX);}
         });
         render();
       })();

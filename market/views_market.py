@@ -296,6 +296,8 @@ def checkout(request):
             return redirect(session.url, permanent=False)
 
         # Stripe anahtari tanimli degil -> demo akis: siparis dogrudan odenmis sayilir.
+        order.payment_method = "cod"
+        order.save(update_fields=["payment_method"])
         _mark_order_paid(order)
         request.session[CART_KEY] = {}
         request.session.modified = True
@@ -585,3 +587,18 @@ def review_create(request, order_item_id):
         messages.success(request, "Yorumun için teşekkürler.")
         return redirect("market:my_orders")
     return render(request, "market/review_form.html", {"form": form, "item": item})
+
+
+@login_required
+def report_listing(request, pk):
+    from .models import ListingReport
+    item = get_object_or_404(Listing, pk=pk)
+    if request.method == "POST":
+        text = request.POST.get("message", "").strip()[:1000]
+        if text:
+            rep = ListingReport.objects.create(listing=item, reporter=request.user, message=text)
+            emails.notify_staff_report(rep)
+            messages.success(request, "Sikayetin alindi, tesekkurler.")
+        else:
+            messages.error(request, "Lutfen sikayet metnini yaz.")
+    return redirect("market:listing_detail", pk=item.pk, slug=item.slug)

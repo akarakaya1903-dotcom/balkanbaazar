@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Balkan Baazar{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin-theme.css' %}">{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}"><img src="{% static 'img/logo-48.png' %}" alt="" height="30"> Balkan Baazar <small>Yönetim</small></a></h1>
+{% endblock %}
+{% block nav-global %}<a class="bb-site" href="/" target="_blank">Siteyi aç ↗</a>{% endblock %}

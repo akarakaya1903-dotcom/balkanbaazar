@@ -134,3 +134,9 @@ footer{background:linear-gradient(160deg,var(--deep),#0A1F2C);border-top:4px sol
 .ubadge{display:inline-block;background:#E5484D;color:#fff;font-style:normal;font-weight:700;font-size:11px;line-height:1;padding:3px 6px;border-radius:999px;min-width:18px;text-align:center}
 .bnav a{position:relative}
 .bnav .ubadge{position:absolute;top:0;left:calc(50% + 6px)}
+
+/* Cerez bildirimi */
+.cookiebar{position:fixed;left:12px;right:12px;bottom:12px;z-index:70;display:flex;gap:12px;align-items:center;justify-content:space-between;background:#0D2A3A;color:#fff;padding:12px 16px;border-radius:14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:760px;margin:0 auto}
+.cookiebar[hidden]{display:none}
+.cookiebar button{background:#E4A13B;color:#1a1a1a;border:0;border-radius:999px;padding:8px 18px;font-weight:700;cursor:pointer}
+@media (max-width:768px){.cookiebar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}

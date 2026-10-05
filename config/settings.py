@@ -29,6 +29,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "market.middleware.VisitorCounterMiddleware",
+    "market.middleware.ThrottleMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -104,6 +105,9 @@ if _render_url:
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -156,3 +160,13 @@ BOOST_PACKAGES = [
 # Ilan basina fotograf siniri (kapak dahil toplam)
 MIN_LISTING_IMAGES = int(os.environ.get("MIN_LISTING_IMAGES", "20"))
 MAX_LISTING_IMAGES = int(os.environ.get("MAX_LISTING_IMAGES", "50"))
+
+# Cok fotografli / videolu yuklemeler
+DATA_UPLOAD_MAX_NUMBER_FILES = 300
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+MAX_VIDEO_MB = int(os.environ.get("MAX_VIDEO_MB", "50"))
+
+# Google ile giris (Google Cloud Console > OAuth istemcisi)
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+LISTING_DAYS = int(os.environ.get("LISTING_DAYS", "60"))

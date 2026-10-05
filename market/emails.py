@@ -190,3 +190,38 @@ def notify_order_cancelled(order):
         _send(f"[Balkan Baazar] Sipariş iptal edildi — #{order.pk}",
               f"{shop.name} için #{order.pk} numaralı sipariş iptal edildi.\n\n— Balkan Baazar",
               shop.owner.email)
+
+
+def notify_staff_new_user(user):
+    """Yeni uye kaydini yoneticilere (STAFF_NOTIFY_EMAILS) bildirir."""
+    body = (f"Yeni uye kaydi\n\nKullanici adi: {user.username}\nAd: {user.first_name} {user.last_name}\n"
+            f"E-posta: {user.email}\n\nYonetim: {_site('/admin/auth/user/')}")
+    _send(f"Yeni uye: {user.username}", body, settings.STAFF_NOTIFY_EMAILS)
+
+
+def welcome_user(user):
+    if not user.email:
+        return
+    name = user.first_name or user.username
+    _send("Balkan Baazar - Hos geldin / Welcome",
+          f"Merhaba {name},\n\nBalkan Baazar'a hos geldin. Hesabin hazir: {_site('/')}\n\n"
+          f"Hi {name},\n\nWelcome to Balkan Baazar. Your account is ready: {_site('/')}\n",
+          user.email)
+
+
+def notify_password_changed(user):
+    if not user.email:
+        return
+    name = user.first_name or user.username
+    _send("Balkan Baazar - Sifren degistirildi / Password changed",
+          f"Merhaba {name},\n\nHesabinin sifresi az once degistirildi. Bunu sen yapmadiysan hemen "
+          f"{_site('/uyelik/sifre-sifirla/')} adresinden sifreni yenile ve bizimle iletisime gec.\n\n"
+          f"Hi {name},\n\nYour account password was just changed. If this wasn't you, reset it right away at "
+          f"{_site('/uyelik/sifre-sifirla/')} and contact us.\n",
+          user.email)
+
+
+def notify_staff_report(report):
+    body = (f"Yeni ilan sikayeti\n\nIlan: {report.listing.title} ({_site('/ilan/%d/%s/' % (report.listing_id, report.listing.slug))})\n"
+            f"Sikayet eden: {report.reporter or 'anonim'}\n\n{report.message}\n\nYonetim: {_site('/admin/market/listingreport/')}")
+    _send(f"Ilan sikayeti #{report.pk}", body, settings.STAFF_NOTIFY_EMAILS)

@@ -180,6 +180,7 @@ class Listing(models.Model):
         help_text="Bireysel (ikinci el) ilanin sahibi",
     )
     image = models.ImageField(upload_to="listings/", blank=True, null=True)
+    video = models.FileField("Video (mp4/webm, en fazla 50 MB)", upload_to="listings/video/", blank=True, null=True)
     featured_until = models.DateTimeField(null=True, blank=True, db_index=True)
     track_stock = models.BooleanField(default=False, help_text="Acilirsa stok adedi tukeninceye kadar satisa acik kalir")
     stock = models.PositiveIntegerField(null=True, blank=True, help_text="track_stock acikken gecerli")
@@ -326,6 +327,7 @@ class Order(models.Model):
     address = models.CharField(max_length=240, blank=True)
     phone = models.CharField(max_length=32, blank=True)
     stripe_session_id = models.CharField(max_length=200, blank=True)
+    payment_method = models.CharField(max_length=10, default="card")  # card | cod (kapida odeme)
     paid_at = models.DateTimeField(null=True, blank=True)
     coupon = models.ForeignKey("Coupon", null=True, blank=True, on_delete=models.SET_NULL)
     discount_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -538,6 +540,10 @@ class SiteSettings(models.Model):
         help_text="Bos birakilirsa varsayilan cizim banner kullanilir. Genis (en az 1600 px) bir fotograf onerilir.",
     )
 
+    seo_title = models.CharField("Google basligi (ana sayfa)", max_length=70, blank=True,
+                                 help_text="Google sonucunda mavi baslik olarak gorunur. Bos birakirsan varsayilan kullanilir.")
+    seo_description = models.CharField("Google aciklamasi (ana sayfa)", max_length=170, blank=True,
+                                       help_text="Basligin altindaki tanitim yazisi, 150-160 karakter ideal.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
                                     help_text="Alt bilgide (c) satirinda gorunur.")
     address = models.TextField("Adres", blank=True)
@@ -612,3 +618,20 @@ class DailyStat(models.Model):
 
     def __str__(self):
         return f"{self.day}: {self.visitors}"
+
+
+class ListingReport(models.Model):
+    """Kullanicilarin ilanlar hakkinda yaptigi sikayetler."""
+    listing = models.ForeignKey("Listing", on_delete=models.CASCADE, related_name="reports")
+    reporter = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="reports_made")
+    message = models.TextField("Sikayet metni", max_length=1000)
+    created_at = models.DateTimeField(default=timezone.now)
+    resolved = models.BooleanField("Cozuldu", default=False)
+
+    class Meta:
+        ordering = ["resolved", "-created_at"]
+        verbose_name = "Ilan sikayeti"
+        verbose_name_plural = "Ilan sikayetleri"
+
+    def __str__(self):
+        return f"#{self.pk} {self.listing_id}"

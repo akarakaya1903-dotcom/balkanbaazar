@@ -13,6 +13,7 @@
 
   <section class="sect">
     <div class="detg">
+      <div class="detleft" style="min-width:0">
       {% if item.image or item.gallery.all %}
       <div class="gal" id="gal">
         <div class="gal-main" id="galMain">
@@ -46,6 +47,8 @@
       })();
       </script>
       {% else %}<div class="dhero" style="{{ item.hue|tile }}">{{ item.icon }}</div>{% endif %}
+      {% if item.video %}<video controls playsinline preload="metadata" style="width:100%;margin-top:12px;border-radius:14px;background:#000" src="{{ item.video.url }}"></video>{% endif %}
+      </div>
       <div>
         {% if item.is_boosted %}<span class="badge boost" style="position:static;display:inline-block;margin-bottom:8px">★ {{ t.featured_badge }}</span>{% endif %}
         <h1 style="font-size:24px">{{ item.title }}</h1>
@@ -106,6 +109,18 @@
           <a class="b2" href="{% url 'market:login' %}">{{ t.msg }}</a>
           {% endif %}
         </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+          {% if item.seller_phone %}<a class="btn-line" style="color:#128C7E;border-color:#128C7E" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">💬 {{ t.wa_btn }}</a>{% endif %}
+          <button class="btn-line" type="button" id="shareBtn">↗ {{ t.share_btn }}</button>
+          <a class="btn-line" target="_blank" rel="noopener" href="https://wa.me/?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">WhatsApp</a>
+        </div>
+        <script>document.getElementById("shareBtn").addEventListener("click",function(){var d={title:document.title,url:location.href};if(navigator.share){navigator.share(d).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(location.href);this.textContent="✓";}});</script>
+        {% if user.is_authenticated %}
+        <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--ink-3);font-size:13px">⚑ {{ t.report_btn }}</summary>
+          <form method="post" action="{% url 'market:report_listing' item.pk %}" style="margin-top:8px">{% csrf_token %}
+            <textarea name="message" rows="3" maxlength="1000" required style="width:100%"></textarea>
+            <button class="btn-line" type="submit" style="margin-top:6px">{{ t.report_btn }}</button></form></details>
+        {% endif %}
         {% if user.is_authenticated and item.owner == user or item.shop and item.shop.owner == user %}
         <a class="btn-line" style="display:block;text-align:center;margin-top:10px;border-color:var(--amber);color:#8A5A0E"
            href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>

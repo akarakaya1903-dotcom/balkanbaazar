@@ -70,3 +70,9 @@ def footer_pages(group):
         return list(Page.objects.filter(group=group, is_published=True))
     except Exception:
         return []
+
+
+@register.filter
+def digits(value):
+    """Telefondaki rakam disi karakterleri atar (wa.me baglantisi icin)."""
+    return "".join(ch for ch in str(value or "") if ch.isdigit())

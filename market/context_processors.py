@@ -58,6 +58,7 @@ def site_context(request):
     from django.conf import settings as _s
     return {
         "unread_messages": unread,
+        "google_enabled": bool(_s.GOOGLE_CLIENT_ID),
         "min_images": _s.MIN_LISTING_IMAGES,
         "max_images": _s.MAX_LISTING_IMAGES,
         "visit_stats": visit_stats,

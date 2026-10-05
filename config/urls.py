@@ -10,6 +10,11 @@ from market.sitemaps import ListingSitemap, PageSitemap, ShopSitemap, StaticSite
 SITEMAPS = {"static": StaticSitemap, "listings": ListingSitemap, "shops": ShopSitemap, "pages": PageSitemap}
 
 
+def favicon(request):
+    from django.http import FileResponse
+    return FileResponse(open(settings.BASE_DIR / "static" / "img" / "favicon.ico", "rb"), content_type="image/x-icon")
+
+
 def robots(request):
     body = ("User-agent: *\nDisallow: /admin/\nDisallow: /yonetim/\nDisallow: /panel/\nDisallow: /sepet/\nDisallow: /odeme/\nDisallow: /uyelik/\n"
             "Sitemap: https://balkanbaazar.com/sitemap.xml\n")
@@ -20,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="sitemap"),
     path("robots.txt", robots, name="robots"),
+    path("favicon.ico", favicon, name="favicon"),
     path("", include("market.urls")),
     # Yuklenen gorseller (urun, logo, banner). Kucuk/orta siteler icin yeterli;
     # buyuyunce bulut depolamaya (S3, Cloudinary) gecmek daha iyi olur.

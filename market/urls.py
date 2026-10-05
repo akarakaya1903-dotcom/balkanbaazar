@@ -1,13 +1,15 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from . import views, views_account, views_market, views_staff
+from django.contrib.auth.decorators import login_required
+from . import views, views_account, views_google, views_market, views_staff
 
 app_name = "market"
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("ilanlar/", views.listings, name="listings"),
+    path("ilan/<int:pk>/sikayet/", views_market.report_listing, name="report_listing"),
     path("trend/", views.trending, name="trending"),
     path("sayfa/<slug:slug>/", views.page_detail, name="page"),
     path("r/<int:pk>/", views.banner_go, name="banner_go"),
@@ -32,9 +34,10 @@ urlpatterns = [
         success_url=reverse_lazy("market:password_reset_done")), name="password_reset"),
     path("uyelik/sifre-sifirla/gonderildi/", auth_views.PasswordResetDoneView.as_view(
         template_name="market/account/pw_done.html"), name="password_reset_done"),
-    path("uyelik/sifre-sifirla/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
-        template_name="market/account/pw_confirm.html",
-        success_url=reverse_lazy("market:password_reset_complete")), name="password_reset_confirm"),
+    path("uyelik/sifre-sifirla/<uidb64>/<token>/", views_account.PwResetConfirm.as_view(), name="password_reset_confirm"),
+    path("uyelik/sifre-degistir/", login_required(views_account.PwChange.as_view()), name="password_change"),
+    path("uyelik/google/", views_google.google_login, name="google_login"),
+    path("uyelik/google/geri/", views_google.google_callback, name="google_callback"),
     path("uyelik/sifre-sifirla/tamam/", auth_views.PasswordResetCompleteView.as_view(
         template_name="market/account/pw_complete.html"), name="password_reset_complete"),
 

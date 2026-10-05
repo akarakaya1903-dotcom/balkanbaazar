@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}404 — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect" style="text-align:center;padding:70px 0">
+  <div style="font-size:78px;font-weight:800;background:linear-gradient(135deg,#22B8C6,#0B3C4F);-webkit-background-clip:text;background-clip:text;color:transparent">404</div>
+  <h1 style="font-size:24px;margin:8px 0">Sayfa bulunamadı / Page not found</h1>
+  <p style="color:var(--ink-3)">Aradığın sayfa taşınmış ya da silinmiş olabilir.</p>
+  <p><a class="btn-sea" href="{% url 'market:home' %}">{{ t.nav_home }}</a>
+  <a class="btn-line" href="{% url 'market:listings' %}">{{ t.nav_browse }}</a></p>
+</section></div>
+{% endblock %}

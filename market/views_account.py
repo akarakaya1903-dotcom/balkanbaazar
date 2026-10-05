@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Uyelik, magaza basvurusu ve satici paneli."""
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 
 from django.utils import timezone
@@ -22,6 +23,8 @@ def signup(request):
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
+        emails.notify_staff_new_user(user)
+        emails.welcome_user(user)
         messages.success(request, "Hesabin hazir.")
         return redirect("market:panel")
     return render(request, "market/account/signup.html", {"form": form})
@@ -202,3 +205,25 @@ def profile(request):
         messages.success(request, "Profil guncellendi.")
         return redirect("market:profile")
     return render(request, "market/account/profile.html", {"form": form})
+
+
+class PwResetConfirm(auth_views.PasswordResetConfirmView):
+    """Sifre sifirlama tamamlaninca kullaniciya bilgi e-postasi gonderir."""
+    template_name = "market/account/pw_confirm.html"
+    success_url = reverse_lazy("market:password_reset_complete")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        emails.notify_password_changed(form.user)
+        return response
+
+
+class PwChange(auth_views.PasswordChangeView):
+    template_name = "market/account/pw_change.html"
+    success_url = reverse_lazy("market:profile")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        emails.notify_password_changed(self.request.user)
+        messages.success(self.request, "Sifren degistirildi.")
+        return response

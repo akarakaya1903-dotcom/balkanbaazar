@@ -17,10 +17,10 @@
         <div class="paynote stripe"><span class="ic">🔒</span>
           <div><b>{{ t.pay_stripe_t }}</b><p>{{ t.pay_stripe_s }}</p></div></div>
         {% else %}
-        <div class="paynote demo"><span class="ic">🧪</span>
-          <div><b>{{ t.pay_demo_t }}</b><p>{{ t.payment_note }}</p></div></div>
+        <div class="paynote"><span class="ic">💵</span>
+          <div><b>{{ t.cod_t }}</b><p>{{ t.cod_s }}</p></div></div>
         {% endif %}
-        <button class="btn-sea" type="submit">{{ t.pay_now }} — € {{ final_total|floatformat:0 }}</button>
+        <button class="btn-sea" type="submit">{% if stripe_ready %}{{ t.pay_now }}{% else %}{{ t.confirm_order }}{% endif %} — € {{ final_total|floatformat:0 }}</button>
       </form>
     </div>
     <aside class="authside">

@@ -8,6 +8,17 @@ from .models import (Category, City, Listing, ListingImage, ListingVariant, Mode
                      Shop, ShopApplication)
 
 
+class VideoCleanMixin:
+    def clean_video(self):
+        v = self.cleaned_data.get("video")
+        if v and hasattr(v, "size"):
+            if not v.name.lower().endswith((".mp4", ".webm", ".mov")):
+                raise forms.ValidationError("Sadece mp4, webm veya mov yukleyebilirsin.")
+            if v.size > settings.MAX_VIDEO_MB * 1024 * 1024:
+                raise forms.ValidationError(f"Video en fazla {settings.MAX_VIDEO_MB} MB olabilir.")
+        return v
+
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=60, required=False)
@@ -62,12 +73,12 @@ class ShopSettingsForm(forms.ModelForm):
         )
 
 
-class ProductForm(forms.ModelForm):
+class ProductForm(VideoCleanMixin, forms.ModelForm):
     """Magaza sahibinin urun formu. mode/country/shop otomatik doldurulur."""
 
     class Meta:
         model = Listing
-        fields = ("title", "category", "price_eur", "city", "description", "image",
+        fields = ("title", "category", "price_eur", "city", "description", "image", "video",
                   "delivery", "free_shipping", "is_active", "track_stock", "stock")
         widgets = {"description": forms.Textarea(attrs={"rows": 4})}
 
@@ -108,13 +119,13 @@ ListingImageFormSet = forms.modelformset_factory(
 )
 
 
-class IndividualListingForm(forms.ModelForm):
+class IndividualListingForm(VideoCleanMixin, forms.ModelForm):
     """Bireysel (ikinci el) ilan formu — sahibinden mantiginda."""
 
     class Meta:
         model = Listing
         fields = ("title", "category", "price_eur", "city", "condition", "delivery",
-                  "description", "image", "seller_phone")
+                  "description", "image", "video", "seller_phone")
         widgets = {"description": forms.Textarea(attrs={"rows": 4})}
 
     def __init__(self, *args, country=None, **kwargs):

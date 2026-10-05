@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Profil — {{ t.brand }}{% endblock %}
+{% block title %}Sifre degistir — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
-<h1>{{ t.profile }}</h1>
+<h1>Şifre değiştir</h1>
 <form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">Kaydet</button></form>
-<p class="authalt"><a href="{% url 'market:password_change' %}">Şifremi değiştir</a></p>
 </div></div></div>
 {% endblock %}

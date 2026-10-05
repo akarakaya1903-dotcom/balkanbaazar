@@ -31,3 +31,27 @@ class VisitorCounterMiddleware:
         except Exception:
             pass
         return response
+
+
+class ThrottleMiddleware:
+    """Giris/kayit/sifre sifirlama POST'larinda IP basina hiz siniri (kaba kuvvet ve sahte kayit onlemi)."""
+    LIMIT = 15
+    WINDOW = 300  # saniye
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method == "POST" and request.path.startswith("/uyelik/"):
+            from django.core.cache import cache
+            from django.http import HttpResponse
+            ip = request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR", "")
+            key = f"throttle:{ip}"
+            cache.add(key, 0, self.WINDOW)
+            try:
+                n = cache.incr(key)
+            except ValueError:
+                n = 1
+            if n > self.LIMIT:
+                return HttpResponse("Cok fazla deneme. Lutfen birkac dakika sonra tekrar dene.", status=429)
+        return self.get_response(request)

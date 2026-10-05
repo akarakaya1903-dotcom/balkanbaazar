@@ -1,6 +1,8 @@
 {% extends "base.html" %}{% load market_extras %}
-{% block title %}{{ t.brand }} — {{ t.heroT }}{% endblock %}
-
+{% block title %}{% if site_settings and site_settings.seo_title %}{{ site_settings.seo_title }}{% else %}{{ t.brand }} — {{ t.brand_tag }}{% endif %}{% endblock %}
+{% block meta_desc %}{% if site_settings and site_settings.seo_description %}{{ site_settings.seo_description }}{% else %}{{ t.heroP }}{% endif %}{% endblock %}
+{% block og_title %}{% if site_settings and site_settings.seo_title %}{{ site_settings.seo_title }}{% else %}{{ t.brand }} — {{ t.brand_tag }}{% endif %}{% endblock %}
+{% block og_desc %}{% if site_settings and site_settings.seo_description %}{{ site_settings.seo_description }}{% else %}{{ t.heroP }}{% endif %}{% endblock %}
 {% block content %}
 {% include "market/_herobanner.html" %}
 {% include "market/_banners.html" %}
@@ -77,4 +79,11 @@
     </div>
   </section>
 </div>
+
+<div class="wrap"><section class="sect" style="padding-top:0">
+  <div style="background:var(--card,#fff);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)">
+    <h2 style="font-size:20px;margin:0 0 8px">{{ t.brand }} — {{ t.brand_tag }}</h2>
+    <p style="margin:0;line-height:1.7;color:var(--ink-2,inherit)">{% if site_settings and site_settings.seo_description %}{{ site_settings.seo_description }}{% else %}{{ t.heroP }}{% endif %}</p>
+  </div>
+</section></div>
 {% endblock %}

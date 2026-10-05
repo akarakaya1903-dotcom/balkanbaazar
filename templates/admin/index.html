@@ -1,0 +1,7 @@
+{% extends "admin/index.html" %}
+{% block content %}
+<div class="bb-stats">
+  {% for s in bb_stats %}<a class="bb-card" href="{{ s.url }}"><b>{{ s.value }}</b><span>{{ s.label }}</span></a>{% endfor %}
+</div>
+{{ block.super }}
+{% endblock %}

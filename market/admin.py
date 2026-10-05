@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (ApplicationStatus, Boost, Category, City, Conversation, Coupon,
                      Country, Favorite, Listing, ListingImage, ListingVariant, Message,
-                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat)
+                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat, ListingReport)
 
 
 @admin.register(Country)
@@ -158,3 +158,48 @@ class DailyStatAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+# ---- Yonetim paneli ana sayfasi: ozet kartlari ----
+admin.site.site_title = "Balkan Baazar"
+admin.site.index_title = "Genel bakis"
+_orig_index = admin.site.index
+
+
+def _dashboard_index(request, extra_context=None):
+    from django.contrib.auth import get_user_model
+    from django.urls import reverse
+    from django.utils import timezone
+    from .models import Order, ShopApplication
+    today = timezone.localdate()
+    stat = DailyStat.objects.filter(day=today).first()
+
+    def link(name):
+        try:
+            return reverse(name)
+        except Exception:
+            return "#"
+    User = get_user_model()
+    stats = [
+        {"label": "Bugunku ziyaretci", "value": stat.visitors if stat else 0, "url": link("admin:market_dailystat_changelist")},
+        {"label": "Toplam uye", "value": User.objects.count(), "url": link("admin:auth_user_changelist")},
+        {"label": "Bugun yeni uye", "value": User.objects.filter(date_joined__date=today).count(), "url": link("admin:auth_user_changelist")},
+        {"label": "Aktif ilan", "value": Listing.objects.filter(is_active=True).count(), "url": link("admin:market_listing_changelist")},
+        {"label": "Magaza", "value": Shop.objects.count(), "url": link("admin:market_shop_changelist")},
+        {"label": "Bekleyen basvuru", "value": ShopApplication.objects.filter(status=ApplicationStatus.PENDING).count(), "url": link("admin:market_shopapplication_changelist")},
+        {"label": "Bugunku siparis", "value": Order.objects.filter(created_at__date=today).count(), "url": link("admin:market_order_changelist")},
+    ]
+    context = {"bb_stats": stats}
+    context.update(extra_context or {})
+    return _orig_index(request, context)
+
+
+admin.site.index = _dashboard_index
+
+
+@admin.register(ListingReport)
+class ListingReportAdmin(admin.ModelAdmin):
+    list_display = ("listing", "reporter", "created_at", "resolved")
+    list_editable = ("resolved",)
+    list_filter = ("resolved",)
+    readonly_fields = ("listing", "reporter", "message", "created_at")
