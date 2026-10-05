@@ -100,4 +100,8 @@
     </div>
   </main>
 </div></div>
+<script>(function(){var v=document.querySelector('input[type=file][name="video"]');if(!v){return;}var MAX={{ max_video_mb }}*1024*1024;
+v.addEventListener("change",function(){var f=v.files[0];if(!f){return;}
+if(f.size>MAX){alert("Video "+Math.round(f.size/1048576)+" MB. En fazla {{ max_video_mb }} MB / Max {{ max_video_mb }} MB");v.value="";return;}
+if(!/\.(mp4|webm|mov)$/i.test(f.name)){alert("mp4, webm, mov");v.value="";}});})();</script>
 {% endblock %}

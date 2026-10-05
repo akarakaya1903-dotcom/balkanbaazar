@@ -67,6 +67,7 @@ def site_context(request):
         "unread_messages": unread,
         "fav_ids": fav_ids,
         "google_enabled": bool(_s.GOOGLE_CLIENT_ID),
+        "max_video_mb": _s.MAX_VIDEO_MB,
         "min_images": _s.MIN_LISTING_IMAGES,
         "max_images": _s.MAX_LISTING_IMAGES,
         "visit_stats": visit_stats,

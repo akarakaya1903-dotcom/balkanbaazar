@@ -18,8 +18,9 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 INFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
 
-def _redirect_uri():
-    return settings.SITE_URL.rstrip("/") + reverse("market:google_callback")
+def _redirect_uri(request):
+    """Kullanici hangi adresten geldiyse (www olsun olmasin) ayni adrese doner, oturum korunur."""
+    return request.build_absolute_uri(reverse("market:google_callback"))
 
 
 def google_login(request):
@@ -29,7 +30,7 @@ def google_login(request):
     request.session["g_state"] = state
     query = urlencode({
         "client_id": settings.GOOGLE_CLIENT_ID,
-        "redirect_uri": _redirect_uri(),
+        "redirect_uri": _redirect_uri(request),
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -50,7 +51,7 @@ def google_callback(request):
             "code": request.GET["code"],
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": _redirect_uri(),
+            "redirect_uri": _redirect_uri(request),
             "grant_type": "authorization_code",
         }, timeout=10).json()
         info = requests.get(INFO_URL, headers={"Authorization": f"Bearer {token['access_token']}"},
