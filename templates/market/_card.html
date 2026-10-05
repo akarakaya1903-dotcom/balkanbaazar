@@ -19,6 +19,10 @@
       <span>{% if item.mode == 'shop' %}<span class="star">★</span> {{ item.rating }}{% else %}{% if item.age_days == 0 %}{{ t.ago_today }}{% else %}{{ item.age_days }} {{ t.ago_days }}{% endif %}{% endif %}</span></span>
   </div>
 </a>
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'market:favorite_toggle_listing' item.pk %}" class="favform">{% csrf_token %}
+  <button class="favbtn{% if item.pk in fav_ids %} on{% endif %}" type="submit" aria-label="Favorite">{% if item.pk in fav_ids %}♥{% else %}♡{% endif %}</button></form>
+{% else %}<a class="favbtn" style="position:absolute;top:10px;right:10px;z-index:4" href="{% url 'market:login' %}" aria-label="Favorite">♡</a>{% endif %}
 {% if item.mode == 'shop' and user.is_authenticated and not item.variants.exists %}
 <form method="post" action="{% url 'market:cart_add' item.pk %}" class="quickaddform">
   {% csrf_token %}<button class="quickadd" type="submit" title="{{ t.cart }}">🛒</button></form>

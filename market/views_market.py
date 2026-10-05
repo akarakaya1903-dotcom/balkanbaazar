@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -590,6 +590,8 @@ def favorite_toggle_listing(request, pk):
     fav, created = Favorite.objects.get_or_create(user=request.user, listing=listing)
     if not created:
         fav.delete()
+    if request.headers.get("x-requested-with") == "fetch":
+        return JsonResponse({"on": created})
     next_url = request.POST.get("next") or request.META.get("HTTP_REFERER")
     return redirect(next_url or "market:home")
 

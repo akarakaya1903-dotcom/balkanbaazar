@@ -27,6 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/theme2.css' %}">
 </head>
 <body>
 <header class="top">
@@ -130,6 +131,8 @@
 <script src="{% static 'js/app.js' %}"></script>
 <div id="cookieBar" class="cookiebar" hidden><span>{{ t.cookie_text }}</span><button type="button" id="cookieOk">{{ t.cookie_ok }}</button></div>
 <script>(function(){var b=document.getElementById("cookieBar");try{if(!localStorage.getItem("bb_cookie")){b.hidden=false;}}catch(e){}document.getElementById("cookieOk").addEventListener("click",function(){try{localStorage.setItem("bb_cookie","1");}catch(e){}b.hidden=true;});})();</script>
+<script>document.addEventListener("submit",function(e){var f=e.target;if(!f.classList||!f.classList.contains("favform")){return;}e.preventDefault();var b=f.querySelector(".favbtn");
+fetch(f.action,{method:"POST",body:new FormData(f),credentials:"same-origin",headers:{"X-Requested-With":"fetch"}}).then(function(r){return r.json();}).then(function(d){b.classList.toggle("on",!!d.on);b.textContent=d.on?"\u2665":"\u2661";}).catch(function(){f.submit();});});</script>
 <button type="button" id="toTop" class="totop" aria-label="Top" hidden>↑</button>
 <script>(function(){var b=document.getElementById("toTop");window.addEventListener("scroll",function(){b.hidden=window.scrollY<600;},{passive:true});b.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});})();</script>
 <nav class="bnav" aria-label="Menu">

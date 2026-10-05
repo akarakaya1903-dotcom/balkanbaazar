@@ -45,6 +45,13 @@ def site_context(request):
         visit_stats = cache.get_or_set("visit_stats", _stats, 60)
     except Exception:
         visit_stats = None
+    fav_ids = set()
+    try:
+        if request.user.is_authenticated:
+            from .models import Favorite
+            fav_ids = set(Favorite.objects.filter(user=request.user, listing__isnull=False).values_list("listing_id", flat=True))
+    except Exception:
+        fav_ids = set()
     unread = 0
     try:
         u = request.user
@@ -58,6 +65,7 @@ def site_context(request):
     from django.conf import settings as _s
     return {
         "unread_messages": unread,
+        "fav_ids": fav_ids,
         "google_enabled": bool(_s.GOOGLE_CLIENT_ID),
         "min_images": _s.MIN_LISTING_IMAGES,
         "max_images": _s.MAX_LISTING_IMAGES,

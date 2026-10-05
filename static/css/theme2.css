@@ -1,0 +1,75 @@
+/* Tema v2: temiz, modern pazaryeri gorunumu. Silersen (base.html'deki satir) onceki gorunume donersin. */
+:root{--hdr-bg:#0D2A3A;--hdr-fg:#fff;--hdr-sub:rgba(255,255,255,.75);--hdr-line:rgba(255,255,255,.12);
+--pill-bg:rgba(255,255,255,.12);--pill-bd:rgba(255,255,255,.2);--pill-fg:#fff;
+--seg-bg:rgba(0,0,0,.22);--seg-fg:rgba(255,255,255,.75);--seg-on-bg:#fff;--seg-on-fg:#0D2A3A;--seg-shadow:none;
+--search-bd:transparent;--search-btn-bg:#E4A13B;--search-btn-fg:#3A2708}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#F4F6F8;--card:#FFFFFF;--line:#E4E7EC;--ink:#101828;--ink-2:#475467;--ink-3:#667085;
+--sea:#0E7C86;--sea-2:#14A3AE;--sea-soft:#E3F4F5;--shadow:0 1px 2px rgba(16,24,40,.05);
+--hdr-bg:#FFFFFF;--hdr-fg:#101828;--hdr-sub:#667085;--hdr-line:#E4E7EC;
+--pill-bg:#FFFFFF;--pill-bd:#D0D5DD;--pill-fg:#101828;
+--seg-bg:#EEF1F4;--seg-fg:#475467;--seg-on-bg:#FFFFFF;--seg-on-fg:#0E7C86;--seg-shadow:0 1px 3px rgba(16,24,40,.12);
+--search-bd:#0E7C86;--search-btn-bg:#0E7C86;--search-btn-fg:#FFFFFF;}}
+:root[data-theme="light"]{--bg:#F4F6F8;--card:#FFFFFF;--line:#E4E7EC;--ink:#101828;--ink-2:#475467;--ink-3:#667085;
+--sea:#0E7C86;--sea-2:#14A3AE;--sea-soft:#E3F4F5;--shadow:0 1px 2px rgba(16,24,40,.05);
+--hdr-bg:#FFFFFF;--hdr-fg:#101828;--hdr-sub:#667085;--hdr-line:#E4E7EC;
+--pill-bg:#FFFFFF;--pill-bd:#D0D5DD;--pill-fg:#101828;
+--seg-bg:#EEF1F4;--seg-fg:#475467;--seg-on-bg:#FFFFFF;--seg-on-fg:#0E7C86;--seg-shadow:0 1px 3px rgba(16,24,40,.12);
+--search-bd:#0E7C86;--search-btn-bg:#0E7C86;--search-btn-fg:#FFFFFF;}
+
+body{background:var(--bg)!important;line-height:1.55}
+header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:1px solid var(--hdr-line)!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.logo b{color:var(--hdr-fg)}.logo small{color:var(--hdr-sub);opacity:1}
+.search{border:1.5px solid var(--search-bd);box-shadow:none!important;background:#fff}
+.search button{background:var(--search-btn-bg)!important;color:var(--search-btn-fg)!important;border-radius:999px;margin:3px}
+.pill{background:var(--pill-bg);border:1px solid var(--pill-bd);color:var(--pill-fg)}
+.pill:hover{background:var(--seg-bg)}
+.ghost{border-color:var(--pill-bd);color:var(--pill-fg)}
+.mode{background:var(--seg-bg)}
+.mode a{color:var(--seg-fg)}
+.mode a.on{background:var(--seg-on-bg);color:var(--seg-on-fg);box-shadow:var(--seg-shadow)}
+.mode small{opacity:.8}
+
+/* Kahraman alani: tekrar eden logo kalkti, daha sade */
+.hero2-logo,.hero2-sub{display:none!important}
+.hero2-h1{letter-spacing:-.025em}
+.cta-blue{background:var(--sea);border-radius:12px}.cta-blue:hover{background:#0B6870}
+.cta-outline{border-radius:12px}
+
+/* Kategori seridi: pastel daireler, duz ikonlar */
+.hcat-card{box-shadow:none;border:1px solid var(--line);border-radius:18px}
+.hcat:hover{background:var(--sea-soft)}
+.hcat .ic{box-shadow:none!important;color:var(--sea)}
+.hcat .ic svg{stroke:currentColor;filter:none}
+.hcat:hover .ic{transform:none}
+.hcat.more .ic svg{fill:currentColor}
+.hcat.c-fashion .ic{background:#FCE7F3!important;color:#DB2777}
+.hcat.c-electronics .ic{background:#E0F2FE!important;color:#0369A1}
+.hcat.c-beauty .ic{background:#FFE4E6!important;color:#BE123C}
+.hcat.c-home .ic{background:#FEF3C7!important;color:#B45309}
+.hcat.c-auto .ic{background:#DBEAFE!important;color:#1D4ED8}
+.hcat.c-realestate .ic{background:#D1FAE5!important;color:#047857}
+.hcat.c-secondhand .ic{background:#CCFBF1!important;color:#0F766E}
+.hcat.c-sport .ic{background:#FFEDD5!important;color:#C2410C}
+.hcat.c-baby .ic{background:#EDE9FE!important;color:#6D28D9}
+.hcat.c-services .ic{background:#E2E8F0!important;color:#475569}
+.hcat.c-grocery .ic{background:#ECFCCB!important;color:#4D7C0F}
+.hcat.c-pets .ic{background:#FFE8CC!important;color:#9A3412}
+.hcat.c-tourism .ic{background:#CFFAFE!important;color:#0E7490}
+.hcat.more .ic{background:#E5E7EB!important;color:#374151}
+
+/* Kartlar: ince cerceve, sade fiyat */
+.card{border:1px solid var(--line);box-shadow:none!important;border-radius:16px;background:var(--card)}
+.card:hover{box-shadow:0 12px 30px rgba(16,24,40,.10)!important;transform:translateY(-3px)}
+.pr{background:none!important;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:currentColor;color:var(--ink)!important;font-size:18px}
+.tt{color:var(--ink)}
+.btn-sea{background:var(--sea)!important;box-shadow:none!important}.btn-sea:hover{background:#0B6870!important;transform:none}
+.rhead h2::before{width:4px;border-radius:2px;background:var(--sea)}
+.rhead .cnt{background:var(--sea-soft);color:var(--sea)}
+.sect{padding:30px 0}
+.shop,.cattile,.panel{border:1px solid var(--line);box-shadow:none!important}
+
+/* Favori kalbi (kart ustunde) */
+.cardwrap{position:relative}
+.favform{position:absolute;top:10px;right:10px;z-index:4;margin:0}
+.favbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.94);color:#667085;font-size:19px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(16,24,40,.18);text-decoration:none}
+.favbtn.on{color:#E11D48}
