@@ -170,3 +170,11 @@ MAX_VIDEO_MB = int(os.environ.get("MAX_VIDEO_MB", "50"))
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 LISTING_DAYS = int(os.environ.get("LISTING_DAYS", "60"))
+
+# Sunucu hatalari (500) yoneticilere e-posta ile bildirilir (DEBUG kapaliyken)
+ADMINS = [("Yonetici", e) for e in STAFF_NOTIFY_EMAILS]
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14

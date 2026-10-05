@@ -42,7 +42,7 @@ class ThrottleMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.method == "POST" and request.path.startswith("/uyelik/"):
+        if request.method == "POST" and request.path.startswith(("/uyelik/", "/admin/login")):
             from django.core.cache import cache
             from django.http import HttpResponse
             ip = request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR", "")

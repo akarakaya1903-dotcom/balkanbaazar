@@ -140,3 +140,14 @@ footer{background:linear-gradient(160deg,var(--deep),#0A1F2C);border-top:4px sol
 .cookiebar[hidden]{display:none}
 .cookiebar button{background:#E4A13B;color:#1a1a1a;border:0;border-radius:999px;padding:8px 18px;font-weight:700;cursor:pointer}
 @media (max-width:768px){.cookiebar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+
+/* Buyuk gorsel (lightbox) */
+.gal-main img{cursor:zoom-in}
+.lb{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center}
+.lb.on{display:flex}
+.lb img{max-width:96vw;max-height:86vh;object-fit:contain;border-radius:6px;user-select:none}
+.lb-x{position:absolute;top:12px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:28px;line-height:1;cursor:pointer}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:32px;line-height:1;cursor:pointer}
+.lb-prev{left:12px}.lb-next{right:12px}
+.lb.single .lb-nav,.lb.single .lb-count{display:none}
+.lb-count{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;background:rgba(0,0,0,.5);padding:3px 12px;border-radius:999px}
