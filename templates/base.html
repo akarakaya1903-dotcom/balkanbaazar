@@ -12,7 +12,11 @@
 <link rel="icon" type="image/png" sizes="48x48" href="{% static 'img/logo-48.png' %}">
 <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/logo-192.png' %}">
 <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
-<meta property="og:image" content="https://balkanbaazar.com{% static 'img/logo-512.png' %}">
+<meta property="og:image" content="{% block og_image %}https://balkanbaazar.com{% static 'img/logo-512.png' %}{% endblock %}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0D2A3A">
+{% block head_extra %}{% endblock %}
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Balkan Baazar","url":"https://balkanbaazar.com","logo":"https://balkanbaazar.com{% static 'img/logo-512.png' %}"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Balkan Baazar","alternateName":["BalkanBaazar","balkanbaazar.com"],"url":"https://balkanbaazar.com/"}</script>
 {% if site_settings and site_settings.analytics_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.analytics_id }}"></script>
@@ -133,5 +137,6 @@
   <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span>{% if unread_messages %}<i class="ubadge">{{ unread_messages }}</i>{% endif %}</a>
   <a href="{% if user.is_authenticated %}{% url 'market:profile' %}{% else %}{% url 'market:login' %}{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>{{ t.nav_me }}</span></a>
 </nav>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
 </body>
 </html>

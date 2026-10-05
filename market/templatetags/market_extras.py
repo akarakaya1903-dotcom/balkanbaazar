@@ -88,3 +88,22 @@ def antispam_fields():
         'style="position:absolute;left:-9999px;opacity:0;height:0;width:0" aria-hidden="true">'
         f'<input type="hidden" name="bbts" value="{antispam.make_token()}">'
     )
+
+
+@register.simple_tag(takes_context=True)
+def listing_jsonld(context, item):
+    """Ilan sayfasi icin Google'in anladigi Product verisi."""
+    import json
+    request = context["request"]
+    in_stock = item.is_active and not (item.track_stock and (item.stock or 0) <= 0)
+    url = request.build_absolute_uri(request.path)
+    data = {
+        "@context": "https://schema.org", "@type": "Product",
+        "name": item.title, "description": (item.description or item.title)[:500], "url": url,
+        "itemCondition": "https://schema.org/NewCondition" if item.condition == "new" else "https://schema.org/UsedCondition",
+        "offers": {"@type": "Offer", "price": str(item.price_eur), "priceCurrency": "EUR", "url": url,
+                   "availability": "https://schema.org/InStock" if in_stock else "https://schema.org/OutOfStock"},
+    }
+    if item.image:
+        data["image"] = [request.build_absolute_uri(item.image.url)]
+    return mark_safe('<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + "</script>")

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (ApplicationStatus, Boost, Category, City, Conversation, Coupon,
                      Country, Favorite, Listing, ListingImage, ListingVariant, Message,
-                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat, ListingReport)
+                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat, ListingReport, UserBlock)
 
 
 @admin.register(Country)
@@ -209,3 +209,8 @@ class ListingReportAdmin(admin.ModelAdmin):
     list_editable = ("resolved",)
     list_filter = ("resolved",)
     readonly_fields = ("listing", "reporter", "message", "created_at")
+
+
+@admin.register(UserBlock)
+class UserBlockAdmin(admin.ModelAdmin):
+    list_display = ("blocker", "blocked", "created_at")

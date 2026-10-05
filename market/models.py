@@ -693,3 +693,18 @@ def email_is_verified(user):
         return True
     prof = UserProfile.objects.filter(user=user).first()
     return bool(prof and prof.email_verified)
+
+
+class UserBlock(models.Model):
+    """Bir kullanicinin baska bir kullaniciyi engellemesi (mesajlasma iki yone de kapanir)."""
+    blocker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocks_made")
+    blocked = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocks_received")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = [("blocker", "blocked")]
+        verbose_name = "Engelleme"
+        verbose_name_plural = "Engellemeler"
+
+    def __str__(self):
+        return f"{self.blocker} -> {self.blocked}"

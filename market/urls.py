@@ -14,6 +14,7 @@ urlpatterns = [
     path("uyelik/dogrulama-gonder/", views_account.resend_verification, name="resend_verification"),
     path("ilanlarim/<int:pk>/yenile/", views_market.renew_listing, name="renew_listing"),
     path("satici/<int:pk>/", views_market.seller_profile, name="seller_profile"),
+    path("engelle/<int:pk>/", views_market.block_user, name="block_user"),
     path("trend/", views.trending, name="trending"),
     path("sayfa/<slug:slug>/", views.page_detail, name="page"),
     path("r/<int:pk>/", views.banner_go, name="banner_go"),

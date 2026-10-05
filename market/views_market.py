@@ -414,12 +414,30 @@ def _listing_owner(listing):
     return listing.owner
 
 
+def _is_blocked(a, b):
+    from .models import UserBlock
+    return UserBlock.objects.filter(Q(blocker=a, blocked=b) | Q(blocker=b, blocked=a)).exists()
+
+
+@login_required
+def block_user(request, pk):
+    from .models import UserBlock
+    target = get_object_or_404(User, pk=pk)
+    if request.method == "POST" and target != request.user:
+        UserBlock.objects.get_or_create(blocker=request.user, blocked=target)
+        messages.success(request, "Kullanici engellendi.")
+    return redirect("market:inbox")
+
+
 @login_required
 def start_conversation(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
     other = _listing_owner(listing)
     if not other or other == request.user:
         messages.error(request, "Bu ilan için mesajlaşma şu anda kullanılamıyor.")
+        return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
+    if _is_blocked(request.user, other):
+        messages.error(request, "Bu kullanici ile mesajlasamazsin.")
         return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
     a, b = sorted([request.user, other], key=lambda u: u.pk)
     conversation, _ = Conversation.objects.get_or_create(
@@ -452,6 +470,13 @@ def message_thread(request, pk):
         return redirect("market:inbox")
     if request.method == "POST":
         body = request.POST.get("body", "").strip()
+        from datetime import timedelta
+        if body and _is_blocked(request.user, conversation.other(request.user)):
+            messages.error(request, "Bu kullanici ile mesajlasamazsin.")
+            return redirect("market:inbox")
+        if body and Message.objects.filter(sender=request.user, created_at__gte=timezone.now() - timedelta(seconds=60)).count() >= 8:
+            messages.error(request, "Cok hizli mesaj gonderiyorsun, biraz bekle.")
+            return redirect("market:message_thread", pk=pk)
         if body:
             msg = Message.objects.create(conversation=conversation, sender=request.user, body=body)
             Conversation.objects.filter(pk=conversation.pk).update(updated_at=timezone.now())

@@ -6,6 +6,7 @@
   <div class="formcard" style="margin-top:12px">
     <div class="rhead">
       <h2>{{ other.first_name|default:other.username }}</h2>
+      <form method="post" action="{% url 'market:block_user' other.pk %}" onsubmit="return confirm('{{ t.block_btn }}?')" style="margin-left:auto">{% csrf_token %}<button class="btn-line" type="submit" style="font-size:12px;padding:5px 10px">🚫 {{ t.block_btn }}</button></form>
       {% if conversation.listing %}
       <a class="cnt" href="{% url 'market:listing_detail' conversation.listing.pk conversation.listing.slug %}">
         {{ t.about }}: {{ conversation.listing.title }}</a>
