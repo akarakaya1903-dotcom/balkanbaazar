@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Hesabı sil — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><div class="authwrap"><div class="authbox">
+<h1>Hesabı sil</h1>
+<p>Hesabın kapatılır, kişisel bilgilerin (ad, e-posta) silinir ve ilanların yayından kaldırılır. Bu işlem geri alınamaz.</p>
+<form method="post">{% csrf_token %}
+  {% if has_pw %}<label>Şifren<input type="password" name="password" required autocomplete="current-password"></label>
+  {% else %}<label>Onay için e-posta adresini yaz<input type="email" name="confirm" required></label>{% endif %}
+  <button class="btn-sea" type="submit" style="background:#C0392B;margin-top:10px">Hesabımı kalıcı olarak sil</button>
+</form>
+<p class="authalt"><a href="{% url 'market:profile' %}">Vazgeç</a></p>
+</div></div></div>
+{% endblock %}

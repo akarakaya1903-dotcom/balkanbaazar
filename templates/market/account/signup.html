@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load market_extras %}
 {% block title %}{{ t.register }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap">
   <div class="authbox">
     <h1>{{ t.reg_t }}</h1>
     <p class="lead">{{ t.reg_s }}</p>
-    <form method="post" novalidate>{% csrf_token %}
+    <form method="post" novalidate>{% csrf_token %}{% antispam_fields %}
       {% include "market/_form.html" %}
       <button class="btn-sea" type="submit">{{ t.register }}</button>
     </form>

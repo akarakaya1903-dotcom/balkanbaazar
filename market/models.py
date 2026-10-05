@@ -195,6 +195,7 @@ class Listing(models.Model):
     favorites = models.PositiveIntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    pending_review = models.BooleanField("Onay bekliyor", default=False, db_index=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
@@ -544,6 +545,8 @@ class SiteSettings(models.Model):
                                  help_text="Google sonucunda mavi baslik olarak gorunur. Bos birakirsan varsayilan kullanilir.")
     seo_description = models.CharField("Google aciklamasi (ana sayfa)", max_length=170, blank=True,
                                        help_text="Basligin altindaki tanitim yazisi, 150-160 karakter ideal.")
+    moderate_new_listings = models.BooleanField("Yeni bireysel ilanlar yonetici onayindan gecsin", default=False,
+                                                help_text="Acikken yeni ilanlar yayina girmeden once Ilanlar listesinde 'Onay bekliyor' olarak gorunur.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
                                     help_text="Alt bilgide (c) satirinda gorunur.")
     address = models.TextField("Adres", blank=True)

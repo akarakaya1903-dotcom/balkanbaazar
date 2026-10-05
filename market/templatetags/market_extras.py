@@ -3,6 +3,9 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import urlencode
 
+from django.utils.safestring import mark_safe
+
+from market import antispam
 from market.models import Banner, Page
 
 register = template.Library()
@@ -76,3 +79,12 @@ def footer_pages(group):
 def digits(value):
     """Telefondaki rakam disi karakterleri atar (wa.me baglantisi icin)."""
     return "".join(ch for ch in str(value or "") if ch.isdigit())
+
+
+@register.simple_tag
+def antispam_fields():
+    return mark_safe(
+        '<input type="text" name="website" tabindex="-1" autocomplete="off" '
+        'style="position:absolute;left:-9999px;opacity:0;height:0;width:0" aria-hidden="true">'
+        f'<input type="hidden" name="bbts" value="{antispam.make_token()}">'
+    )

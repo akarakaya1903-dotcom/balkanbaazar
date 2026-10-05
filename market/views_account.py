@@ -19,6 +19,10 @@ from .models import (ApplicationStatus, Listing, ListingImage, ListingVariant,
 def signup(request):
     if request.user.is_authenticated:
         return redirect("market:panel")
+    from . import antispam
+    if request.method == "POST" and antispam.looks_like_bot(request):
+        messages.error(request, "Form gonderilemedi, sayfayi yenileyip tekrar dene.")
+        return redirect("market:signup")
     form = SignUpForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -227,3 +231,33 @@ class PwChange(auth_views.PasswordChangeView):
         emails.notify_password_changed(self.request.user)
         messages.success(self.request, "Sifren degistirildi.")
         return response
+
+
+@login_required
+def delete_account(request):
+    """Hesabi anonimlestirip kapatir. Siparis gecmisi satici icin korunur, kisisel veriler silinir."""
+    user = request.user
+    if Shop.objects.filter(owner=user).exists():
+        messages.error(request, "Magaza sahibi hesaplar icin silme talebini e-posta ile ilet.")
+        return redirect("market:profile")
+    if request.method == "POST":
+        has_pw = user.has_usable_password()
+        ok = (user.check_password(request.POST.get("password", "")) if has_pw
+              else request.POST.get("confirm", "").strip().lower() == (user.email or "").lower())
+        if not ok:
+            messages.error(request, "Dogrulama basarisiz.")
+            return redirect("market:delete_account")
+        Listing.objects.filter(owner=user).update(is_active=False, seller_name="", seller_phone="")
+        uid = user.pk
+        user.username = f"silinen-{uid}"
+        user.email = ""
+        user.first_name = ""
+        user.last_name = ""
+        user.is_active = False
+        user.set_unusable_password()
+        user.save()
+        from django.contrib.auth import logout
+        logout(request)
+        messages.success(request, "Hesabin silindi.")
+        return redirect("market:home")
+    return render(request, "market/account/delete_account.html", {"has_pw": user.has_usable_password()})

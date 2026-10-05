@@ -45,6 +45,10 @@ def my_listings(request):
 def my_listing_form(request, pk=None):
     country = _current_country(request)
     item = get_object_or_404(Listing, pk=pk, owner=request.user) if pk else None
+    from . import antispam
+    if request.method == "POST" and not pk and antispam.looks_like_bot(request):
+        messages.error(request, "Form gonderilemedi, sayfayi yenileyip tekrar dene.")
+        return redirect("market:my_listing_new")
     form = IndividualListingForm(
         request.POST or None, request.FILES or None, instance=item, country=country
     )
@@ -64,7 +68,16 @@ def my_listing_form(request, pk=None):
             img.save()
         for obj in formset.deleted_objects:
             obj.delete()
-        messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
+        from .models import SiteSettings
+        _ss = SiteSettings.objects.first()
+        if not item and _ss and _ss.moderate_new_listings:
+            saved.is_active = False
+            saved.pending_review = True
+            saved.save(update_fields=["is_active", "pending_review"])
+            emails.notify_staff_pending_listing(saved)
+            messages.success(request, "İlanın incelemeye alındı, onaylanınca yayınlanacak.")
+        else:
+            messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
         return redirect("market:my_listings")
     return render(request, "market/mylistings/form.html",
                   {"form": form, "formset": formset, "item": item})

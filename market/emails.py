@@ -225,3 +225,9 @@ def notify_staff_report(report):
     body = (f"Yeni ilan sikayeti\n\nIlan: {report.listing.title} ({_site('/ilan/%d/%s/' % (report.listing_id, report.listing.slug))})\n"
             f"Sikayet eden: {report.reporter or 'anonim'}\n\n{report.message}\n\nYonetim: {_site('/admin/market/listingreport/')}")
     _send(f"Ilan sikayeti #{report.pk}", body, settings.STAFF_NOTIFY_EMAILS)
+
+
+def notify_staff_pending_listing(listing):
+    _send(f"Onay bekleyen ilan: {listing.title}",
+          f"Yeni bir ilan onay bekliyor.\n\nBaslik: {listing.title}\nFiyat: {listing.price_eur}\n\nOnaylamak icin: {_site('/admin/market/listing/?pending_review__exact=1')}",
+          settings.STAFF_NOTIFY_EMAILS)

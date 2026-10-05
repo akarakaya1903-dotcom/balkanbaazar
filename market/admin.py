@@ -46,11 +46,17 @@ class ListingVariantInline(admin.TabularInline):
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
     list_display = ("title", "mode", "country", "city", "price_eur", "category", "shop",
-                    "is_active", "track_stock", "stock", "featured_until")
-    list_filter = ("mode", "country", "condition", "delivery", "is_active", "track_stock")
+                    "is_active", "pending_review", "track_stock", "stock", "featured_until")
+    list_filter = ("pending_review", "mode", "country", "condition", "delivery", "is_active", "track_stock")
+    actions = ["approve_listings"]
     search_fields = ("title", "description")
     autocomplete_fields = ("city",)
     inlines = [ListingImageInline, ListingVariantInline]
+
+    @admin.action(description="Secili ilanlari onayla ve yayinla")
+    def approve_listings(self, request, queryset):
+        n = queryset.update(is_active=True, pending_review=False)
+        self.message_user(request, f"{n} ilan yayinlandi.")
 
 
 @admin.register(Coupon)

@@ -27,6 +27,7 @@ urlpatterns = [
          name="logout"),
 
     path("uyelik/profil/", views_account.profile, name="profile"),
+    path("uyelik/hesabi-sil/", views_account.delete_account, name="delete_account"),
     path("uyelik/sifre-sifirla/", auth_views.PasswordResetView.as_view(
         template_name="market/account/pw_form.html",
         email_template_name="market/account/pw_email.txt",

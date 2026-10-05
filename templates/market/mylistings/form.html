@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load market_extras %}
 {% block title %}{% if item %}{{ t.edit }}{% else %}{{ t.new_listing }}{% endif %} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><section class="sect">
   <div class="formcard" style="max-width:640px;margin:0 auto">
     <h1>{% if item %}{{ t.edit }}{% else %}{{ t.new_listing }}{% endif %}</h1>
-    <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+    <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}{% antispam_fields %}
       {% if item and item.image %}
       <div class="imgpreview"><img src="{{ item.image.url }}" alt=""></div>
       {% endif %}
