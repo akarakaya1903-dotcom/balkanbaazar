@@ -143,6 +143,7 @@
             <textarea name="message" rows="3" maxlength="1000" required style="width:100%"></textarea>
             <button class="btn-line" type="submit" style="margin-top:6px">{{ t.report_btn }}</button></form></details>
         {% endif %}
+        {% if item.mode == "used" %}<div class="safebox"><b>🛡 {{ t.safety_t }}</b><p>{{ t.safety_s }}</p></div>{% endif %}
         {% if user.is_authenticated and item.owner == user or item.shop and item.shop.owner == user %}
         <a class="btn-line" style="display:block;text-align:center;margin-top:10px;border-color:var(--amber);color:#8A5A0E"
            href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>
@@ -158,4 +159,12 @@
   </section>
   {% endif %}
 </div>
+  <div class="stickybar">
+    <div class="sb-price">{% price item country %}</div>
+    <div class="sb-actions">
+      {% if item.seller_phone and not item.shop %}<a class="sb1" href="tel:{{ item.seller_phone }}" aria-label="{{ t.call }}">📞</a>{% endif %}
+      {% if item.seller_phone %}<a class="sb1 wa" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}">WhatsApp</a>{% endif %}
+      <a class="sb2" href="{% if user.is_authenticated %}{% url 'market:start_conversation' item.pk %}{% else %}{% url 'market:login' %}{% endif %}">{{ t.msg }}</a>
+    </div>
+  </div>
 {% endblock %}

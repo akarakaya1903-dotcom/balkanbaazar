@@ -151,3 +151,31 @@ footer{background:linear-gradient(160deg,var(--deep),#0A1F2C);border-top:4px sol
 .lb-prev{left:12px}.lb-next{right:12px}
 .lb.single .lb-nav,.lb.single .lb-count{display:none}
 .lb-count{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;background:rgba(0,0,0,.5);padding:3px 12px;border-radius:999px}
+
+/* Ilan detayi: guvenlik kutusu ve telefonda yapiskan eylem cubugu */
+.safebox{margin-top:12px;padding:12px 14px;border-radius:14px;background:#FFF8E7;border:1px solid #F2D9A0;color:#5C4310;font-size:13px}
+.safebox b{display:block;margin-bottom:3px}.safebox p{margin:0;line-height:1.5}
+.stickybar{display:none}
+@media (max-width:768px){
+  .stickybar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:55;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 12px}
+  .sb-price{font-weight:800;font-size:18px;color:var(--sea)}
+  .sb-actions{display:flex;gap:8px}
+  .sb1,.sb2{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;font-weight:700;font-size:14px;text-decoration:none}
+  .sb1{background:var(--sea-soft);color:var(--sea)}.sb1.wa{background:#E6F7EF;color:#128C7E}
+  .sb2{background:linear-gradient(135deg,var(--sea-2),var(--sea));color:#fff}
+  body{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+  .cookiebar{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+}
+/* Liste: telefonda filtre acma dugmesi */
+.filterbtn{display:none}
+@media (max-width:920px){
+  .filterbtn{display:inline-flex;align-items:center;gap:6px;order:-2;justify-self:start;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card,#fff);font-weight:700;color:var(--sea);cursor:pointer;box-shadow:var(--shadow)}
+  .main .side{display:none}.main .side.open{display:block}
+}
+/* Fotograf onizleme seridi */
+.photoprev{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.photoprev img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+/* Yukari cik dugmesi */
+.totop{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:56;width:42px;height:42px;border-radius:50%;border:0;background:var(--secondary,#0D2A3A);color:#fff;font-size:20px;box-shadow:0 6px 16px rgba(0,0,0,.3);cursor:pointer}
+.totop[hidden]{display:none}
+@media (min-width:769px){.totop{bottom:20px}}

@@ -24,6 +24,7 @@
         {% endfor %}
       </div>
       <div class="small" style="margin-top:8px">{{ t.photo_rule }} <b>{{ min_images }}–{{ max_images }}</b> <span id="photoCount"></span></div>
+      <div id="photoPrev" class="photoprev"></div>
       <input type="file" id="multiPhotos" accept="image/*" multiple hidden>
       <button class="btn-sea" type="button" id="pickPhotos" style="margin-top:6px">{{ t.pick_photos }}</button>
       <button class="btn-line" type="button" id="addPhoto" style="margin-top:6px">+ {{ t.add_photo }}</button>
@@ -57,7 +58,7 @@
             var free=cells.filter(function(c){var f=c.querySelector("input[type=file]");return f&&!f.files.length;}),n=0;
             for(;i<out.length&&n<free.length;i++,n++){put(free[n].querySelector("input[type=file]"),out[i]);}
             if(n){shown=Math.max(shown,cells.indexOf(free[n-1])+1);}
-            info.textContent=" ("+out.length+")";pick.disabled=false;render();
+            var pv=document.getElementById("photoPrev");pv.innerHTML="";out.forEach(function(f){var im=document.createElement("img");im.src=URL.createObjectURL(f);pv.appendChild(im);});info.textContent=" ("+out.length+")";pick.disabled=false;render();
           });
         });
         form.addEventListener("submit",function(e){

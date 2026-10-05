@@ -5,7 +5,8 @@
 
 {% block content %}
 <div class="wrap"><div class="main">
-  <aside class="side">
+  <button class="filterbtn" type="button" id="filterBtn">⚙ {{ t.filters }}</button>
+  <aside class="side" id="sideBox">
     <div class="panel">
       <h3>{% if root %}{{ t.subs }}{% else %}{{ t.cat }}{% endif %}</h3>
       <ul class="subl">
@@ -119,4 +120,5 @@
     {% endif %}
   </main>
 </div></div>
+<script>(function(){var b=document.getElementById("filterBtn"),x=document.getElementById("sideBox");if(b&&x){b.addEventListener("click",function(){x.classList.toggle("open");});}})();</script>
 {% endblock %}
