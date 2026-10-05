@@ -101,7 +101,18 @@ def trending(request):
 
 def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug, is_published=True)
-    return render(request, "market/page.html", {"page": page})
+    from .models import SiteSettings
+    ss = SiteSettings.objects.first()
+    values = {
+        "company": (ss.company_name if ss and ss.company_name else "Balkan Baazar"),
+        "address": (ss.address if ss and ss.address else "(adres)"),
+        "email": (ss.email if ss and ss.email else "(e-posta adresi)"),
+        "phone": (ss.phone if ss and ss.phone else ""),
+    }
+    body = page.body
+    for key, val in values.items():
+        body = body.replace("[[" + key + "]]", val)
+    return render(request, "market/page.html", {"page": page, "body": body})
 
 
 def banner_go(request, pk):
