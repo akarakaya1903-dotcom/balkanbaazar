@@ -17,7 +17,7 @@ read -rsp "Yonetici sifresi: " SU_PASS; echo
 echo ">> Programlar kuruluyor..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y python3-venv python3-pip nginx postgresql git certbot python3-certbot-nginx ufw openssl
+apt-get install -y python3-venv python3-pip nginx postgresql git certbot python3-certbot-nginx ufw openssl ffmpeg
 ufw allow OpenSSH >/dev/null
 ufw allow "Nginx Full" >/dev/null
 ufw --force enable >/dev/null

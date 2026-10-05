@@ -134,6 +134,8 @@ def panel_product_form(request, pk=None):
         for obj in variant_formset.deleted_objects:
             obj.delete()
         messages.success(request, "Urun kaydedildi.")
+        from .videos import start_video_job
+        start_video_job(saved_item)
         return redirect("market:panel_products")
     return render(request, "market/panel/product_form.html",
                   {"form": form, "shop": shop, "item": item, "formset": formset,

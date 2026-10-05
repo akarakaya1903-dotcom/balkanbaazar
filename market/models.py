@@ -211,6 +211,7 @@ class Listing(models.Model):
     )
     image = models.ImageField(upload_to="listings/", blank=True, null=True)
     video = models.FileField("Video (mp4/webm, en fazla 50 MB)", upload_to="listings/video/", blank=True, null=True)
+    video_processed = models.BooleanField(default=False, editable=False)  # sunucuda kucultuldu mu
     featured_until = models.DateTimeField(null=True, blank=True, db_index=True)
     track_stock = models.BooleanField(default=False, help_text="Acilirsa stok adedi tukeninceye kadar satisa acik kalir")
     stock = models.PositiveIntegerField(null=True, blank=True, help_text="track_stock acikken gecerli")
@@ -240,6 +241,8 @@ class Listing(models.Model):
             self.slug = slugify(self.title)[:220] or "ilan"
         if self.image and not getattr(self.image, "_committed", True):
             self.image = _shrink(self.image)
+        if self.video and not getattr(self.video, "_committed", True):
+            self.video_processed = False
         super().save(*args, **kwargs)
 
     @property

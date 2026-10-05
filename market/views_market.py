@@ -72,6 +72,7 @@ def my_listing_form(request, pk=None):
             messages.error(request, photo_err)
     if request.method == "POST" and photo_err is None and form.is_valid() and formset.is_valid():
         saved = form.save(owner=request.user)
+        from .videos import start_video_job
         for img in formset.save(commit=False):
             img.listing = saved
             img.save()
@@ -87,6 +88,7 @@ def my_listing_form(request, pk=None):
             messages.success(request, "İlanın incelemeye alındı, onaylanınca yayınlanacak.")
         else:
             messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
+        start_video_job(saved)
         return redirect("market:my_listings")
     return render(request, "market/mylistings/form.html",
                   {"form": form, "formset": formset, "item": item})
