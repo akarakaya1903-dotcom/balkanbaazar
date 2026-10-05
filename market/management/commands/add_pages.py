@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from market.models import Page
+from market.page_translations import TRANSLATIONS
 
 PAGES = [
  [
@@ -58,6 +59,10 @@ class Command(BaseCommand):
         for slug, title, group, order, body in PAGES:
             page, created = Page.objects.get_or_create(
                 slug=slug, defaults={"title": title, "body": body, "group": group, "order": order, "is_published": True})
+            if (created or options["force"] or not page.translations) and slug in TRANSLATIONS:
+                page.translations = TRANSLATIONS[slug]
+                page.save(update_fields=["translations"])
+                self.stdout.write(f"ceviriler yuklendi: {slug}")
             if created:
                 self.stdout.write(self.style.SUCCESS(f"eklendi: {slug}"))
             elif options["force"]:

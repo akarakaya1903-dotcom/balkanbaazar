@@ -121,8 +121,8 @@
         <h5>{{ t.brand }}</h5>
         <p style="font-size:13px;opacity:.78;max-width:34ch">{% if site_settings %}{{ site_settings.address|linebreaksbr }}{% if site_settings.email %}<br><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>{% endif %}{% if site_settings.phone %}<br>{{ site_settings.phone }}{% endif %}{% endif %}</p>
       </div>
-      {% footer_pages "f1" as p1 %}{% if p1 %}<div><h5>{{ t.f1 }}</h5><ul>{% for p in p1 %}<li><a href="{% url 'market:page' p.slug %}">{{ p.title }}</a></li>{% endfor %}</ul></div>{% endif %}
-      {% footer_pages "f2" as p2 %}{% if p2 %}<div><h5>{{ t.f2 }}</h5><ul>{% for p in p2 %}<li><a href="{% url 'market:page' p.slug %}">{{ p.title }}</a></li>{% endfor %}</ul></div>{% endif %}
+      {% footer_pages "f1" as p1 %}{% if p1 %}<div><h5>{{ t.f1 }}</h5><ul>{% for p in p1 %}<li><a href="{% url 'market:page' p.slug %}">{{ p|ptitle:lang }}</a></li>{% endfor %}</ul></div>{% endif %}
+      {% footer_pages "f2" as p2 %}{% if p2 %}<div><h5>{{ t.f2 }}</h5><ul>{% for p in p2 %}<li><a href="{% url 'market:page' p.slug %}">{{ p|ptitle:lang }}</a></li>{% endfor %}</ul></div>{% endif %}
       <div><h5>{{ t.f3 }}</h5><ul>{% for c in countries %}<li><a href="{% url 'market:set_country' c.code %}">{% countryname c lang %}</a></li>{% endfor %}</ul></div>
     </div>
     <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span>{% if visit_stats %}<span>{{ t.visits_today }}: <b>{{ visit_stats.today }}</b> · {{ t.visits_total }}: <b>{{ visit_stats.total }}</b></span>{% endif %}</div>

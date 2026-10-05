@@ -640,6 +640,22 @@ class Page(models.Model):
     group = models.CharField("Alt bilgide yeri", max_length=2, choices=GROUPS, default="f1")
     order = models.PositiveSmallIntegerField("Sira", default=0)
     is_published = models.BooleanField("Yayinda", default=True)
+    translations = models.JSONField("Ceviriler", default=dict, blank=True,
+                                    help_text='Ornek: {"mk": {"title": "...", "body": "..."}}. Dil kodlari: en, mk, sq, sr, bg, el, bs.')
+
+    def localized(self, lang):
+        """(baslik, icerik): once secili dil, sonra Ingilizce, sonra Turkce (ana alan)."""
+        if lang == "tr":
+            return self.title, self.body
+        tr = self.translations or {}
+
+        def pick(field):
+            for code in (lang, "en"):
+                value = (tr.get(code) or {}).get(field)
+                if value:
+                    return value
+            return getattr(self, field)
+        return pick("title"), pick("body")
 
     class Meta:
         ordering = ["group", "order", "title"]

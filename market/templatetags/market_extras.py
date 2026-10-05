@@ -107,3 +107,8 @@ def listing_jsonld(context, item):
     if item.image:
         data["image"] = [request.build_absolute_uri(item.image.url)]
     return mark_safe('<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + "</script>")
+
+
+@register.filter
+def ptitle(page, lang):
+    return page.localized(lang)[0]

@@ -102,17 +102,27 @@ def trending(request):
 def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug, is_published=True)
     from .models import SiteSettings
+    lang, _country = _current(request)
+    title, body = page.localized(lang)
     ss = SiteSettings.objects.first()
     values = {
         "company": (ss.company_name if ss and ss.company_name else "Balkan Baazar"),
-        "address": (ss.address if ss and ss.address else "(adres)"),
-        "email": (ss.email if ss and ss.email else "(e-posta adresi)"),
+        "address": (ss.address if ss and ss.address else ""),
+        "email": (ss.email if ss and ss.email else ""),
         "phone": (ss.phone if ss and ss.phone else ""),
     }
-    body = page.body
-    for key, val in values.items():
-        body = body.replace("[[" + key + "]]", val)
-    return render(request, "market/page.html", {"page": page, "body": body})
+    lines = []
+    for line in body.split("\n"):
+        skip = False
+        for key, val in values.items():
+            token = "[[" + key + "]]"
+            if token in line:
+                if not val:
+                    skip = True  # bos bilgiyi iceren satiri gosterme (orn. adres girilmemisse)
+                line = line.replace(token, val)
+        if not skip:
+            lines.append(line)
+    return render(request, "market/page.html", {"page": page, "title": title, "body": "\n".join(lines)})
 
 
 def banner_go(request, pk):
