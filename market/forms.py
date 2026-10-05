@@ -81,6 +81,12 @@ class ProductForm(VideoCleanMixin, forms.ModelForm):
         fields = ("title", "category", "price_eur", "city", "description", "image", "video",
                   "delivery", "free_shipping", "is_active", "track_stock", "stock")
         widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        labels = {
+            "title": "Urun adi", "category": "Kategori", "price_eur": "Fiyat (EUR)", "city": "Sehir",
+            "description": "Aciklama", "image": "Kapak gorseli", "delivery": "Teslimat",
+            "free_shipping": "Ucretsiz kargo", "is_active": "Yayinda", "track_stock": "Stok takibi",
+            "stock": "Stok adedi",
+        }
 
     def __init__(self, *args, shop=None, **kwargs):
         super().__init__(*args, **kwargs)

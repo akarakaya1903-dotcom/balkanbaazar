@@ -69,7 +69,7 @@
           if(hasOld||coverOld){return;}
           var total=(cover&&cover.files.length?1:0);
           cells.forEach(function(c){var f=c.querySelector("input[type=file]");if(f&&f.files.length){total++;}});
-          if(total<MIN||total>MAX){e.preventDefault();alert(total+" / "+MIN+"–"+MAX);}
+          if(total<MIN||total>MAX){e.preventDefault();alert(total+" fotoğraf seçtin. Kapak dahil en az "+MIN+", en fazla "+MAX+" fotoğraf gerekli. / "+total+" photos selected, "+MIN+"–"+MAX+" required (cover included).");}
         });
         render();
       })();
