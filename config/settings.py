@@ -164,7 +164,8 @@ MAX_LISTING_IMAGES = int(os.environ.get("MAX_LISTING_IMAGES", "50"))
 # Cok fotografli / videolu yuklemeler
 DATA_UPLOAD_MAX_NUMBER_FILES = 300
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
-MAX_VIDEO_MB = int(os.environ.get("MAX_VIDEO_MB", "50"))
+MAX_VIDEO_MB = int(os.environ.get("MAX_VIDEO_MB", "300"))
+MAX_VIDEO_SECONDS = int(os.environ.get("MAX_VIDEO_SECONDS", "240"))
 
 # Google ile giris (Google Cloud Console > OAuth istemcisi)
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")

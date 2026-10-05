@@ -9,6 +9,14 @@ from .models import (Category, City, Listing, ListingImage, ListingVariant, Mode
 
 
 class VideoCleanMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "video" in self.fields:
+            self.fields["video"].label = "Video (mp4, mov, webm)"
+            self.fields["video"].help_text = (
+                f"En fazla {settings.MAX_VIDEO_SECONDS // 60} dakika / {settings.MAX_VIDEO_MB} MB. "
+                "Yukleme internet hizina gore birkac dakika surebilir, sayfayi kapatma.")
+
     def clean_video(self):
         v = self.cleaned_data.get("video")
         if v and hasattr(v, "size"):

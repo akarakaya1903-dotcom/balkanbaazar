@@ -100,8 +100,28 @@
     </div>
   </main>
 </div></div>
-<script>(function(){var v=document.querySelector('input[type=file][name="video"]');if(!v){return;}var MAX={{ max_video_mb }}*1024*1024;
+<script>(function(){var v=document.querySelector('input[type=file][name="video"]');if(!v){return;}
+var MAXB={{ max_video_mb }}*1048576,MAXS={{ max_video_sec }};
 v.addEventListener("change",function(){var f=v.files[0];if(!f){return;}
-if(f.size>MAX){alert("Video "+Math.round(f.size/1048576)+" MB. En fazla {{ max_video_mb }} MB / Max {{ max_video_mb }} MB");v.value="";return;}
-if(!/\.(mp4|webm|mov)$/i.test(f.name)){alert("mp4, webm, mov");v.value="";}});})();</script>
+  if(f.size>MAXB){alert("Video "+Math.round(f.size/1048576)+" MB. En fazla {{ max_video_mb }} MB / Max {{ max_video_mb }} MB");v.value="";return;}
+  if(!/\.(mp4|webm|mov)$/i.test(f.name)){alert("mp4, webm, mov");v.value="";return;}
+  var el=document.createElement("video");el.preload="metadata";
+  el.onloadedmetadata=function(){URL.revokeObjectURL(el.src);if(el.duration&&el.duration>MAXS+5){alert("Video "+(Math.round(el.duration/6)/10)+" dk. En fazla {{ max_video_min }} dakika / Max {{ max_video_min }} min");v.value="";}};
+  el.src=URL.createObjectURL(f);});
+var form=v.closest("form");
+form.addEventListener("submit",function(e){
+  if(!v.files.length||e.defaultPrevented){return;}
+  e.preventDefault();
+  var bar=document.createElement("div");bar.className="upbar";
+  bar.innerHTML='<div class="upbox"><b>0%</b><div class="uptrack"><i></i></div><small>Yükleniyor, sayfayı kapatma / Uploading, do not close</small></div>';
+  document.body.appendChild(bar);
+  var txt=bar.querySelector("b"),fill=bar.querySelector("i"),xhr=new XMLHttpRequest();
+  xhr.open("POST",form.action||location.href);
+  xhr.upload.onprogress=function(ev){if(ev.lengthComputable){var p=Math.round(ev.loaded/ev.total*100);txt.textContent=p+"%";fill.style.width=p+"%";}};
+  xhr.onload=function(){bar.remove();
+    if(xhr.status>=400){alert("Hata "+xhr.status);return;}
+    var u=xhr.responseURL||location.href;document.open();document.write(xhr.responseText);document.close();try{history.replaceState(null,"",u);}catch(x){}};
+  xhr.onerror=function(){bar.remove();alert("Yükleme başarısız / Upload failed");};
+  xhr.send(new FormData(form));});
+})();</script>
 {% endblock %}

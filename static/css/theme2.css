@@ -73,3 +73,11 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .favform{position:absolute;top:10px;right:10px;z-index:4;margin:0}
 .favbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.94);color:#667085;font-size:19px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(16,24,40,.18);text-decoration:none}
 .favbtn.on{color:#E11D48}
+
+/* Video yukleme ilerleme cubugu */
+.upbar{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);display:grid;place-items:center}
+.upbox{background:#fff;color:#101828;border-radius:18px;padding:22px 26px;width:min(86vw,360px);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.upbox b{font-size:30px;display:block;margin-bottom:10px;color:#0E7C86}
+.uptrack{height:10px;border-radius:6px;background:#E4E7EC;overflow:hidden}
+.uptrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,#14A3AE,#0E7C86);transition:width .2s}
+.upbox small{display:block;margin-top:12px;color:#667085}
