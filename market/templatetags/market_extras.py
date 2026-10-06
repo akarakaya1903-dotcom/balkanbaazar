@@ -141,3 +141,17 @@ def user_verified(user):
 def seller_rating_of(user):
     from market.models import seller_rating
     return seller_rating(user) if user else (None, 0)
+
+
+@register.simple_tag
+def cat_icon(c, size=""):
+    """Kategori icin pastel zeminli cizgi simge (ya da yuklenmis fotograf)."""
+    from market import icons
+    if getattr(c, "image", None):
+        return mark_safe(f'<span class="ic cat-ic photo {size}" style="background-image:url({c.image.url})"></span>')
+    key = icons.SLUG_ICON.get(c.slug, "tag")
+    bg, fg = icons.TONES[key]
+    return mark_safe(
+        f'<span class="ic cat-ic {size}" style="background:{bg};color:{fg}">'
+        f'<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+        f'stroke-linejoin="round" aria-hidden="true">{icons.ICONS[key]}</svg></span>')

@@ -13,7 +13,7 @@
     <div class="cattiles">
       {% for c in used_cats %}
       <a class="cattile" href="{% seo_url 'used' c.slug %}">
-        <span class="ic">{{ c.icon }}</span>
+        {% cat_icon c %}
         <span>{% catname c lang %}{% if c.n %}<br><small style="color:var(--ink-3);font-weight:500">{{ c.n }} {{ t.listings_in }}</small>{% endif %}</span></a>
       {% endfor %}
     </div>
@@ -54,7 +54,7 @@
     <div class="cattiles">
       {% for c in shop_cats %}
       <a class="cattile" href="{% url 'market:shops' %}?cat={{ c.slug }}">
-        <span class="ic">{{ c.icon }}</span>
+        {% cat_icon c %}
         <span>{% catname c lang %}{% if c.n %}<br><small style="color:var(--ink-3);font-weight:500">{{ c.n }} {{ t.shop_count }}</small>{% endif %}</span></a>
       {% endfor %}
     </div>

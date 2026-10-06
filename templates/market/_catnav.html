@@ -8,7 +8,7 @@
       <div class="catitem">
         <a href="{{ nav_base }}{% if nav_sep %}{{ nav_sep }}{% endif %}cat={{ c.slug }}"
            class="{% if root and root.pk == c.pk %}on{% endif %}">
-          <span class="ci">{{ c.icon }}</span>{% catname c lang %}
+          {% cat_icon c "sm" %}{% catname c lang %}
           {% if c.n %}<span class="cn">{{ c.n }}</span>{% endif %}
         </a>
         {% if c.children.all %}

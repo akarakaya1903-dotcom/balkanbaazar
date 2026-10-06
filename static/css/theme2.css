@@ -100,3 +100,14 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .attrtbl tr:last-child th,.attrtbl tr:last-child td{border-bottom:0}
 .vok{background:#E3F4F5;color:#0E7C86;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
 .af{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+
+/* Kategori kutulari: pastel simge karolari */
+.cattiles{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.cattile{padding:14px 16px;border-radius:16px;gap:14px;font-size:15px;transition:transform .18s,box-shadow .18s,border-color .18s}
+.cattile:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(16,24,40,.08)!important;border-color:var(--sea)}
+.cat-ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;flex:0 0 auto;background-size:cover;background-position:center;font-size:0}
+.cat-ic svg{width:28px;height:28px}
+.cat-ic.sm{width:26px;height:26px;border-radius:8px;vertical-align:middle;margin-right:6px;display:inline-grid}
+.cat-ic.sm svg{width:16px;height:16px}
+.cattile:hover .cat-ic{transform:scale(1.06)}
+@media (max-width:640px){.cattiles{grid-template-columns:repeat(2,1fr)}.cattile{padding:12px;gap:10px;font-size:14px}.cat-ic{width:44px;height:44px}}

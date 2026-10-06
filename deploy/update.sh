@@ -10,6 +10,12 @@ echo ">> Paketler, veritabani, statik dosyalar..."
 ./venv/bin/pip install -q -r requirements.txt
 ./venv/bin/python manage.py migrate --no-input
 ./venv/bin/python manage.py collectstatic --no-input >/dev/null
+# Tekrar calistirilmasi guvenli yardimci komutlar (yeni sayfa/kategori/ceviri/puan duzeltmeleri)
+./venv/bin/python manage.py add_categories >/dev/null
+./venv/bin/python manage.py add_pages >/dev/null
+./venv/bin/python manage.py fix_ratings >/dev/null
 chown -R www-data:www-data /var/www/balkanbaazar
 systemctl restart balkanbaazar
+# nginx ayarlari, zamanli gorevler (yedek, kayitli arama, video) - tekrar calistirmak guvenli
+bash deploy/update-nginx.sh
 echo "Guncelleme tamam."

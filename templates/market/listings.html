@@ -22,7 +22,7 @@
           {% endfor %}
         {% else %}
           {% for c in roots %}
-          <li><a href="{% url 'market:listings' %}?mode={{ mode }}&amp;cat={{ c.slug }}">{{ c.icon }} {% catname c lang %}<span class="ct">›</span></a></li>
+          <li><a href="{% url 'market:listings' %}?mode={{ mode }}&amp;cat={{ c.slug }}">{% cat_icon c "sm" %} {% catname c lang %}<span class="ct">›</span></a></li>
           {% endfor %}
         {% endif %}
       </ul>

@@ -72,6 +72,8 @@ class Category(models.Model):
     )
     slug = models.SlugField(max_length=80)
     icon = models.CharField(max_length=8, blank=True)
+    image = models.ImageField("Gorsel (istege bagli)", upload_to="categories/", blank=True, null=True,
+                              help_text="Yuklenirse ana sayfa kutusunda simge yerine bu fotograf gorunur.")
     names = models.JSONField(default=dict, help_text='{"tr": "...", "en": "...", ...}')
     order = models.PositiveSmallIntegerField(default=0)
 
