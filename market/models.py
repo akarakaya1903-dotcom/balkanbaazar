@@ -593,6 +593,8 @@ class SiteSettings(models.Model):
                                                 help_text="Acikken yeni ilanlar yayina girmeden once Ilanlar listesinde 'Onay bekliyor' olarak gorunur.")
     meta_pixel_id = models.CharField("Meta (Facebook/Instagram) Piksel kimligi", max_length=20, blank=True,
                                      help_text="Sadece rakamlar (orn. 123456789012345). Bos birakirsan piksel yuklenmez. Yalnizca cerez onayi veren ziyaretcilerde calisir.")
+    meta_pixel_early = models.BooleanField("Meta onay modu: piksel kodunu hemen yukle, veri gonderimi onaya kadar dursun", default=False,
+                                           help_text="Meta'nin 'piksel saptanmadi' kontrolu icin. Acikken fbevents.js onaydan once yuklenir ama Meta onay ('consent revoke') moduyla veri gondermez.")
     meta_domain_verification = models.CharField("Meta alan adi dogrulama kodu", max_length=80, blank=True,
                                                 help_text="Meta Business > Marka guvenligi > Alan adlari ekraninda verilen meta etiketi kodu.")
     analytics_id = models.CharField("Google Analytics olcum kimligi", max_length=30, blank=True,
