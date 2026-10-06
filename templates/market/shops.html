@@ -11,7 +11,7 @@
       <a class="shop" href="{% url 'market:shop_detail' s.slug %}">
         {% if s.logo %}<img class="avimg" src="{{ s.logo.url }}" alt="{{ s.name }}">{% else %}<div class="av" style="background:hsl({{ s.hue }} 42% 34%)">{{ s.name|slice:":1" }}</div>{% endif %}
         <div class="nm">{{ s.name }} {% if s.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %}</div>
-        <div class="ms"><span class="star">★</span> {{ s.rating }} · {{ s.product_count }} {{ t.products }}</div>
+        <div class="ms">{% if s.rating %}<span class="star">★</span> {{ s.rating }}{% else %}{{ t.new_label }}{% endif %} · {{ s.product_count }} {{ t.products }}</div>
         <div class="ms">{{ s.city.name }} · {{ s.get_plan_display }}</div>
       </a>
       {% empty %}

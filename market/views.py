@@ -65,6 +65,7 @@ def home(request):
             "listings": Listing.objects.filter(country=c, is_active=True).count(),
             "shops": Shop.objects.filter(country=c).count(),
         })
+    stats.sort(key=lambda x: -(x["listings"] + x["shops"]))
     ctx = {
         "used_cats": used_cats,
         "shop_cats": shop_cats,
@@ -79,7 +80,7 @@ def home(request):
                     .annotate(boosted=Case(When(featured_until__gte=timezone.now(), then=1),
                                            default=0, output_field=IntegerField()))
                     .order_by("-boosted", "-created_at")[:8],
-        "featured_shops": Shop.objects.filter(country=country)[:6],
+        "featured_shops": [sh for sh in Shop.objects.filter(country=country).select_related("city")[:24] if sh.product_count][:6],
         "total_listings": Listing.objects.filter(is_active=True).count(),
         "total_shops": Shop.objects.count(),
     }

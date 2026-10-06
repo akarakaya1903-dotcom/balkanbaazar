@@ -8,7 +8,7 @@
       <div>
         <h1 style="font-size:22px">{{ shop.name }} {% if shop.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %}</h1>
         <div style="color:var(--ink-3);font-size:13px">
-          <span class="star">★</span> {{ shop.rating }} · {{ shop.sales }} {{ t.s1 }} ·
+          {% if shop.rating %}<span class="star">★</span> {{ shop.rating }}{% else %}{{ t.new_label }}{% endif %} · {{ shop.sales }} {{ t.s1 }} ·
           {{ shop.country.flag }} {{ shop.city.name }}</div>
         <div style="color:var(--ink-3);font-size:12.5px">
           {{ shop.get_plan_display }} · {{ shop.months_open }} ay ·

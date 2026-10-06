@@ -111,7 +111,7 @@ class Shop(models.Model):
     logo = models.ImageField(upload_to="shops/", blank=True, null=True)
     about = models.TextField(blank=True)
     hue = models.PositiveSmallIntegerField(default=190)
-    rating = models.DecimalField(max_digits=3, decimal_places=1, default=5)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     sales = models.PositiveIntegerField(default=0)
     verified = models.BooleanField(default=False)
     plan = models.CharField(max_length=8, choices=ShopPlan.choices, default=ShopPlan.TRIAL)
@@ -223,7 +223,7 @@ class Listing(models.Model):
     free_shipping = models.BooleanField(default=False)
     icon = models.CharField(max_length=8, blank=True)
     hue = models.PositiveSmallIntegerField(default=190)
-    rating = models.DecimalField(max_digits=3, decimal_places=1, default=5)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     favorites = models.PositiveIntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -325,7 +325,7 @@ class ShopApplication(models.Model):
         shop = Shop.objects.create(
             owner=self.applicant, name=self.shop_name, country=self.country,
             city=self.city, category=self.category, about=self.about,
-            plan=ShopPlan.TRIAL, opened_at=timezone.now(), rating=5, hue=190,
+            plan=ShopPlan.TRIAL, opened_at=timezone.now(), rating=0, hue=190,
         )
         self.shop = shop
         self.status = ApplicationStatus.APPROVED
@@ -835,14 +835,15 @@ from django.dispatch import receiver  # noqa: E402
 
 
 @receiver([post_save, post_delete], sender=Review)
-def _update_shop_rating(sender, instance, **kwargs):
-    """Yorum eklenince/silinince magaza puanini gercek yorum ortalamasina gunceller."""
+def _update_ratings(sender, instance, **kwargs):
+    """Yorum eklenince/silinince ilanin ve magazanin puanini gercek yorum ortalamasina gunceller (yorum yoksa 0)."""
     try:
         from decimal import Decimal
-        shop = instance.listing.shop
-        if shop:
-            avg = Review.objects.filter(listing__shop=shop).aggregate(a=models.Avg("rating"))["a"]
-            if avg is not None:
-                Shop.objects.filter(pk=shop.pk).update(rating=Decimal(str(round(avg, 1))))
+        listing = instance.listing
+        avg = Review.objects.filter(listing=listing).aggregate(a=models.Avg("rating"))["a"]
+        Listing.objects.filter(pk=listing.pk).update(rating=Decimal(str(round(avg, 1))) if avg else 0)
+        if listing.shop_id:
+            avg = Review.objects.filter(listing__shop_id=listing.shop_id).aggregate(a=models.Avg("rating"))["a"]
+            Shop.objects.filter(pk=listing.shop_id).update(rating=Decimal(str(round(avg, 1))) if avg else 0)
     except Exception:
         pass
