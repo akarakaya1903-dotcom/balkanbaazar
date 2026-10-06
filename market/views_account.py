@@ -103,11 +103,6 @@ def panel_product_form(request, pk=None):
     form = ProductForm(
         request.POST or None, request.FILES or None, instance=item, shop=shop
     )
-    if request.method == "POST":
-        import sys
-        print("UPLOAD-DEBUG files=%s form_errors=%s" % (
-            {k: (f.name, f.size) for k, f in request.FILES.items()},
-            {k: [str(e) for e in v] for k, v in form.errors.items()}), file=sys.stderr, flush=True)
     gallery_qs = ListingImage.objects.filter(listing=item) if item else ListingImage.objects.none()
     formset = ListingImageFormSet(
         request.POST or None, request.FILES or None, queryset=gallery_qs, prefix="gallery"
