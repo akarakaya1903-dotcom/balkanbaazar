@@ -122,3 +122,5 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .combo-list li.on{font-weight:700;color:var(--sea)}
 .combo-list li.add{color:var(--sea);font-weight:700;border-top:1px dashed var(--line);margin-top:4px}
 .combo-list li.none{color:var(--ink-3);cursor:default}
+
+.cookiebar .cbtns{display:flex;gap:8px;flex:0 0 auto}.cookiebar .cno{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}

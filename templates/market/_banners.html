@@ -2,7 +2,7 @@
 {% banners "home_hero" as slides %}
 {% if slides %}
 <div class="wrap"><div class="slider" id="slider">
-  {% for b in slides %}<a class="slide" href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><img src="{{ b.image.url }}" alt="{{ b.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"><span class="adtag">{{ t.ad_label }}</span></a>{% endfor %}
+  {% for b in slides %}<a class="slide" href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><picture>{% if b.image_mobile %}<source media="(max-width:640px)" srcset="{{ b.image_mobile.url }}">{% endif %}<img src="{{ b.image.url }}" alt="{{ b.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"></picture><span class="adtag">{{ t.ad_label }}</span></a>{% endfor %}
 </div></div>
 <script>(function(){var s=document.getElementById("slider");if(!s||s.children.length<2)return;setInterval(function(){var w=s.clientWidth;s.scrollLeft+w>=s.scrollWidth-4?s.scrollTo({left:0,behavior:"smooth"}):s.scrollBy({left:w,behavior:"smooth"});},4500);})();</script>
 {% endif %}

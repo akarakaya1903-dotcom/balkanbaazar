@@ -84,6 +84,9 @@ def my_listing_form(request, pk=None):
         else:
             messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
         start_video_job(saved)
+        if not item:
+            from .tracking import bb_event
+            bb_event(request, "PostListing", {"content_name": saved.title[:80]}, custom=True)
         return redirect("market:my_listings")
     return render(request, "market/mylistings/form.html",
                   {"form": form, "formset": formset, "item": item})
@@ -398,6 +401,10 @@ def order_cancel(request, pk):
 
 def order_success(request, pk):
     order = get_object_or_404(Order, pk=pk, buyer=request.user)
+    from .tracking import bb_event
+    if not request.session.get("bb_purchase_%d" % order.pk):
+        request.session["bb_purchase_%d" % order.pk] = True
+        bb_event(request, "Purchase", {"value": float(order.total_eur), "currency": "EUR"})
     return render(request, "market/cart/order_success.html", {"order": order})
 
 

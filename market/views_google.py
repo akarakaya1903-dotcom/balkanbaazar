@@ -86,5 +86,7 @@ def google_callback(request):
     if created:
         emails.notify_staff_new_user(user)
         emails.welcome_user(user)
+        from .tracking import bb_event
+        bb_event(request, "CompleteRegistration", {"status": True})
         messages.success(request, "Hesabin hazir.")
     return redirect("market:panel")

@@ -127,7 +127,7 @@
             {% else %}<span class="b1" style="opacity:.5;pointer-events:none">{{ t.call }}</span>{% endif %}
           {% endif %}
           {% if user.is_authenticated %}
-          <a class="b2" href="{% url 'market:start_conversation' item.pk %}">{{ t.msg }}</a>
+          <a class="b2" data-track="Contact" href="{% url 'market:start_conversation' item.pk %}">{{ t.msg }}</a>
           <form method="post" action="{% url 'market:favorite_toggle_listing' item.pk %}" style="flex:0 0 auto">
             {% csrf_token %}<button class="b2" type="submit" style="padding:12px 16px">
               {% if is_fav %}♥{% else %}♡{% endif %}</button></form>
@@ -136,9 +136,9 @@
           {% endif %}
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
-          {% if item.seller_phone %}<a class="btn-line" style="color:#128C7E;border-color:#128C7E" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">💬 {{ t.wa_btn }}</a>{% endif %}
+          {% if item.seller_phone %}<a class="btn-line" style="color:#128C7E;border-color:#128C7E" data-track="Contact" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">💬 {{ t.wa_btn }}</a>{% endif %}
           <button class="btn-line" type="button" id="shareBtn">↗ {{ t.share_btn }}</button>
-          <a class="btn-line" target="_blank" rel="noopener" href="https://wa.me/?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">WhatsApp</a>
+          <a class="btn-line" data-track="Contact" target="_blank" rel="noopener" href="https://wa.me/?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">WhatsApp</a>
         </div>
         <script>document.getElementById("shareBtn").addEventListener("click",function(){var d={title:document.title,url:location.href};if(navigator.share){navigator.share(d).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(location.href);this.textContent="✓";}});</script>
         {% if user.is_authenticated %}
@@ -167,8 +167,9 @@
     <div class="sb-price">{% price item country %}</div>
     <div class="sb-actions">
       {% if item.seller_phone and not item.shop %}<a class="sb1" href="tel:{{ item.seller_phone }}" aria-label="{{ t.call }}">📞</a>{% endif %}
-      {% if item.seller_phone %}<a class="sb1 wa" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}">WhatsApp</a>{% endif %}
-      <a class="sb2" href="{% if user.is_authenticated %}{% url 'market:start_conversation' item.pk %}{% else %}{% url 'market:login' %}{% endif %}">{{ t.msg }}</a>
+      {% if item.seller_phone %}<a class="sb1 wa" data-track="Contact" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}">WhatsApp</a>{% endif %}
+      <a class="sb2" data-track="Contact" href="{% if user.is_authenticated %}{% url 'market:start_conversation' item.pk %}{% else %}{% url 'market:login' %}{% endif %}">{{ t.msg }}</a>
     </div>
   </div>
+<script>bbTrack("ViewContent",{content_name:"{{ item.title|escapejs }}",content_ids:["{{ item.pk }}"],content_type:"product",value:{{ item.price_eur|stringformat:"s" }},currency:"EUR"});</script>
 {% endblock %}

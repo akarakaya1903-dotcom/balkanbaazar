@@ -19,8 +19,7 @@
 {% block head_extra %}{% endblock %}
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Balkan Baazar","url":"https://balkanbaazar.com","logo":"https://balkanbaazar.com{% static 'img/logo-512.png' %}"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Balkan Baazar","alternateName":["BalkanBaazar","balkanbaazar.com"],"url":"https://balkanbaazar.com/"}</script>
-{% if site_settings and site_settings.analytics_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.analytics_id }}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","{{ site_settings.analytics_id }}");</script>{% endif %}
+{% if site_settings and site_settings.meta_domain_verification %}<meta name="facebook-domain-verification" content="{{ site_settings.meta_domain_verification }}">{% endif %}
 {% block robots_meta %}{% endblock %}
 <link rel="canonical" href="https://balkanbaazar.com/{{ lang }}{{ request.path_info }}">
 {% for code, name in languages %}{% if code != "cnr" %}<link rel="alternate" hreflang="{{ code }}" href="https://balkanbaazar.com/{{ code }}{{ request.path_info }}">{% endif %}{% endfor %}
@@ -133,8 +132,32 @@
   </div>
 </footer>
 <script src="{% static 'js/app.js' %}"></script>
-<div id="cookieBar" class="cookiebar" hidden><span>{{ t.cookie_text }}</span><button type="button" id="cookieOk">{{ t.cookie_ok }}</button></div>
-<script>(function(){var b=document.getElementById("cookieBar");try{if(!localStorage.getItem("bb_cookie")){b.hidden=false;}}catch(e){}document.getElementById("cookieOk").addEventListener("click",function(){try{localStorage.setItem("bb_cookie","1");}catch(e){}b.hidden=true;});})();</script>
+<script>
+window.bbQueue=[];
+window.bbTrack=function(n,p,c){if(window.fbq){c?fbq("trackCustom",n,p||{}):fbq("track",n,p||{});}else{bbQueue.push([n,p,c]);}};
+document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-track]");if(t){bbTrack(t.getAttribute("data-track"),{});}});
+</script>
+{% if site_settings and site_settings.meta_pixel_id or site_settings.analytics_id %}
+<script>
+(function(){var PIX="{{ site_settings.meta_pixel_id|default:''|escapejs }}",GA="{{ site_settings.analytics_id|default:''|escapejs }}";
+function load(){if(window.__bbLoaded){return;}window.__bbLoaded=true;
+  if(PIX){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
+    fbq("init",PIX);fbq("track","PageView");bbQueue.splice(0).forEach(function(q){bbTrack(q[0],q[1],q[2]);});}
+  if(GA){var g=document.createElement("script");g.async=true;g.src="https://www.googletagmanager.com/gtag/js?id="+GA;document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag("js",new Date());gtag("config",GA);}
+}
+window.bbConsentLoad=load;
+var c=null;try{c=localStorage.getItem("bb_cookie");}catch(e){}
+if(c==="1"){load();}
+})();
+</script>
+{% endif %}
+{% if bb_events %}{{ bb_events|json_script:"bb-events" }}<script>(JSON.parse(document.getElementById("bb-events").textContent)||[]).forEach(function(q){bbTrack(q[0],q[1],q[2]);});</script>{% endif %}
+<div id="cookieBar" class="cookiebar" hidden><span>{{ t.cookie_text }}</span><span class="cbtns"><button type="button" id="cookieNo" class="cno">{{ t.cookie_no }}</button><button type="button" id="cookieOk">{{ t.cookie_ok }}</button></span></div>
+<script>(function(){var b=document.getElementById("cookieBar");try{if(!localStorage.getItem("bb_cookie")){b.hidden=false;}}catch(e){}
+function set(v){try{localStorage.setItem("bb_cookie",v);}catch(e){}b.hidden=true;}
+document.getElementById("cookieOk").addEventListener("click",function(){set("1");if(window.bbConsentLoad){bbConsentLoad();}});
+document.getElementById("cookieNo").addEventListener("click",function(){set("0");});})();</script>
 <script>document.addEventListener("submit",function(e){var f=e.target;if(!f.classList||!f.classList.contains("favform")){return;}e.preventDefault();var b=f.querySelector(".favbtn");
 fetch(f.action,{method:"POST",body:new FormData(f),credentials:"same-origin",headers:{"X-Requested-With":"fetch"}}).then(function(r){return r.json();}).then(function(d){b.classList.toggle("on",!!d.on);b.textContent=d.on?"\u2665":"\u2661";}).catch(function(){f.submit();});});</script>
 {% if user.is_authenticated %}

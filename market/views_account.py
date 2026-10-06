@@ -29,6 +29,8 @@ def signup(request):
         login(request, user)
         emails.notify_staff_new_user(user)
         emails.welcome_user(user)
+        from .tracking import bb_event
+        bb_event(request, "CompleteRegistration", {"status": True})
         emails.send_verification(user)
         messages.success(request, "Hesabin hazir. E-postani dogrulamak icin gelen kutuna bak.")
         return redirect("market:panel")
@@ -56,6 +58,8 @@ def shop_apply(request):
         application.save()
         # Magaza aninda acilir; firma hemen urun ekleyebilir.
         shop = application.approve()
+        from .tracking import bb_event
+        bb_event(request, "SubmitApplication")
         emails.notify_application_approved(application, shop)
         emails.notify_staff_new_application(application)
         messages.success(request, "Magazan acildi. Ilk urununu ekleyebilirsin.")

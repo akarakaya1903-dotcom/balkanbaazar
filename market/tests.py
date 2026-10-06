@@ -136,3 +136,18 @@ class SearchableFieldTests(TestCase):
         form = ShopApplicationForm({"shop_name": "T", "country": country.pk, "category": cat.pk, "contact_name": "A",
                                     "email": "a@example.com", "phone": "1", "city_new": "<script>"})
         self.assertFalse(form.is_valid())
+
+
+class PixelTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_pixel_only_when_configured(self):
+        from .models import SiteSettings
+        self.assertNotContains(self.client.get("/"), "fbevents.js")
+        SiteSettings.objects.create(meta_pixel_id="123456789012345")
+        resp = self.client.get("/")
+        self.assertContains(resp, "fbevents.js")
+        self.assertContains(resp, "123456789012345")
+        self.assertContains(resp, "bbConsentLoad")  # onay verilmeden yuklenmez: yukleme bbConsentLoad ile tetiklenir

@@ -591,6 +591,10 @@ class SiteSettings(models.Model):
                                        help_text="Basligin altindaki tanitim yazisi, 150-160 karakter ideal.")
     moderate_new_listings = models.BooleanField("Yeni bireysel ilanlar yonetici onayindan gecsin", default=False,
                                                 help_text="Acikken yeni ilanlar yayina girmeden once Ilanlar listesinde 'Onay bekliyor' olarak gorunur.")
+    meta_pixel_id = models.CharField("Meta (Facebook/Instagram) Piksel kimligi", max_length=20, blank=True,
+                                     help_text="Sadece rakamlar (orn. 123456789012345). Bos birakirsan piksel yuklenmez. Yalnizca cerez onayi veren ziyaretcilerde calisir.")
+    meta_domain_verification = models.CharField("Meta alan adi dogrulama kodu", max_length=80, blank=True,
+                                                help_text="Meta Business > Marka guvenligi > Alan adlari ekraninda verilen meta etiketi kodu.")
     analytics_id = models.CharField("Google Analytics olcum kimligi", max_length=30, blank=True,
                                     help_text="Ornek: G-XXXXXXXXXX. Bos birakirsan analiz kodu eklenmez.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
@@ -617,7 +621,9 @@ class Banner(models.Model):
               ("home_mid", "Ana sayfa orta serit (600x300 onerilir, en fazla 3)")]
     title = models.CharField("Baslik", max_length=120)
     advertiser = models.CharField("Reklamveren", max_length=120, blank=True)
-    image = models.ImageField("Gorsel", upload_to="banners/")
+    image = models.ImageField("Gorsel (web / bilgisayar)", upload_to="banners/")
+    image_mobile = models.ImageField("Gorsel (telefon / Android, istege bagli)", upload_to="banners/", blank=True, null=True,
+                                     help_text="16:9 (orn. 1280x720). Bos birakirsan telefonda da web gorseli kullanilir.")
     link_url = models.CharField("Tiklayinca gidilecek adres", max_length=300, blank=True)
     place = models.CharField("Alan", max_length=12, choices=PLACES, default="home_hero")
     order = models.PositiveSmallIntegerField("Sira", default=0)

@@ -145,4 +145,5 @@
   </div>
 </section></div>
 {% endif %}
+{% if f.q %}<script>bbTrack("Search",{search_string:"{{ f.q|escapejs }}"});</script>{% endif %}
 {% endblock %}

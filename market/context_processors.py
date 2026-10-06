@@ -65,6 +65,7 @@ def site_context(request):
     from django.conf import settings as _s
     return {
         "unread_messages": unread,
+        "bb_events": request.session.pop("bb_events", []) if request.session.get("bb_events") else [],
         "vapid_public_key": _s.VAPID_PUBLIC_KEY if _s.VAPID_PRIVATE_KEY else "",
         "fav_ids": fav_ids,
         "google_enabled": bool(_s.GOOGLE_CLIENT_ID),
