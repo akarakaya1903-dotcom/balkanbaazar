@@ -294,3 +294,27 @@ def resend_verification(request):
         emails.send_verification(request.user)
         messages.success(request, "Dogrulama e-postasi gonderildi.")
     return redirect("market:profile")
+
+
+@login_required
+def panel_verification(request):
+    import os
+    from .models import VerificationRequest
+    shop = _owned_shop(request)
+    if not shop:
+        return redirect("market:shop_apply")
+    pending = shop.verification_requests.filter(status="pending").first()
+    if request.method == "POST" and not shop.verified and not pending:
+        doc = request.FILES.get("document")
+        ext = os.path.splitext(doc.name)[1].lower() if doc else ""
+        if not doc or ext not in (".pdf", ".jpg", ".jpeg", ".png"):
+            messages.error(request, "PDF, JPG veya PNG belge yükle / Upload a PDF, JPG or PNG document.")
+        elif doc.size > 8 * 1024 * 1024:
+            messages.error(request, "Belge en fazla 8 MB olabilir / Max 8 MB.")
+        else:
+            vr = VerificationRequest.objects.create(shop=shop, document=doc, note=request.POST.get("note", "")[:500])
+            emails.notify_staff_verification(vr)
+            messages.success(request, "Başvurun alındı, inceleyip dönüş yapacağız / Request received.")
+            return redirect("market:panel_verification")
+    return render(request, "market/panel/verification.html", {
+        "shop": shop, "pending": pending, "last": shop.verification_requests.first()})

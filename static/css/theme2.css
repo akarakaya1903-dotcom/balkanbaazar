@@ -81,3 +81,22 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .uptrack{height:10px;border-radius:6px;background:#E4E7EC;overflow:hidden}
 .uptrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,#14A3AE,#0E7C86);transition:width .2s}
 .upbox small{display:block;margin-top:12px;color:#667085}
+
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.seocities .pill{font-size:13px}
+
+/* Mesaj kutusu: okunmamis konusmalar belirgin */
+.stf-row.unread{background:var(--sea-soft);border-left:4px solid var(--sea)}
+.stf-row.unread b{color:var(--sea)}
+.stf-row.unread span{color:var(--ink);font-weight:600}
+
+.ubadge[hidden]{display:none!important}
+
+/* Kategoriye ozel ozellik tablosu */
+.attrtbl{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.attrtbl caption{caption-side:top;text-align:left;font-weight:700;padding:8px 2px;color:var(--ink)}
+.attrtbl th{width:42%;text-align:left;font-weight:500;color:var(--ink-3);padding:8px 12px;border-bottom:1px solid var(--line)}
+.attrtbl td{padding:8px 12px;border-bottom:1px solid var(--line);font-weight:600}
+.attrtbl tr:last-child th,.attrtbl tr:last-child td{border-bottom:0}
+.vok{background:#E3F4F5;color:#0E7C86;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+.af{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}

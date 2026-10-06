@@ -21,7 +21,10 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Balkan Baazar","alternateName":["BalkanBaazar","balkanbaazar.com"],"url":"https://balkanbaazar.com/"}</script>
 {% if site_settings and site_settings.analytics_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.analytics_id }}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","{{ site_settings.analytics_id }}");</script>{% endif %}
-<link rel="canonical" href="https://balkanbaazar.com{{ request.path }}">
+{% block robots_meta %}{% endblock %}
+<link rel="canonical" href="https://balkanbaazar.com/{{ lang }}{{ request.path_info }}">
+{% for code, name in languages %}{% if code != "cnr" %}<link rel="alternate" hreflang="{{ code }}" href="https://balkanbaazar.com/{{ code }}{{ request.path_info }}">{% endif %}{% endfor %}
+<link rel="alternate" hreflang="x-default" href="https://balkanbaazar.com/en{{ request.path_info }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
@@ -56,7 +59,7 @@
         <summary class="pill" style="list-style:none">{{ lang|upper }} ▾</summary>
         <div class="dropdown">
           {% for code, name in languages %}
-          <a href="{% url 'market:set_lang' code %}"><span>{{ name }}</span>
+          <a href="/{{ code }}{{ request.path_info }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"><span>{{ name }}</span>
             <span class="aux">{{ code|upper }}</span></a>
           {% endfor %}
         </div>
@@ -76,7 +79,8 @@
         <summary class="ghost" style="list-style:none">{{ user.first_name|default:user.username }} ▾</summary>
         <div class="dropdown">
           <a href="{% url 'market:panel' %}">{{ t.panel }}</a>
-          <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }}{% if unread_messages %} <span class="ubadge">{{ unread_messages }}</span>{% endif %}</a>
+          <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }} <span class="ubadge" data-ub{% if not unread_messages %} hidden{% endif %}>{{ unread_messages }}</span></a>
+          <a href="{% url 'market:saved_searches' %}">{{ t.saved_t }}</a>
           <a href="{% url 'market:profile' %}">{{ t.profile }}</a>
           <a href="{% url 'market:panel_products' %}">{{ t.my_products }}</a>
           {% if user.is_staff %}<a href="{% url 'market:staff_dashboard' %}">{{ t.manage }}
@@ -133,13 +137,30 @@
 <script>(function(){var b=document.getElementById("cookieBar");try{if(!localStorage.getItem("bb_cookie")){b.hidden=false;}}catch(e){}document.getElementById("cookieOk").addEventListener("click",function(){try{localStorage.setItem("bb_cookie","1");}catch(e){}b.hidden=true;});})();</script>
 <script>document.addEventListener("submit",function(e){var f=e.target;if(!f.classList||!f.classList.contains("favform")){return;}e.preventDefault();var b=f.querySelector(".favbtn");
 fetch(f.action,{method:"POST",body:new FormData(f),credentials:"same-origin",headers:{"X-Requested-With":"fetch"}}).then(function(r){return r.json();}).then(function(d){b.classList.toggle("on",!!d.on);b.textContent=d.on?"\u2665":"\u2661";}).catch(function(){f.submit();});});</script>
+{% if user.is_authenticated %}
+<script>(function(){var URL="{% url 'market:messages_status' %}",last={{ unread_messages|default:0 }},base=document.title,fails=0,timer=null;
+function badges(n){document.querySelectorAll("[data-ub]").forEach(function(b){b.textContent=n;b.hidden=!n;});document.title=(n?"("+n+") ":"")+base;}
+function swap(id){return fetch(location.href,{credentials:"same-origin"}).then(function(r){return r.text();}).then(function(h){
+  var d=new DOMParser().parseFromString(h,"text/html"),nw=d.getElementById(id),cur=document.getElementById(id);
+  if(nw&&cur){cur.innerHTML=nw.innerHTML;if(id==="msgBox"){cur.scrollTop=cur.scrollHeight;}}});}
+function poll(){if(document.hidden){return;}
+  fetch(URL,{credentials:"same-origin",cache:"no-store"}).then(function(r){if(!r.ok){throw 0;}return r.json();}).then(function(d){fails=0;var n=d.unread||0;badges(n);
+    if(n!==last){if(document.getElementById("convList")){swap("convList");}
+      if(n>0&&document.getElementById("msgBox")){swap("msgBox").then(function(){badges(0);last=0;});}
+      last=n;}
+  }).catch(function(){if(++fails>5){clearInterval(timer);}});}
+badges(last);timer=setInterval(poll,10000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden){poll();}});
+var box=document.getElementById("msgBox");if(box){box.scrollTop=box.scrollHeight;}
+})();</script>
+{% endif %}
 <button type="button" id="toTop" class="totop" aria-label="Top" hidden>↑</button>
 <script>(function(){var b=document.getElementById("toTop");window.addEventListener("scroll",function(){b.hidden=window.scrollY<600;},{passive:true});b.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});})();</script>
 <nav class="bnav" aria-label="Menu">
   <a href="{% url 'market:home' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>{{ t.nav_home }}</span></a>
   <a href="{% url 'market:listings' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>{{ t.nav_browse }}</span></a>
   <a class="sell" href="{% url 'market:my_listing_new' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>{{ t.nav_sell }}</span></a>
-  <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span>{% if unread_messages %}<i class="ubadge">{{ unread_messages }}</i>{% endif %}</a>
+  <a href="{% url 'market:inbox' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>{{ t.nav_msgs }}</span><i class="ubadge" data-ub{% if not unread_messages %} hidden{% endif %}>{{ unread_messages }}</i></a>
   <a href="{% if user.is_authenticated %}{% url 'market:profile' %}{% else %}{% url 'market:login' %}{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>{{ t.nav_me }}</span></a>
 </nav>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>

@@ -6,7 +6,7 @@ from .models import ApplicationStatus, Country, ShopApplication, SiteSettings, D
 
 def site_context(request):
     """Her sablonda ulke, dil ve metin sozlugu hazir olsun."""
-    lang = request.session.get("lang", settings.DEFAULT_LANG)
+    lang = getattr(request, "lang_override", None) or request.session.get("lang", settings.DEFAULT_LANG)
     if lang not in T:
         lang = settings.DEFAULT_LANG
     countries = list(Country.objects.filter(is_active=True))
@@ -65,6 +65,7 @@ def site_context(request):
     from django.conf import settings as _s
     return {
         "unread_messages": unread,
+        "vapid_public_key": _s.VAPID_PUBLIC_KEY if _s.VAPID_PRIVATE_KEY else "",
         "fav_ids": fav_ids,
         "google_enabled": bool(_s.GOOGLE_CLIENT_ID),
         "max_video_mb": _s.MAX_VIDEO_MB,

@@ -487,7 +487,15 @@ def message_thread(request, pk):
         if body:
             msg = Message.objects.create(conversation=conversation, sender=request.user, body=body)
             Conversation.objects.filter(pk=conversation.pk).update(updated_at=timezone.now())
-            emails.notify_new_message(msg)
+            from . import push
+            push.notify_new_message(msg)
+            # E-posta birlestirme: ayni kisiden okunmamis ve zaten bildirilmis mesaj varsa (30 dk) tekrar e-posta gonderme
+            already = (Message.objects.filter(conversation=conversation, sender=request.user, is_read=False,
+                                              notified=True, created_at__gte=timezone.now() - timedelta(minutes=30))
+                       .exclude(pk=msg.pk).exists())
+            if not already:
+                emails.notify_new_message(msg)
+                Message.objects.filter(pk=msg.pk).update(notified=True)
         return redirect("market:message_thread", pk=pk)
     conversation.messages.exclude(sender=request.user).update(is_read=True)
     return render(request, "market/messages/thread.html",
@@ -672,4 +680,102 @@ def seller_profile(request, pk):
     seller = get_object_or_404(User, pk=pk, is_active=True)
     qs = Listing.objects.filter(owner=seller, is_active=True, shop__isnull=True).select_related("city")
     page = Paginator(qs, 24).get_page(request.GET.get("page"))
-    return render(request, "market/seller.html", {"seller": seller, "page_obj": page})
+    from .models import SellerReview, can_review_seller, seller_rating
+    avg, n = seller_rating(seller)
+    return render(request, "market/seller.html", {
+        "seller": seller, "page_obj": page, "rating_avg": avg, "rating_n": n,
+        "reviews": SellerReview.objects.filter(seller=seller).select_related("author")[:20],
+        "can_review": can_review_seller(request.user, seller)})
+
+
+@login_required
+def push_subscribe(request):
+    """Tarayicinin gonderdigi anlik bildirim aboneligini kaydeder."""
+    import json
+    from .models import PushSubscription
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST")
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        endpoint = data["endpoint"]
+        keys = data["keys"]
+        PushSubscription.objects.update_or_create(
+            endpoint=endpoint,
+            defaults={"user": request.user, "p256dh": keys["p256dh"], "auth": keys["auth"]},
+        )
+    except Exception:
+        return HttpResponseBadRequest("bad subscription")
+    return HttpResponse("ok")
+
+
+@login_required
+def messages_status(request):
+    """Okunmamis mesaj sayisi (sayfa her birkac saniyede bir sorar, rozetler aninda guncellenir)."""
+    u = request.user
+    n = (Message.objects.filter(is_read=False)
+         .filter(Q(conversation__participant_a=u) | Q(conversation__participant_b=u))
+         .exclude(sender=u).count())
+    resp = JsonResponse({"unread": n})
+    resp["Cache-Control"] = "no-store"
+    return resp
+
+
+@login_required
+def save_search(request):
+    from django.http import QueryDict
+    from .models import SavedSearch
+    if request.method != "POST":
+        return redirect("market:listings")
+    qs = request.POST.get("qs", "")[:500]
+    label = request.POST.get("label", "").strip()[:120] or "Arama"
+    country = _current_country(request)
+    if SavedSearch.objects.filter(user=request.user).count() >= 10 and not SavedSearch.objects.filter(user=request.user, params=qs).exists():
+        messages.error(request, "En fazla 10 arama kaydedebilirsin.")
+    else:
+        mode = QueryDict(qs).get("mode") or Mode.USED
+        SavedSearch.objects.get_or_create(user=request.user, params=qs,
+                                          defaults={"label": label, "country": country, "mode": mode})
+        messages.success(request, "Arama kaydedildi. Yeni ilan gelince haber vereceğiz.")
+    return redirect(reverse("market:listings") + ("?" + qs if qs else ""))
+
+
+@login_required
+def saved_searches(request):
+    from .models import SavedSearch
+    return render(request, "market/saved_searches.html",
+                  {"searches": SavedSearch.objects.filter(user=request.user)})
+
+
+@login_required
+def delete_saved_search(request, pk):
+    from .models import SavedSearch
+    if request.method == "POST":
+        SavedSearch.objects.filter(pk=pk, user=request.user).delete()
+    return redirect("market:saved_searches")
+
+
+@login_required
+def review_seller(request, pk):
+    from .models import SellerReview, can_review_seller
+    seller = get_object_or_404(User, pk=pk, is_active=True)
+    if request.method == "POST" and can_review_seller(request.user, seller):
+        try:
+            rating = int(request.POST.get("rating", 0))
+        except ValueError:
+            rating = 0
+        if 1 <= rating <= 5:
+            SellerReview.objects.create(seller=seller, author=request.user, rating=rating,
+                                        comment=request.POST.get("comment", "").strip()[:500])
+            messages.success(request, "Degerlendirmen kaydedildi, tesekkurler.")
+    return redirect("market:seller_profile", pk=seller.pk)
+
+
+@login_required
+def verification_doc(request, pk):
+    """Dogrulama belgesini yalnizca yoneticiler acabilir."""
+    from django.http import FileResponse, Http404
+    from .models import VerificationRequest
+    if not request.user.is_staff:
+        raise Http404
+    vr = get_object_or_404(VerificationRequest, pk=pk)
+    return FileResponse(vr.document.open("rb"))

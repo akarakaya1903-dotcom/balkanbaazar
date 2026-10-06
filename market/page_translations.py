@@ -156,5 +156,29 @@ TRANSLATIONS = {
   "bs": {
    "title": "Politika kolačića"
   }
+ },
+ "yardim-merkezi": {
+  "en": {
+   "title": "Help Center",
+   "body": "Frequently asked questions.\n\n1. How do I post a listing?\nSign up, verify your email and press \"Post a listing\". Choose a category, enter the price and description and add photos. Private listings are free.\n\n2. Why wasn't my listing published immediately?\nIf admin approval is on, new listings go live after review. Listings that follow the rules are published quickly.\n\n3. How long does my listing stay online?\nPrivate listings expire after a set period. Use \"Renew\" on the \"My listings\" page to republish.\n\n4. How do I open a shop?\nFill in the application via \"Open a shop\". Once your shop is open you manage products, stock and orders from the panel.\n\n5. How does payment work?\nOnline card payments are not available yet. Shop orders are paid on delivery. For private listings, payment is agreed between buyer and seller.\n\n6. How do I avoid scams?\nDon't pay in advance without seeing the item, meet in a public place and never share ID or passwords. Report suspicious listings with the \"Report\" button.\n\n7. What is a saved search?\nSave your search criteria and we'll notify you by email and push when a new matching listing appears. Use the \"Save search\" button on the listings page.\n\n8. I'm not getting message notifications.\nCheck your spam folder. For phone notifications press \"Turn on notifications\" on the Messages page; on iPhone, add the site to your home screen first.\n\n9. How do I delete my account?\nUse the \"Delete my account\" link at the bottom of the profile page.\n\n10. How can I contact you?\nEmail: [[email]]\nAddress: [[address]]"
+  },
+  "mk": {
+   "title": "Центар за помош"
+  },
+  "sq": {
+   "title": "Qendra e ndihmës"
+  },
+  "sr": {
+   "title": "Центар за помоћ"
+  },
+  "bg": {
+   "title": "Помощен център"
+  },
+  "el": {
+   "title": "Κέντρο βοήθειας"
+  },
+  "bs": {
+   "title": "Centar za pomoć"
+  }
  }
 }

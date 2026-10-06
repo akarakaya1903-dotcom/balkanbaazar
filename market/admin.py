@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (ApplicationStatus, Boost, Category, City, Conversation, Coupon,
                      Country, Favorite, Listing, ListingImage, ListingVariant, Message,
-                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat, ListingReport, UserBlock)
+                     Order, OrderItem, Review, Shop, ShopApplication, SiteSettings, Banner, Page, DailyStat, ListingReport, UserBlock, SavedSearch, VerificationRequest, SellerReview)
 
 
 @admin.register(Country)
@@ -31,6 +31,11 @@ class ShopAdmin(admin.ModelAdmin):
     list_filter = ("country", "plan", "verified")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    actions = ["verify_shops"]
+
+    @admin.action(description="Secili magazalari dogrulanmis yap")
+    def verify_shops(self, request, queryset):
+        self.message_user(request, f"{queryset.update(verified=True)} magaza dogrulandi.")
 
 
 class ListingImageInline(admin.TabularInline):
@@ -214,3 +219,51 @@ class ListingReportAdmin(admin.ModelAdmin):
 @admin.register(UserBlock)
 class UserBlockAdmin(admin.ModelAdmin):
     list_display = ("blocker", "blocked", "created_at")
+
+
+@admin.register(SavedSearch)
+class SavedSearchAdmin(admin.ModelAdmin):
+    list_display = ("user", "label", "country", "created_at", "last_checked")
+    readonly_fields = ("created_at", "last_checked")
+
+
+@admin.register(VerificationRequest)
+class VerificationRequestAdmin(admin.ModelAdmin):
+    list_display = ("shop", "status", "created_at", "reviewed_at", "belge")
+    list_filter = ("status",)
+    readonly_fields = ("shop", "belge", "note", "created_at", "reviewed_at")
+    fields = ("shop", "belge", "note", "status", "admin_note", "created_at", "reviewed_at")
+    actions = ["approve", "reject"]
+
+    @admin.display(description="Belge")
+    def belge(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        return format_html('<a href="{}" target="_blank">Belgeyi ac</a>', reverse("market:verification_doc", args=[obj.pk]))
+
+    def _finish(self, request, queryset, status):
+        from django.utils import timezone
+        from . import emails
+        n = 0
+        for vr in queryset.filter(status="pending"):
+            vr.status, vr.reviewed_at = status, timezone.now()
+            vr.save()
+            if status == "approved":
+                Shop.objects.filter(pk=vr.shop_id).update(verified=True)
+            emails.notify_verification_result(vr)
+            n += 1
+        self.message_user(request, f"{n} basvuru guncellendi.")
+
+    @admin.action(description="Secili basvurulari ONAYLA (magaza dogrulanir)")
+    def approve(self, request, queryset):
+        self._finish(request, queryset, "approved")
+
+    @admin.action(description="Secili basvurulari REDDET")
+    def reject(self, request, queryset):
+        self._finish(request, queryset, "rejected")
+
+
+@admin.register(SellerReview)
+class SellerReviewAdmin(admin.ModelAdmin):
+    list_display = ("seller", "author", "rating", "created_at")
+    list_filter = ("rating",)

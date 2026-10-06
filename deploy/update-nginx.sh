@@ -17,6 +17,7 @@ sed -i 's/--workers 3$/--workers 3 --timeout 180/' /etc/systemd/system/balkanbaa
 cat > /etc/cron.d/balkanbaazar <<'CRON_EOF'
 0 3 * * * root cd /var/www/balkanbaazar && set -a && . /etc/balkanbaazar.env && set +a && ./venv/bin/python manage.py expire_listings >> /var/log/balkanbaazar-expire.log 2>&1
 */10 * * * * root cd /var/www/balkanbaazar && set -a && . /etc/balkanbaazar.env && set +a && ./venv/bin/python manage.py compress_videos >> /var/log/balkanbaazar-video.log 2>&1
+*/30 * * * * root cd /var/www/balkanbaazar && set -a && . /etc/balkanbaazar.env && set +a && ./venv/bin/python manage.py notify_saved_searches >> /var/log/balkanbaazar-saved.log 2>&1
 CRON_EOF
 systemctl daemon-reload
 nginx -t

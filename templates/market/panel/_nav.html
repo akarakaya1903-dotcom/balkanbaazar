@@ -14,6 +14,7 @@
     <a href="{% url 'market:panel_orders' %}" class="{% if section == 'orders' %}on{% endif %}">{{ t.incoming_orders }}</a>
     <a href="{% url 'market:panel_settings' %}" class="{% if section == 'settings' %}on{% endif %}">{{ t.shop_set }}</a>
     <a href="{% url 'market:panel_billing' %}" class="{% if section == 'billing' %}on{% endif %}">{{ t.billing }}</a>
+    <a href="{% url 'market:panel_verification' %}" class="{% if section == 'verify' %}on{% endif %}">✔ {{ t.ver_nav }}</a>
     <a href="{% url 'market:shop_detail' shop.slug %}">{{ t.vis }} →</a>
   </nav>
 </aside>

@@ -103,4 +103,5 @@ form.addEventListener("submit",function(e){
   xhr.onerror=function(){bar.remove();alert("Yükleme başarısız / Upload failed");};
   xhr.send(new FormData(form));});
 })();</script>
+{% include "market/_attr_js.html" %}
 {% endblock %}

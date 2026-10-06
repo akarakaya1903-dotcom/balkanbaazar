@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ t.saved_t }} — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <div class="rhead"><h2>🔔 {{ t.saved_t }}</h2></div>
+  {% for s in searches %}
+  <div class="formcard" style="display:flex;gap:12px;align-items:center;margin-bottom:10px;padding:14px 16px">
+    <a href="{% url 'market:listings' %}?{{ s.params }}" style="flex:1;font-weight:700;color:var(--sea)">{{ s.label }}</a>
+    <form method="post" action="{% url 'market:delete_saved_search' s.pk %}">{% csrf_token %}<button class="btn-line" type="submit" style="padding:6px 12px">✕</button></form>
+  </div>
+  {% empty %}<div class="empty"><h3>{{ t.saved_empty }}</h3></div>{% endfor %}
+</section></div>
+{% endblock %}

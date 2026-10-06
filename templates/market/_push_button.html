@@ -1,0 +1,13 @@
+{% if user.is_authenticated and vapid_public_key %}
+<button type="button" class="btn-line" id="pushBtn" hidden style="margin:8px 0">🔔 {{ t.push_on }}</button>
+<script>(function(){var btn=document.getElementById("pushBtn");if(!btn||!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){return;}
+var KEY="{{ vapid_public_key }}",DONE="✓ {{ t.push_done|escapejs }}",BLOCKED="{{ t.push_blocked|escapejs }}",URL="{% url 'market:push_subscribe' %}";
+function csrf(){var m=document.cookie.match(/csrftoken=([^;]+)/);return m?m[1]:"";}
+function key(s){var p="=".repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,"+").replace(/_/g,"/"),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++){o[i]=r.charCodeAt(i);}return o;}
+navigator.serviceWorker.ready.then(function(reg){btn.hidden=false;
+  reg.pushManager.getSubscription().then(function(sub){if(sub&&Notification.permission==="granted"){btn.textContent=DONE;}});
+  btn.addEventListener("click",function(){Notification.requestPermission().then(function(p){if(p!=="granted"){alert(BLOCKED);return;}
+    reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key(KEY)}).then(function(sub){
+      return fetch(URL,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-CSRFToken":csrf()},body:JSON.stringify(sub)});
+    }).then(function(){btn.textContent=DONE;}).catch(function(){alert(BLOCKED);});});});});})();</script>
+{% endif %}

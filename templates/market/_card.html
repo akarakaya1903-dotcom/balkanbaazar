@@ -15,7 +15,7 @@
     <span class="tt">{{ item.title }}</span>
     <span class="pr">{% price item country %}</span>
     {% if country.currency != 'EUR' %}<span class="eur">≈ {% eur item %}</span>{% endif %}
-    <span class="mt"><span>{{ item.city.name }}</span>
+    <span class="mt"><span>{{ item.city.name }}{% if item.shop.verified %} <span class="vok" title="{{ t.verified }}">✔</span>{% endif %}</span>
       <span>{% if item.mode == 'shop' %}<span class="star">★</span> {{ item.rating }}{% else %}{% if item.age_days == 0 %}{{ t.ago_today }}{% else %}{{ item.age_days }} {{ t.ago_days }}{% endif %}{% endif %}</span></span>
   </div>
 </a>

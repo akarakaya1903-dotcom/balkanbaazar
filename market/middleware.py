@@ -55,3 +55,35 @@ class ThrottleMiddleware:
             if n > self.LIMIT:
                 return HttpResponse("Cok fazla deneme. Lutfen birkac dakika sonra tekrar dene.", status=429)
         return self.get_response(request)
+
+
+class LanguagePrefixMiddleware:
+    """/mk/..., /sq/... gibi dil onekli adresleri ayni sayfalara baglar ve dili o adresten alir.
+    {% url %} baglantilari betik oneki sayesinde otomatik olarak dil onekiyle uretilir."""
+
+    def __init__(self, get_response):
+        import re
+        from .i18n import T
+        self.get_response = get_response
+        self.pattern = re.compile(r"^/(" + "|".join(sorted(T.keys())) + r")(/.*)?$")
+
+    def __call__(self, request):
+        m = self.pattern.match(request.path_info)
+        if not m:
+            return self.get_response(request)
+        from django.conf import settings
+        from django.http import HttpResponseRedirect
+        from django.urls import get_script_prefix, set_script_prefix
+        lang, rest = m.group(1), m.group(2)
+        if not rest:
+            return HttpResponseRedirect(f"/{lang}/")
+        original = get_script_prefix()
+        request.lang_override = lang
+        request.path_info = rest
+        if request.COOKIES.get(settings.SESSION_COOKIE_NAME) and request.session.get("lang") != lang:
+            request.session["lang"] = lang
+        set_script_prefix(original.rstrip("/") + f"/{lang}/")
+        try:
+            return self.get_response(request)
+        finally:
+            set_script_prefix(original)

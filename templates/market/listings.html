@@ -1,6 +1,9 @@
 {% extends "base.html" %}{% load market_extras %}
-{% block title %}{% if root %}{% catname root lang %}{% else %}{{ t.all_l }}{% endif %} — {{ t.brand }}{% endblock %}
+{% block title %}{% if seo %}{{ seo.title }}{% elif root %}{% catname root lang %}{% else %}{{ t.all_l }}{% endif %} — {{ t.brand }}{% endblock %}
 
+{% block meta_desc %}{% if seo %}{{ seo.description }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_title %}{% if seo %}{{ seo.title }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block robots_meta %}{% if request.GET and not seo %}<meta name="robots" content="noindex,follow">{% endif %}{% endblock %}
 {% block catstrip %}{% include "market/_catnav.html" %}{% endblock %}
 
 {% block content %}
@@ -53,6 +56,13 @@
           </select>
         </label>
         {% endif %}
+        {% if attr_specs %}<div class="af">
+        {% for sp in attr_specs %}
+          <label class="field"><span>{{ sp.label }}</span>
+          {% if sp.kind == "select" %}<select name="a_{{ sp.key }}"><option value="">—</option>{% for c, cl in sp.choices %}<option value="{{ c }}" {% if sp.value == c %}selected{% endif %}>{{ cl }}</option>{% endfor %}</select>
+          {% elif sp.kind == "number" %}<span class="two"><input type="number" name="a_{{ sp.key }}_min" min="0" value="{{ sp.min }}" placeholder="min"><input type="number" name="a_{{ sp.key }}_max" min="0" value="{{ sp.max }}" placeholder="max"></span>
+          {% else %}<input type="text" name="a_{{ sp.key }}" value="{{ sp.value }}">{% endif %}</label>
+        {% endfor %}</div>{% endif %}
         <label class="field"><span>{{ t.deliv }}</span>
           <select name="deliv">
             <option value="">{{ t.anyd }}</option>
@@ -83,10 +93,13 @@
     </div>
     {% endif %}
 
+    {% if seo %}<h1 class="sr-only">{{ seo.h1 }}</h1>{% endif %}
     <div class="rhead">
       <h2>{% if root %}{% catname root lang %}{% if sub %} · {% catname sub lang %}{% endif %}
           {% else %}{% if mode == 'shop' %}{{ t.all_p }}{% else %}{{ t.all_l }}{% endif %}{% endif %}</h2>
       <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {{ country.name_local }}</span>
+      {% if user.is_authenticated %}<form method="post" action="{% url 'market:save_search' %}" style="margin:0">{% csrf_token %}<input type="hidden" name="qs" value="{{ search_qs }}"><input type="hidden" name="label" value="{{ search_label }}"><button class="btn-line" type="submit" style="padding:6px 12px;font-size:13px">🔔 {{ t.save_search }}</button></form>
+      {% else %}<a class="btn-line" href="{% url 'market:login' %}" style="padding:6px 12px;font-size:13px">🔔 {{ t.save_search }}</a>{% endif %}
       <form method="get" action="{% url 'market:listings' %}">
         <input type="hidden" name="mode" value="{{ mode }}">
         {% if root %}<input type="hidden" name="cat" value="{{ root.slug }}">{% endif %}
@@ -97,6 +110,7 @@
         <input type="hidden" name="deliv" value="{{ f.deliv }}">
         <input type="hidden" name="min" value="{{ f.min }}">
         <input type="hidden" name="max" value="{{ f.max }}">
+        {% for k, v in attr_pairs %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
         <select name="sort" onchange="this.form.submit()" aria-label="{{ t.sort }}">
           <option value="new" {% if f.sort == 'new' %}selected{% endif %}>{{ t.s_new }}</option>
           <option value="lo" {% if f.sort == 'lo' %}selected{% endif %}>{{ t.s_lo }}</option>
@@ -121,4 +135,12 @@
   </main>
 </div></div>
 <script>(function(){var b=document.getElementById("filterBtn"),x=document.getElementById("sideBox");if(b&&x){b.addEventListener("click",function(){x.classList.toggle("open");});}})();</script>
+{% if root %}
+<div class="wrap"><section class="sect seocities" style="padding-top:0">
+  <div class="rhead"><h2>{% catname root lang %} · {{ t.cat }}</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    {% for c in cities %}<a class="pill" href="{% seo_url mode root.slug sub.slug c.name %}">{% catname sub|default:root lang %} · {{ c.name }}</a>{% endfor %}
+  </div>
+</section></div>
+{% endif %}
 {% endblock %}

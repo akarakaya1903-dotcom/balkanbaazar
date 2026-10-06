@@ -12,7 +12,7 @@
         {{ t.about }}: {{ conversation.listing.title }}</a>
       {% endif %}
     </div>
-    <div class="thread">
+    <div class="thread" id="msgBox">
       {% for m in thread_messages %}
       <div class="bubble {% if m.sender_id == request.user.id %}mine{% endif %}">
         <p>{{ m.body }}</p><span>{{ m.created_at|date:"d.m H:i" }}</span>

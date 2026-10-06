@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
-from django.contrib.sitemaps.views import sitemap
+from django.contrib.sitemaps.views import index, sitemap
 from django.http import HttpResponse
 from django.views.static import serve
 
-from market.sitemaps import ListingSitemap, PageSitemap, ShopSitemap, StaticSitemap
+from market.sitemaps import CategorySitemap, ListingSitemap, PageSitemap, ShopSitemap, StaticSitemap, expand
 
-SITEMAPS = {"static": StaticSitemap, "listings": ListingSitemap, "shops": ShopSitemap, "pages": PageSitemap}
+SITEMAPS = {"static": expand(StaticSitemap), "categories": expand(CategorySitemap), "listings": expand(ListingSitemap), "shops": expand(ShopSitemap), "pages": expand(PageSitemap)}
 
 
 def manifest(request):
@@ -22,7 +22,7 @@ def manifest(request):
 
 
 def service_worker(request):
-    js = "self.addEventListener('install',function(){self.skipWaiting();});self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});self.addEventListener('fetch',function(){});"
+    js = "self.addEventListener('install',function(){self.skipWaiting();});self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});self.addEventListener('fetch',function(){});self.addEventListener('push',function(e){var d={};try{d=e.data.json();}catch(x){}e.waitUntil(self.registration.showNotification(d.title||'Balkan Baazar',{body:d.body||'',icon:'/static/img/logo-192.png',badge:'/static/img/logo-96.png',tag:d.tag||'bb',renotify:true,data:{url:d.url||'/'}}));});self.addEventListener('notificationclick',function(e){e.notification.close();var u=(e.notification.data&&e.notification.data.url)||'/';e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(function(l){for(var i=0;i<l.length;i++){if('focus' in l[i]){l[i].navigate(u);return l[i].focus();}}return clients.openWindow(u);}));});"
     resp = HttpResponse(js, content_type="application/javascript")
     resp["Cache-Control"] = "no-cache"
     return resp
@@ -34,14 +34,20 @@ def favicon(request):
 
 
 def robots(request):
-    body = ("User-agent: *\nDisallow: /admin/\nDisallow: /yonetim/\nDisallow: /panel/\nDisallow: /sepet/\nDisallow: /odeme/\nDisallow: /uyelik/\n"
-            "Sitemap: https://balkanbaazar.com/sitemap.xml\n")
+    from market.i18n import T
+    private = ["/admin/", "/yonetim/", "/panel/", "/sepet/", "/odeme/", "/uyelik/"]
+    lines = ["User-agent: *"]
+    for prefix in [""] + ["/" + c for c in T.keys()]:
+        lines += [f"Disallow: {prefix}{path}" for path in private]
+    lines.append("Sitemap: https://balkanbaazar.com/sitemap.xml")
+    body = "\n".join(lines) + "\n"
     return HttpResponse(body, content_type="text/plain")
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="sitemap"),
+    path("sitemap.xml", index, {"sitemaps": SITEMAPS}),
+    path("sitemap-<section>.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", robots, name="robots"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("sw.js", service_worker, name="sw"),

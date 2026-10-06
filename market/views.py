@@ -1,16 +1,18 @@
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, F, IntegerField, Q, When
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.text import slugify
 
 from .i18n import T
+from . import attributes as ATTR
 from .models import Banner, Page, Category, City, Country, Favorite, Listing, Mode, Shop
 
 
 def _current(request):
-    lang = request.session.get("lang", settings.DEFAULT_LANG)
+    lang = getattr(request, "lang_override", None) or request.session.get("lang", settings.DEFAULT_LANG)
     code = request.session.get("country", settings.DEFAULT_COUNTRY)
     country = Country.objects.filter(code=code).first() or Country.objects.first()
     return lang, country
@@ -131,9 +133,12 @@ def banner_go(request, pk):
     return HttpResponseRedirect(banner.link_url or "/")
 
 
-def listings(request):
+def listings(request, _o=None):
+    o = _o or {}
     lang, country = _current(request)
-    mode = request.GET.get("mode") or request.session.get("mode", Mode.USED)
+    if o.get("country"):
+        country = o["country"]
+    mode = o.get("mode") or request.GET.get("mode") or request.session.get("mode", Mode.USED)
     if mode not in {Mode.USED, Mode.SHOP}:
         mode = Mode.USED
     request.session["mode"] = mode
@@ -145,8 +150,8 @@ def listings(request):
               default=0, output_field=IntegerField(),
           )))
 
-    cat_slug = request.GET.get("cat") or ""
-    sub_slug = request.GET.get("sub") or ""
+    cat_slug = o.get("cat") or request.GET.get("cat") or ""
+    sub_slug = o.get("sub") or request.GET.get("sub") or ""
     root = None
     sub = None
     if cat_slug:
@@ -161,7 +166,7 @@ def listings(request):
     q = request.GET.get("q", "").strip()
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
-    city = request.GET.get("city", "")
+    city = o.get("city") or request.GET.get("city", "")
     if city:
         qs = qs.filter(city__name=city)
     cond = request.GET.get("cond", "")
@@ -180,6 +185,8 @@ def listings(request):
     except ValueError:
         pmin = pmax = ""
 
+    if root:
+        qs = ATTR.apply_filters(qs, root.slug, request.GET)
     sort = request.GET.get("sort", "new")
     secondary = {
         "lo": "price_eur", "hi": "-price_eur", "pop": "-favorites",
@@ -206,7 +213,18 @@ def listings(request):
                                               **({"category": root} if root else {}))[:4]
         if mode == Mode.SHOP else [],
         "total": page.paginator.count,
+        "seo": o.get("seo"),
+        "attr_specs": ATTR.filter_specs(root.slug, request.GET, lang) if root else [],
+        "attr_pairs": ATTR.param_pairs(root.slug, request.GET) if root else [],
     }
+    from urllib.parse import urlencode as _ue
+    _p = {"mode": mode, "cat": cat_slug if root else "", "sub": sub_slug if sub else "", "city": city, "q": q,
+          "cond": cond, "deliv": deliv, "min": pmin, "max": pmax}
+    _p = {k: v for k, v in _p.items() if v}
+    _p.update(dict(ctx["attr_pairs"]))
+    ctx["search_qs"] = _ue(_p)
+    ctx["search_label"] = " · ".join(x for x in [
+        ((sub or root).name(lang) if root else ""), city, q] if x) or ("Tüm ilanlar" if mode == Mode.USED else "Tüm ürünler")
     return render(request, "market/listings.html", ctx)
 
 
@@ -260,3 +278,39 @@ def pricing(request):
         "mid_until": settings.SHOP_PLAN_MID_UNTIL_MONTH,
         "full_price": settings.SHOP_PLAN_FULL_PRICE_EUR,
     })
+
+
+def _city_by_slug(city_slug):
+    for c in City.objects.select_related("country"):
+        if slugify(c.name) == city_slug:
+            return c
+    return None
+
+
+def seo_listing(request, mode, cat, sub=None, city=None):
+    """Arama motoru icin temiz adresli kategori / sehir sayfalari."""
+    if mode not in {Mode.USED, Mode.SHOP}:
+        raise Http404
+    root = Category.objects.filter(mode=mode, parent__isnull=True, slug=cat).first()
+    if not root:  # bilinmeyen kategori: eski liste sayfasina don (404 yerine)
+        from django.urls import reverse
+        return HttpResponseRedirect(reverse("market:listings") + f"?mode={mode}&cat={cat}")
+    subcat = get_object_or_404(Category, parent=root, slug=sub) if sub else None
+    lang, country = _current(request)
+    override = {"mode": mode, "cat": cat, "sub": sub or ""}
+    city_obj = None
+    if city:
+        city_obj = _city_by_slug(city)
+        if not city_obj:
+            raise Http404
+        override["city"] = city_obj.name
+        override["country"] = city_obj.country
+        country = city_obj.country
+    t = T.get(lang) or T["en"]
+    cat_name = (subcat or root).name(lang)
+    mode_label = t.get("used", "") if mode == Mode.USED else t.get("shops", "")
+    place = city_obj.name if city_obj else (country.name_local if country else "")
+    title = f"{cat_name} · {mode_label} · {place} — {t.get('brand', 'Balkan Baazar')}"
+    desc = f"{cat_name} — {mode_label}, {place}. {t.get('heroP', '')}"[:160]
+    override["seo"] = {"title": title, "description": desc, "h1": f"{cat_name} · {mode_label} · {place}"}
+    return listings(request, override)

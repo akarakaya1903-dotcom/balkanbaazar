@@ -247,3 +247,38 @@ def send_verification(user):
           f"Merhaba,\n\nE-posta adresini dogrulamak icin su baglantiya tikla (3 gun gecerli):\n{link}\n\n"
           f"Hi,\n\nPlease verify your email address with this link (valid for 3 days):\n{link}\n",
           user.email)
+
+
+def notify_saved_search(search, listings, count):
+    """Kayitli aramaya uyan yeni ilanlari tek e-postada ozetler."""
+    user = search.user
+    if not user.email:
+        return
+    lines = "\n".join(f"- {l.title} ({l.price_eur} EUR)\n  {_site('/ilan/%d/%s/' % (l.pk, l.slug))}" for l in listings)
+    more = f"\n... ve {count - len(listings)} ilan daha." if count > len(listings) else ""
+    link = _site("/ilanlar/?" + search.params)
+    _send(f"[Balkan Baazar] Yeni ilanlar: {search.label}",
+          f"Kayıtlı aramana uyan {count} yeni ilan var: {search.label}\n\n{lines}{more}\n\nTümünü gör: {link}\n"
+          f"Aramalarını yönet: {_site('/kayitli-aramalar/')}\n\n---\n\n"
+          f"{count} new listing(s) match your saved search: {search.label}\nSee all: {link}\n",
+          user.email)
+
+
+def notify_staff_verification(vr):
+    _send(f"Dogrulama basvurusu: {vr.shop.name}",
+          f"{vr.shop.name} magazasi dogrulama icin belge yukledi.\n\nInceleme: {_site('/admin/market/verificationrequest/')}",
+          settings.STAFF_NOTIFY_EMAILS)
+
+
+def notify_verification_result(vr):
+    owner = vr.shop.owner
+    if not owner or not owner.email:
+        return
+    if vr.status == "approved":
+        tr = f"Harika! {vr.shop.name} mağazan doğrulandı. Mağaza sayfanda ve ilanlarında ✔ rozeti görünecek."
+        en = f"Great news! Your shop {vr.shop.name} has been verified. The ✔ badge now shows on your shop and listings."
+    else:
+        why = f" Not: {vr.admin_note}" if vr.admin_note else ""
+        tr = f"{vr.shop.name} mağazanın doğrulama başvurusu onaylanamadı.{why} Belgeni yeniden yükleyebilirsin."
+        en = f"Your verification request for {vr.shop.name} could not be approved.{(' Note: ' + vr.admin_note) if vr.admin_note else ''} You can upload a new document."
+    _send("Balkan Baazar - Mağaza doğrulama / Shop verification", f"{tr}\n\n---\n\n{en}\n", owner.email)

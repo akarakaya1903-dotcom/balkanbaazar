@@ -212,6 +212,7 @@ class Listing(models.Model):
     image = models.ImageField(upload_to="listings/", blank=True, null=True)
     video = models.FileField("Video (mp4/webm, en fazla 50 MB)", upload_to="listings/video/", blank=True, null=True)
     video_processed = models.BooleanField(default=False, editable=False)  # sunucuda kucultuldu mu
+    attrs = models.JSONField(default=dict, blank=True)  # kategoriye ozel alanlar (marka, yil, km, oda sayisi ...)
     featured_until = models.DateTimeField(null=True, blank=True, db_index=True)
     track_stock = models.BooleanField(default=False, help_text="Acilirsa stok adedi tukeninceye kadar satisa acik kalir")
     stock = models.PositiveIntegerField(null=True, blank=True, help_text="track_stock acikken gecerli")
@@ -438,6 +439,7 @@ class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
     body = models.TextField()
     is_read = models.BooleanField(default=False)
+    notified = models.BooleanField(default=False)  # alicıya e-posta gonderildi mi
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -650,7 +652,7 @@ class Page(models.Model):
         tr = self.translations or {}
 
         def pick(field):
-            for code in (lang, "en"):
+            for code in (lang, {"hr": "bs", "cnr": "bs"}.get(lang, lang), "en"):
                 value = (tr.get(code) or {}).get(field)
                 if value:
                     return value
@@ -727,3 +729,120 @@ class UserBlock(models.Model):
 
     def __str__(self):
         return f"{self.blocker} -> {self.blocked}"
+
+
+class PushSubscription(models.Model):
+    """Tarayici/telefon anlik bildirim abonelikleri (Web Push)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="push_subscriptions")
+    endpoint = models.CharField(max_length=600, unique=True)
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=100)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user} ({self.endpoint[:40]}...)"
+
+
+class SavedSearch(models.Model):
+    """Kullanicinin kayitli aramasi; yeni eslesen ilan gelince bildirim gider."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="saved_searches")
+    label = models.CharField(max_length=120)
+    params = models.CharField(max_length=500)  # ornek: mode=used&cat=vasita&a_year_min=2015
+    country = models.ForeignKey("Country", null=True, blank=True, on_delete=models.SET_NULL)
+    mode = models.CharField(max_length=10, default="used")
+    created_at = models.DateTimeField(default=timezone.now)
+    last_checked = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+        unique_together = [("user", "params")]
+        verbose_name = "Kayitli arama"
+        verbose_name_plural = "Kayitli aramalar"
+
+    def __str__(self):
+        return f"{self.user}: {self.label}"
+
+
+def get_private_storage():
+    from django.conf import settings
+    from django.core.files.storage import FileSystemStorage
+    return FileSystemStorage(location=str(settings.PRIVATE_ROOT))
+
+
+def _verify_path(instance, filename):
+    import os
+    import uuid
+    return f"verify/{uuid.uuid4().hex}{os.path.splitext(filename)[1].lower()}"
+
+
+class VerificationRequest(models.Model):
+    """Magaza dogrulama basvurusu (belge herkese kapali klasorde saklanir)."""
+    STATUS = [("pending", "Beklemede"), ("approved", "Onaylandi"), ("rejected", "Reddedildi")]
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name="verification_requests")
+    document = models.FileField(upload_to=_verify_path, storage=get_private_storage)
+    note = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS, default="pending")
+    admin_note = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Dogrulama basvurusu"
+        verbose_name_plural = "Dogrulama basvurulari"
+
+    def __str__(self):
+        return f"{self.shop} ({self.get_status_display()})"
+
+
+class SellerReview(models.Model):
+    """Bireysel saticilar icin degerlendirme (yalnizca mesajlasmis, e-postasi dogrulanmis uyeler)."""
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller_reviews")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller_reviews_written")
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True, max_length=500)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = [("seller", "author")]
+        ordering = ["-created_at"]
+        verbose_name = "Satici degerlendirmesi"
+        verbose_name_plural = "Satici degerlendirmeleri"
+
+    def __str__(self):
+        return f"{self.author} -> {self.seller}: {self.rating}"
+
+
+def seller_rating(user):
+    agg = SellerReview.objects.filter(seller=user).aggregate(a=models.Avg("rating"), n=models.Count("id"))
+    return (round(agg["a"], 1) if agg["a"] else None, agg["n"])
+
+
+def can_review_seller(author, seller):
+    """Kendisi olmayan, e-postasi dogrulanmis ve satici ile karsilikli mesajlasmis uye."""
+    if not getattr(author, "is_authenticated", False) or author.pk == seller.pk or not email_is_verified(author):
+        return False
+    if SellerReview.objects.filter(author=author, seller=seller).exists():
+        return False
+    convs = Conversation.objects.filter(models.Q(participant_a=author, participant_b=seller) |
+                                        models.Q(participant_a=seller, participant_b=author))
+    return (Message.objects.filter(conversation__in=convs, sender=author).exists()
+            and Message.objects.filter(conversation__in=convs, sender=seller).exists())
+
+
+from django.db.models.signals import post_delete, post_save  # noqa: E402
+from django.dispatch import receiver  # noqa: E402
+
+
+@receiver([post_save, post_delete], sender=Review)
+def _update_shop_rating(sender, instance, **kwargs):
+    """Yorum eklenince/silinince magaza puanini gercek yorum ortalamasina gunceller."""
+    try:
+        from decimal import Decimal
+        shop = instance.listing.shop
+        if shop:
+            avg = Review.objects.filter(listing__shop=shop).aggregate(a=models.Avg("rating"))["a"]
+            if avg is not None:
+                Shop.objects.filter(pk=shop.pk).update(rating=Decimal(str(round(avg, 1))))
+    except Exception:
+        pass

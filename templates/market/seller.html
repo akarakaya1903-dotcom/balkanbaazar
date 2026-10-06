@@ -7,9 +7,23 @@
     <div><h1 style="font-size:22px">{{ seller.first_name|default:seller.username }}</h1>
       <div style="color:var(--ink-3);font-size:13px">{{ t.seller_page }} · {{ t.member_since }}: {{ seller.date_joined|date:"d.m.Y" }} · {{ t.active_ads }}: {{ page_obj.paginator.count }}</div></div>
   </div>
+  {% if rating_n %}<div style="margin:-6px 0 14px;font-size:15px"><span class="star">★</span> <b>{{ rating_avg }}</b> ({{ rating_n }})</div>{% endif %}
   <div class="grid">{% for item in page_obj %}{% include "market/_card.html" %}{% empty %}<div class="empty"><h3>{{ t.none }}</h3></div>{% endfor %}</div>
   {% if page_obj.has_other_pages %}<div class="pager">
     {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">{{ t.prev }}</a>{% endif %}
     {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">{{ t.next }}</a>{% endif %}</div>{% endif %}
-</section></div>
+</section>
+<section class="sect" style="padding-top:0">
+  <div class="rhead"><h2>{{ t.reviews_t }}</h2></div>
+  {% for r in reviews %}<div class="formcard" style="margin-bottom:10px;padding:12px 16px"><b>{{ r.author.first_name|default:r.author.username }}</b> · <span class="star">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% endif %}{% endfor %}</span> <small style="color:var(--ink-3)">{{ r.created_at|date:"d.m.Y" }}</small>{% if r.comment %}<p style="margin:6px 0 0">{{ r.comment }}</p>{% endif %}</div>{% endfor %}
+  {% if can_review %}
+  <form method="post" action="{% url 'market:review_seller' seller.pk %}" class="formcard" style="max-width:520px">{% csrf_token %}
+    <b>{{ t.review_leave }}</b>
+    <label class="field"><select name="rating" required><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label>
+    <label class="field"><textarea name="comment" rows="3" maxlength="500"></textarea></label>
+    <button class="btn-sea" type="submit">{{ t.review_send }}</button>
+  </form>
+  {% elif user.is_authenticated and user.pk != seller.pk %}<p style="color:var(--ink-3);font-size:13px">{{ t.review_need }}</p>{% endif %}
+</section>
+</div>
 {% endblock %}

@@ -8,6 +8,31 @@ from .models import (Category, City, Listing, ListingImage, ListingVariant, Mode
                      Shop, ShopApplication)
 
 
+class AttrFormMixin:
+    """Kategoriye ozel alanlar (attr_*): kategoriye gore JS ile gosterilir, kayitta yalniz ilgili alanlar alinir."""
+
+    def _init_attrs(self):
+        import json
+        from . import attributes as A
+        for key, (kind, choices, cats) in A.all_keys().items():
+            widget_attrs = {"data-cats": " ".join(cats)}
+            if kind == "number":
+                field = forms.IntegerField(required=False, min_value=0, widget=forms.NumberInput(attrs=widget_attrs))
+            elif kind == "select":
+                field = forms.ChoiceField(required=False, widget=forms.Select(attrs=widget_attrs),
+                                          choices=[("", "—")] + [(c, A.choice_label(c, "tr")) for c in choices])
+            else:
+                field = forms.CharField(required=False, max_length=60, widget=forms.TextInput(attrs=widget_attrs))
+            field.label = A.label(key, "tr")
+            self.fields["attr_" + key] = field
+            self.initial["attr_" + key] = (self.instance.attrs or {}).get(key, "")
+        self.cat_roots_json = json.dumps({c.pk: A.root_slug(c) for c in self.fields["category"].queryset})
+
+    def collect_attrs(self, category):
+        from . import attributes as A
+        return A.clean_attrs(A.root_slug(category), self.cleaned_data)
+
+
 class VideoCleanMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,7 +106,7 @@ class ShopSettingsForm(forms.ModelForm):
         )
 
 
-class ProductForm(VideoCleanMixin, forms.ModelForm):
+class ProductForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
     """Magaza sahibinin urun formu. mode/country/shop otomatik doldurulur."""
 
     class Meta:
@@ -107,6 +132,7 @@ class ProductForm(VideoCleanMixin, forms.ModelForm):
         )
         self.fields["city"].queryset = City.objects.filter(country=self.shop.country)
         self.fields["city"].required = False
+        self._init_attrs()
 
     def save(self, commit=True):
         item = super().save(commit=False)
@@ -114,6 +140,7 @@ class ProductForm(VideoCleanMixin, forms.ModelForm):
         item.shop = self.shop
         item.country = self.shop.country
         item.condition = "new"
+        item.attrs = self.collect_attrs(item.category)
         root = item.category.parent or item.category
         item.icon = root.icon
         item.hue = self.shop.hue
@@ -133,7 +160,7 @@ ListingImageFormSet = forms.modelformset_factory(
 )
 
 
-class IndividualListingForm(VideoCleanMixin, forms.ModelForm):
+class IndividualListingForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
     """Bireysel (ikinci el) ilan formu — sahibinden mantiginda."""
 
     class Meta:
@@ -153,10 +180,12 @@ class IndividualListingForm(VideoCleanMixin, forms.ModelForm):
         )
         self.fields["city"].queryset = City.objects.filter(country=self.country)
         self.fields["city"].required = False
+        self._init_attrs()
 
     def save(self, commit=True, owner=None):
         item = super().save(commit=False)
         item.mode = Mode.USED
+        item.attrs = self.collect_attrs(item.category)
         item.country = self.country
         item.owner = owner or item.owner
         item.seller_name = owner.get_full_name() or owner.username if owner else item.seller_name

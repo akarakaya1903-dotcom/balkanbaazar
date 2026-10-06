@@ -5,6 +5,13 @@ from market.page_translations import TRANSLATIONS
 
 PAGES = [
  [
+  "yardim-merkezi",
+  "Yardım Merkezi",
+  "f2",
+  0,
+  "Sık sorulan sorular ve yanıtları.\n\n1. Nasıl ilan veririm?\nÜye ol, e-postanı doğrula, \"İlan ver\" düğmesine bas. Kategori seç, fiyat ve açıklamayı yaz, fotoğrafları ekle. Bireysel ilanlar ücretsizdir.\n\n2. İlanım neden hemen yayınlanmadı?\nYönetici onayı açıksa yeni ilanlar kontrolden sonra yayına girer. Kurallara uyan ilanlar kısa sürede yayınlanır.\n\n3. İlanım ne kadar süre yayında kalır?\nBireysel ilanlar belirli bir süre sonra yayından kalkar. \"İlanlarım\" sayfasından \"Yenile\" ile tekrar yayına alabilirsin.\n\n4. Mağaza nasıl açılır?\n\"Mağaza aç\" düğmesinden başvuruyu doldur. Mağazan açılınca panelden ürün, stok ve siparişlerini yönetirsin.\n\n5. Ödeme nasıl yapılır?\nŞu an siteden online kart ödemesi alınmıyor. Mağaza siparişlerinde ödeme kapıda yapılır. Bireysel ilanlarda ödeme alıcı ve satıcı arasında kararlaştırılır.\n\n6. Dolandırılmamak için nelere dikkat etmeliyim?\nÜrünü görmeden ön ödeme yapma, halka açık yerde buluş, kimlik ya da şifre bilgisi paylaşma. Şüpheli ilanları \"Şikâyet et\" düğmesiyle bildir.\n\n7. Kayıtlı arama nedir?\nAradığın kriterleri kaydedersen, uyan yeni ilan geldiğinde e-posta ve bildirimle haber veririz. Liste sayfasında \"Aramayı kaydet\" düğmesini kullan.\n\n8. Mesaj bildirimleri gelmiyor, ne yapmalıyım?\nE-posta spam klasörünü kontrol et. Telefonda bildirim için Mesajlar sayfasında \"Bildirimleri aç\" düğmesine bas; iPhone'da önce siteyi ana ekrana eklemelisin.\n\n9. Hesabımı nasıl silerim?\nProfil sayfasının altındaki \"Hesabımı sil\" bağlantısını kullan.\n\n10. Bize nasıl ulaşırım?\nE-posta: [[email]]\nAdres: [[address]]"
+ ],
+ [
   "hakkimizda",
   "Hakkımızda",
   "f1",

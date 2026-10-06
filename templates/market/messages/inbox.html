@@ -3,15 +3,16 @@
 {% block content %}
 <div class="wrap"><section class="sect">
   <div class="rhead"><h2>{{ t.inbox_t }}</h2></div>
-  <div class="stf-table">
+  {% include "market/_push_button.html" %}
+  <div class="stf-table" id="convList">
     {% for r in rows %}
-    <a class="stf-row" style="padding:14px;display:flex" href="{% url 'market:message_thread' r.c.pk %}">
+    <a class="stf-row{% if r.unread %} unread{% endif %}" style="padding:14px;display:flex;align-items:center;gap:10px" href="{% url 'market:message_thread' r.c.pk %}">
       <div>
-        <b>{{ r.other.first_name|default:r.other.username }}</b>
+        <b>{% if r.unread %}● {% endif %}{{ r.other.first_name|default:r.other.username }}</b>
         {% if r.c.listing %}<span>{{ r.c.listing.title }}</span>{% endif %}
         {% if r.last %}<span>{{ r.last.body|truncatechars:60 }}</span>{% endif %}
       </div>
-      {% if r.unread %}<span class="badgeN" style="margin-left:auto">{{ r.unread }}</span>{% endif %}
+      {% if r.unread %}<span class="ubadge" style="margin-left:auto">{{ r.unread }}</span>{% endif %}
     </a>
     {% empty %}
     <div class="empty"><h3>{{ t.no_conv }}</h3><p>{{ t.no_convH }}</p></div>

@@ -112,3 +112,32 @@ def listing_jsonld(context, item):
 @register.filter
 def ptitle(page, lang):
     return page.localized(lang)[0]
+
+
+@register.simple_tag
+def seo_url(mode, cat, sub=None, city=None):
+    """Temiz adresli kategori/sehir sayfasi baglantisi."""
+    from django.urls import reverse
+    from django.utils.text import slugify
+    if city:
+        c = slugify(city)
+        return reverse("market:seo_city_sub", args=[c, mode, cat, sub]) if sub else reverse("market:seo_city", args=[c, mode, cat])
+    return reverse("market:seo_sub", args=[mode, cat, sub]) if sub else reverse("market:seo_category", args=[mode, cat])
+
+
+@register.simple_tag
+def attr_rows(item, lang):
+    from market import attributes
+    return attributes.display_rows(item, lang)
+
+
+@register.simple_tag
+def user_verified(user):
+    from market.models import email_is_verified
+    return bool(user and email_is_verified(user))
+
+
+@register.simple_tag
+def seller_rating_of(user):
+    from market.models import seller_rating
+    return seller_rating(user) if user else (None, 0)
