@@ -107,3 +107,32 @@ class TrustTests(TestCase):
         u = User.objects.create_user("seller", "s@example.com", "pw12345678")
         self.assertEqual(self.client.get(reverse("market:seller_profile", args=[u.pk])).status_code, 200)
         self.assertEqual(self.client.get(reverse("market:panel_verification")).status_code, 302)
+
+
+class SearchableFieldTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_new_city_is_created_for_application_form(self):
+        from .forms import ShopApplicationForm
+        from .models import City, Country
+        country = Country.objects.first()
+        cat = Category.objects.filter(mode=Mode.SHOP, parent__isnull=True).first()
+        data = {"shop_name": "Test Magaza", "country": country.pk, "category": cat.pk, "contact_name": "A B",
+                "email": "a@example.com", "phone": "+38970000000", "city_new": "Yeni Sehir Adi"}
+        form = ShopApplicationForm(data)
+        self.assertTrue(form.is_valid(), form.errors)
+        obj = form.save(commit=False)
+        self.assertEqual(obj.city.name, "Yeni Sehir Adi")
+        self.assertIsNotNone(obj.city.pk)
+        self.assertEqual(City.objects.filter(country=country, name="Yeni Sehir Adi").count(), 1)
+
+    def test_bad_city_name_rejected(self):
+        from .forms import ShopApplicationForm
+        from .models import Country
+        country = Country.objects.first()
+        cat = Category.objects.filter(mode=Mode.SHOP, parent__isnull=True).first()
+        form = ShopApplicationForm({"shop_name": "T", "country": country.pk, "category": cat.pk, "contact_name": "A",
+                                    "email": "a@example.com", "phone": "1", "city_new": "<script>"})
+        self.assertFalse(form.is_valid())

@@ -111,3 +111,14 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .cat-ic.sm svg{width:16px;height:16px}
 .cattile:hover .cat-ic{transform:scale(1.06)}
 @media (max-width:640px){.cattiles{grid-template-columns:repeat(2,1fr)}.cattile{padding:12px;gap:10px;font-size:14px}.cat-ic{width:44px;height:44px}}
+
+/* Aranabilir secim kutusu */
+.combo{position:relative}
+.combo-in{width:100%;box-sizing:border-box}
+.combo-list{position:absolute;z-index:40;left:0;right:0;max-height:260px;overflow:auto;margin:4px 0 0;padding:4px;list-style:none;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(16,24,40,.14)}
+.combo-list[hidden]{display:none}
+.combo-list li{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:14px}
+.combo-list li:hover,.combo-list li.act{background:var(--sea-soft)}
+.combo-list li.on{font-weight:700;color:var(--sea)}
+.combo-list li.add{color:var(--sea);font-weight:700;border-top:1px dashed var(--line);margin-top:4px}
+.combo-list li.none{color:var(--ink-3);cursor:default}

@@ -8,6 +8,53 @@ from .models import (Category, City, Listing, ListingImage, ListingVariant, Mode
                      Shop, ShopApplication)
 
 
+class CitySelect(forms.Select):
+    """Sehir secenekleri icin ulke bilgisini (data-country) ekler; arama kutusu ulkeye gore daraltir."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
+        inst = getattr(value, "instance", None)
+        if inst is not None:
+            option["attrs"]["data-country"] = str(inst.country_id)
+        return option
+
+
+class CityAddMixin:
+    """Aranabilir kategori/ulke/sehir kutulari + listede olmayan sehri yazarak ekleme (city_new)."""
+
+    def _init_combo(self, depends=None):
+        for name in ("category", "country"):
+            if name in self.fields:
+                self.fields[name].widget.attrs["data-combo"] = "1"
+        c = self.fields["city"]
+        attrs = {"data-combo": "1", "data-combo-add": "city_new"}
+        if depends:
+            attrs["data-depends"] = depends
+        if self.is_bound and self.data.get("city_new"):
+            attrs["data-new"] = self.data.get("city_new")
+        c.widget = CitySelect(attrs=attrs)
+        c.widget.choices = c.choices
+
+    def clean(self):
+        import re
+        data = super().clean()
+        new = " ".join((self.data.get("city_new") or "").split())[:60]
+        if new and not data.get("city"):
+            if not re.match(r"^[\w .'’()\-]{2,60}$", new):
+                raise forms.ValidationError("Sehir adi gecersiz.")
+            country = data.get("country") or getattr(self, "country", None) or getattr(getattr(self, "shop", None), "country", None)
+            if country:
+                existing = City.objects.filter(country=country, name__iexact=new).first()
+                data["city"] = existing or City(country=country, name=new)
+        return data
+
+    def _persist_city(self, obj):
+        city = getattr(obj, "city", None)
+        if city is not None and city.pk is None:
+            city.save()
+            obj.city = city
+
+
 class AttrFormMixin:
     """Kategoriye ozel alanlar (attr_*): kategoriye gore JS ile gosterilir, kayitta yalniz ilgili alanlar alinir."""
 
@@ -75,7 +122,7 @@ class SignUpForm(UserCreationForm):
         return user
 
 
-class ShopApplicationForm(forms.ModelForm):
+class ShopApplicationForm(CityAddMixin, forms.ModelForm):
     class Meta:
         model = ShopApplication
         fields = ("shop_name", "country", "city", "category", "contact_name",
@@ -89,6 +136,14 @@ class ShopApplicationForm(forms.ModelForm):
         )
         self.fields["city"].queryset = City.objects.select_related("country")
         self.fields["city"].required = False
+        self._init_combo(depends="id_country")
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        self._persist_city(obj)
+        if commit:
+            obj.save()
+        return obj
 
 
 class ShopSettingsForm(forms.ModelForm):
@@ -106,7 +161,7 @@ class ShopSettingsForm(forms.ModelForm):
         )
 
 
-class ProductForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
+class ProductForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
     """Magaza sahibinin urun formu. mode/country/shop otomatik doldurulur."""
 
     class Meta:
@@ -133,6 +188,7 @@ class ProductForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
         self.fields["city"].queryset = City.objects.filter(country=self.shop.country)
         self.fields["city"].required = False
         self._init_attrs()
+        self._init_combo()
 
     def save(self, commit=True):
         item = super().save(commit=False)
@@ -141,6 +197,7 @@ class ProductForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
         item.country = self.shop.country
         item.condition = "new"
         item.attrs = self.collect_attrs(item.category)
+        self._persist_city(item)
         root = item.category.parent or item.category
         item.icon = root.icon
         item.hue = self.shop.hue
@@ -160,7 +217,7 @@ ListingImageFormSet = forms.modelformset_factory(
 )
 
 
-class IndividualListingForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
+class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
     """Bireysel (ikinci el) ilan formu — sahibinden mantiginda."""
 
     class Meta:
@@ -181,11 +238,13 @@ class IndividualListingForm(AttrFormMixin, VideoCleanMixin, forms.ModelForm):
         self.fields["city"].queryset = City.objects.filter(country=self.country)
         self.fields["city"].required = False
         self._init_attrs()
+        self._init_combo()
 
     def save(self, commit=True, owner=None):
         item = super().save(commit=False)
         item.mode = Mode.USED
         item.attrs = self.collect_attrs(item.category)
+        self._persist_city(item)
         item.country = self.country
         item.owner = owner or item.owner
         item.seller_name = owner.get_full_name() or owner.username if owner else item.seller_name
