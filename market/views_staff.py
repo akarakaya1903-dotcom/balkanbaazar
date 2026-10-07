@@ -151,7 +151,9 @@ def listings(request):
 def listing_toggle_active(request, pk):
     item = get_object_or_404(Listing, pk=pk)
     item.is_active = not item.is_active
-    item.save(update_fields=["is_active"])
+    if item.is_active:
+        item.pending_review = False  # yonetici acarsa onaylanmis sayilir
+    item.save(update_fields=["is_active", "pending_review"])
     return redirect(request.POST.get("next") or "market:staff_listings")
 
 

@@ -16,10 +16,10 @@
             <small>{{ item.city.name }}</small></td>
           <td>{% catname item.category lang %}</td>
           <td>{% price item shop.country %}</td>
-          <td>{% if item.is_boosted %}<span class="ok">★ {{ t.featured_badge }}</span>{% elif item.is_active %}<span class="ok">{{ t.stat_active }}</span>{% else %}—{% endif %}</td>
+          <td>{% if item.pending_review %}<span style="color:#8A5A0E;font-weight:600">⏳ {{ t.stat_pending }}</span>{% elif item.is_boosted %}<span class="ok">★ {{ t.featured_badge }}</span>{% elif item.is_active %}<span class="ok">{{ t.stat_active }}</span>{% else %}—{% endif %}</td>
           <td class="ract">
             <a href="{% url 'market:panel_product_edit' item.pk %}">{{ t.edit }}</a>
-            <a style="color:#8A5A0E" href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>
+            {% if not item.pending_review %}<a style="color:#8A5A0E" href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>{% endif %}
             <a class="danger" href="{% url 'market:panel_product_delete' item.pk %}">{{ t.delete }}</a>
           </td>
         </tr>

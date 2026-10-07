@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from . import emails
+from .i18n import msg
 from .forms import (ListingImageFormSet, photo_count_error, ProductForm, ShipmentForm,
                     ShopApplicationForm, ShopSettingsForm, SignUpForm, VariantFormSet)
 from .models import (ApplicationStatus, Listing, ListingImage, ListingVariant,
@@ -61,7 +62,7 @@ def shop_apply(request):
         bb_event(request, "SubmitApplication")
         emails.notify_application_received(application)
         emails.notify_staff_new_application(application)
-        messages.success(request, "Basvurun alindi. Yonetici onayindan sonra magazan acilacak, e-posta ile haber verecegiz.")
+        messages.success(request, msg(request, "apply_received"))
         return render(request, "market/account/apply_done.html", {"application": application})
     return render(request, "market/account/apply.html", {"form": form})
 
@@ -137,7 +138,7 @@ def panel_product_form(request, pk=None):
             v.save()
         for obj in variant_formset.deleted_objects:
             obj.delete()
-        messages.success(request, "Urun kaydedildi. Yonetici onayindan sonra yayinlanacak." if not item else "Urun kaydedildi.")
+        messages.success(request, msg(request, "product_pending") if not item else "Urun kaydedildi.")
         from .videos import start_video_job
         start_video_job(saved_item)
         return redirect("market:panel_products")

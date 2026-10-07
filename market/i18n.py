@@ -861,3 +861,65 @@ EXTRA7["cnr"] = dict(EXTRA7["bs"])
 
 for _code, _extra in EXTRA7.items():
     T.setdefault(_code, {}).update(_extra)
+
+
+# ---------------------------------------------------------------------------
+# Onay sistemi mesajlari (10 dil). Kullanim: msg(request, "apply_received")
+# ---------------------------------------------------------------------------
+APPROVAL = {
+"tr": {"stat_pending":"Onay bekliyor",
+ "apply_received":"Başvurun alındı. Yönetici onayından sonra mağazan açılacak, e-posta ile haber vereceğiz.",
+ "listing_pending":"İlanın incelemeye alındı, onaylanınca yayınlanacak.",
+ "product_pending":"Ürün kaydedildi. Yönetici onayından sonra yayınlanacak.",
+ "pending_note":"Yönetici onayı bekleniyor. Onaylanınca yayına girer."},
+"en": {"stat_pending":"Awaiting approval",
+ "apply_received":"Your application was received. Your shop will open once an admin approves it, and we will email you.",
+ "listing_pending":"Your listing is under review and will go live once approved.",
+ "product_pending":"Product saved. It will go live once an admin approves it.",
+ "pending_note":"Waiting for admin approval. It goes live once approved."},
+"mk": {"stat_pending":"Чека одобрение",
+ "apply_received":"Пријавата е примена. Продавницата ќе се отвори откако администратор ќе ја одобри, а ние ќе ве известиме по е-пошта.",
+ "listing_pending":"Огласот е на преглед и ќе биде објавен по одобрувањето.",
+ "product_pending":"Производот е зачуван. Ќе биде објавен по одобрување од администратор.",
+ "pending_note":"Се чека одобрение од администратор. По одобрувањето се објавува."},
+"sq": {"stat_pending":"Në pritje të miratimit",
+ "apply_received":"Aplikimi u pranua. Dyqani do të hapet pasi administratori ta miratojë dhe do t'ju njoftojmë me email.",
+ "listing_pending":"Shpallja është në shqyrtim dhe do të publikohet pas miratimit.",
+ "product_pending":"Produkti u ruajt. Do të publikohet pasi administratori ta miratojë.",
+ "pending_note":"Në pritje të miratimit nga administratori. Publikohet sapo miratohet."},
+"sr": {"stat_pending":"Чека одобрење",
+ "apply_received":"Пријава је примљена. Продавница ће бити отворена када администратор одобри, а обавестићемо вас е-поштом.",
+ "listing_pending":"Оглас је на прегледу и биће објављен након одобрења.",
+ "product_pending":"Производ је сачуван. Биће објављен након одобрења администратора.",
+ "pending_note":"Чека се одобрење администратора. Објављује се чим буде одобрено."},
+"bg": {"stat_pending":"Чака одобрение",
+ "apply_received":"Заявката е получена. Магазинът ще се отвори след одобрение от администратор и ще ви уведомим по имейл.",
+ "listing_pending":"Обявата е в процес на преглед и ще бъде публикувана след одобрение.",
+ "product_pending":"Продуктът е запазен. Ще бъде публикуван след одобрение от администратор.",
+ "pending_note":"Чака одобрение от администратор. Публикува се след одобрение."},
+"el": {"stat_pending":"Αναμονή έγκρισης",
+ "apply_received":"Η αίτησή σου ελήφθη. Το κατάστημα θα ανοίξει μόλις την εγκρίνει διαχειριστής και θα σε ειδοποιήσουμε με email.",
+ "listing_pending":"Η αγγελία σου εξετάζεται και θα δημοσιευτεί μόλις εγκριθεί.",
+ "product_pending":"Το προϊόν αποθηκεύτηκε. Θα δημοσιευτεί μόλις το εγκρίνει διαχειριστής.",
+ "pending_note":"Αναμονή έγκρισης από διαχειριστή. Δημοσιεύεται μόλις εγκριθεί."},
+"bs": {"stat_pending":"Čeka odobrenje",
+ "apply_received":"Prijava je primljena. Prodavnica će biti otvorena kada administrator odobri, a obavijestit ćemo vas e-poštom.",
+ "listing_pending":"Oglas je na pregledu i bit će objavljen nakon odobrenja.",
+ "product_pending":"Proizvod je sačuvan. Bit će objavljen nakon odobrenja administratora.",
+ "pending_note":"Čeka se odobrenje administratora. Objavljuje se čim bude odobreno."},
+}
+APPROVAL["hr"] = dict(APPROVAL["bs"], stat_pending="Čeka odobrenje",
+    apply_received="Prijava je primljena. Trgovina će biti otvorena kada administrator odobri, a obavijestit ćemo vas e-poštom.",
+    listing_pending="Oglas je na pregledu i bit će objavljen nakon odobrenja.",
+    product_pending="Proizvod je spremljen. Bit će objavljen nakon odobrenja administratora.")
+APPROVAL["cnr"] = dict(APPROVAL["bs"])
+
+for _code, _msgs in APPROVAL.items():
+    T.setdefault(_code, {}).update(_msgs)
+
+
+def msg(request, key):
+    """Istek diline gore onay mesaji dondurur."""
+    from django.conf import settings
+    lang = getattr(request, "lang_override", None) or request.session.get("lang", settings.DEFAULT_LANG)
+    return tr(lang if lang in T else settings.DEFAULT_LANG, key)

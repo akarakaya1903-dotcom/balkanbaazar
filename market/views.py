@@ -234,7 +234,14 @@ def listing_detail(request, pk, slug):
     item = get_object_or_404(
         Listing.objects.select_related("country", "city", "category", "shop"), pk=pk
     )
-    Listing.objects.filter(pk=pk).update(views=item.views + 1)
+    if item.pending_review:
+        # Onay bekleyen ilani yalniz sahibi ve yonetim gorebilir.
+        u = request.user
+        owner_ids = {item.owner_id, item.shop.owner_id if item.shop_id else None} - {None}
+        if not (u.is_authenticated and (u.is_staff or u.pk in owner_ids)):
+            raise Http404()
+    else:
+        Listing.objects.filter(pk=pk).update(views=item.views + 1)
     similar = (Listing.objects.filter(mode=item.mode, category=item.category,
                                       country=item.country, is_active=True)
                .exclude(pk=item.pk)[:8])

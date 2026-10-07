@@ -174,3 +174,23 @@ class ApprovalTests(TestCase):
         item.refresh_from_db()
         self.assertFalse(item.is_active)
         self.assertTrue(item.pending_review)
+
+    def test_pending_detail_hidden_from_public_visible_to_owner(self):
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create_user("satici2", "s2@example.com", "pw12345678")
+        base = Listing.objects.filter(is_active=True, mode=Mode.USED).first()
+        item = Listing.objects.create(
+            mode=Mode.USED, title="Gizli bekleyen", price_eur=10, country=base.country,
+            category=base.category, owner=user, is_active=False, pending_review=True,
+        )
+        url = reverse("market:listing_detail", args=[item.pk, item.slug])
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_approval_messages_in_all_languages(self):
+        from .i18n import LANGUAGES, T
+        for code, _ in LANGUAGES:
+            for key in ("stat_pending", "apply_received", "listing_pending", "product_pending", "pending_note"):
+                with self.subTest(lang=code, key=key):
+                    self.assertTrue(T[code].get(key))

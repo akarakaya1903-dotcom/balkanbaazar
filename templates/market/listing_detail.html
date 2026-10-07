@@ -1,13 +1,14 @@
 {% extends "base.html" %}{% load market_extras %}
 {% block og_image %}{% if item.image %}{{ request.scheme }}://{{ request.get_host }}{{ item.image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 {% block head_extra %}{% listing_jsonld item %}{% endblock %}
-{% block robots_meta %}{% if not item.is_active %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
+{% block robots_meta %}{% if not item.is_active or item.pending_review %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
 {% block meta_desc %}{{ item.title }} — {{ item.description|truncatechars:150 }}{% endblock %}
 {% block og_title %}{{ item.title }}{% endblock %}
 {% block og_desc %}{{ item.description|truncatechars:150 }}{% endblock %}
 {% block title %}{{ item.title }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap">
+  {% if item.pending_review %}<div style="background:#FFF4DC;border:1px solid #E9B44C;color:#8A5A0E;padding:10px 14px;border-radius:10px;margin:12px 0;font-weight:600">⏳ {{ t.stat_pending }} — {{ t.pending_note }}</div>{% endif %}
   <div class="crumbs">
     <a href="{% url 'market:home' %}">{{ t.brand }}</a> ›
     <a href="{% url 'market:listings' %}?mode={{ item.mode }}&amp;cat={{ item.parent_category.slug }}">{% catname item.parent_category lang %}</a> ›

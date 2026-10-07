@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from . import emails
+from .i18n import msg
 from .forms import (CouponForm, IndividualListingForm, ListingImageFormSet, ReviewForm,
                     photo_count_error)
 from .models import (Boost, BoostStatus, Conversation, Coupon, Country, Favorite,
@@ -78,7 +79,7 @@ def my_listing_form(request, pk=None):
             saved.pending_review = True
             saved.save(update_fields=["is_active", "pending_review"])
             emails.notify_staff_pending_listing(saved)
-            messages.success(request, "İlanın incelemeye alındı, onaylanınca yayınlanacak.")
+            messages.success(request, msg(request, "listing_pending"))
         else:
             messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
         start_video_job(saved)
@@ -438,7 +439,7 @@ def block_user(request, pk):
 
 @login_required
 def start_conversation(request, listing_id):
-    listing = get_object_or_404(Listing, pk=listing_id)
+    listing = get_object_or_404(Listing, pk=listing_id, pending_review=False)
     other = _listing_owner(listing)
     if not other or other == request.user:
         messages.error(request, "Bu ilan için mesajlaşma şu anda kullanılamıyor.")
@@ -507,6 +508,8 @@ def message_thread(request, pk):
 # Ilan one cikarma (ucretli vitrin)
 # ---------------------------------------------------------------------------
 def _can_boost(user, listing):
+    if listing.pending_review:
+        return False
     return listing.owner == user or (listing.shop and listing.shop.owner == user)
 
 
