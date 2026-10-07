@@ -2,7 +2,8 @@ from django.db.models import F
 from django.utils import timezone
 
 SKIP_PREFIXES = ("/admin", "/yonetim", "/static", "/media", "/r/", "/odeme/webhook", "/sitemap", "/robots", "/favicon", "/saglik")
-BOT_WORDS = ("bot", "crawl", "spider", "slurp", "facebookexternalhit", "preview", "monitor")
+BOT_WORDS = ("bot", "crawl", "spider", "slurp", "facebookexternalhit", "preview", "monitor", "uptime", "headless",
+             "python-requests", "curl/", "wget", "lighthouse", "pingdom", "ahrefs", "semrush", "scrapy", "go-http-client")
 
 
 class VisitorCounterMiddleware:
@@ -14,19 +15,35 @@ class VisitorCounterMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         try:
+            # ?bb_ignore=1 ile acilan tarayici sayilmaz (site sahibi kendi cihazlarinda bir kez acar)
+            if request.GET.get("bb_ignore") == "1":
+                response.set_cookie("bb_ignore", "1", max_age=60 * 60 * 24 * 730, samesite="Lax",
+                                    secure=request.is_secure())
+                return response
             ctype = response.get("Content-Type", "")
             ua = request.META.get("HTTP_USER_AGENT", "").lower()
+            user = getattr(request, "user", None)
+            is_staff = bool(user is not None and user.is_authenticated and user.is_staff)
             if (request.method == "GET" and response.status_code == 200 and "text/html" in ctype
                     and not request.path.startswith(SKIP_PREFIXES)
+                    and not request.COOKIES.get("bb_ignore") and not is_staff
                     and not any(w in ua for w in BOT_WORDS)):
+                from django.db.models.functions import Coalesce
+                from django.db.models import Value
+                import uuid
                 from .models import DailyStat
                 today = timezone.localdate()
-                stat, _ = DailyStat.objects.get_or_create(day=today)
+                stat, _ = DailyStat.objects.get_or_create(day=today, defaults={"new_visitors": 0})
                 fields = {"pageviews": F("pageviews") + 1}
                 if request.COOKIES.get("bb_v") != str(today):
                     fields["visitors"] = F("visitors") + 1
                     response.set_cookie("bb_v", str(today), max_age=86400, samesite="Lax",
                                         secure=request.is_secure())
+                if not request.COOKIES.get("bb_uid"):
+                    # Ilk kez gelen tarayici: rastgele kimlik cerezi (kisisel veri icermez, veritabaninda saklanmaz)
+                    fields["new_visitors"] = Coalesce(F("new_visitors"), Value(0)) + 1
+                    response.set_cookie("bb_uid", uuid.uuid4().hex, max_age=60 * 60 * 24 * 730, samesite="Lax",
+                                        secure=request.is_secure(), httponly=True)
                 DailyStat.objects.filter(pk=stat.pk).update(**fields)
         except Exception:
             pass

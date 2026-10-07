@@ -185,8 +185,8 @@ class PageAdmin(admin.ModelAdmin):
 
 @admin.register(DailyStat)
 class DailyStatAdmin(admin.ModelAdmin):
-    list_display = ("day", "visitors", "pageviews")
-    readonly_fields = ("day", "visitors", "pageviews")
+    list_display = ("day", "visitors", "new_visitors", "pageviews")
+    readonly_fields = ("day", "visitors", "new_visitors", "pageviews")
 
     def has_add_permission(self, request):
         return False

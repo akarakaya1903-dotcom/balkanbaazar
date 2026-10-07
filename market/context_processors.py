@@ -37,10 +37,12 @@ def site_context(request):
     try:
         from django.core.cache import cache
         from django.db.models import Sum
+        from django.db.models.functions import Coalesce
         from django.utils import timezone
         def _stats():
             today = DailyStat.objects.filter(day=timezone.localdate()).first()
-            total = DailyStat.objects.aggregate(s=Sum("visitors"))["s"] or 0
+            # Toplam = ilk kez gelen kisiler (ayni kisi her gun tekrar sayilmaz). Eski kayitlarda yedek olarak gunluk sayi kullanilir.
+            total = DailyStat.objects.aggregate(s=Sum(Coalesce("new_visitors", "visitors")))["s"] or 0
             return {"today": today.visitors if today else 0, "total": total}
         visit_stats = cache.get_or_set("visit_stats", _stats, 60)
     except Exception:

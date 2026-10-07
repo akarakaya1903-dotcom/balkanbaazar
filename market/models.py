@@ -681,7 +681,9 @@ class Page(models.Model):
 class DailyStat(models.Model):
     """Gunluk tekil ziyaretci ve sayfa goruntuleme sayaci (kisisel veri tutmaz)."""
     day = models.DateField("Gun", unique=True)
-    visitors = models.PositiveIntegerField("Tekil ziyaretci", default=0)
+    visitors = models.PositiveIntegerField("Bugunku tekil ziyaretci", default=0)
+    new_visitors = models.PositiveIntegerField("Ilk kez gelen kisi", null=True, blank=True,
+                                               help_text="Bos = eski kayit (tekrar eden ziyaretler ayrilamadi)")
     pageviews = models.PositiveIntegerField("Sayfa goruntuleme", default=0)
 
     class Meta:

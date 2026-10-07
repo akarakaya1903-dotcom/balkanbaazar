@@ -234,3 +234,24 @@ class StaffTwoFactorTests(TestCase):
     def test_normal_user_not_affected_and_health_ok(self):
         self.assertEqual(self.client.get("/saglik/").content, b"ok")
         self.assertEqual(self.client.get("/").status_code, 200)
+
+
+class VisitorCounterTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_same_browser_counts_once_and_ignore_cookie(self):
+        from .models import DailyStat
+        self.client.get("/")
+        self.client.get("/")
+        stat = DailyStat.objects.first()
+        self.assertEqual(stat.new_visitors, 1)
+        self.assertEqual(stat.visitors, 1)
+        self.assertEqual(stat.pageviews, 2)
+        from django.test import Client
+        c2 = Client()
+        c2.get("/?bb_ignore=1")
+        c2.get("/")
+        stat.refresh_from_db()
+        self.assertEqual(stat.new_visitors, 1)   # yoksayilan tarayici sayilmadi
