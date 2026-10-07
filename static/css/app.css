@@ -268,7 +268,10 @@ footer ul{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:13px
 /* ===== dropdown ===== */
 .dropdown{position:absolute;right:0;top:110%;background:var(--card);border:1px solid var(--line);
   border-radius:10px;padding:8px;min-width:200px;box-shadow:var(--shadow);z-index:70}
+.dropdown{max-width:calc(100vw - 20px)}
 .dropdown.wide{min-width:250px}
+/* Telefonda hesap menusu satirin solunda durur: paneli soldan hizala, ekran disina tasmasin */
+@media(max-width:860px){.dropdown.start{left:0;right:auto}}
 .dropdown a,.dropdown .linkbtn{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;
   color:var(--ink);font-size:13.5px;width:100%;text-align:left;background:none;border:0}
 .dropdown a:hover,.dropdown .linkbtn:hover{background:var(--bg)}

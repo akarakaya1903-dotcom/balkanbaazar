@@ -76,7 +76,7 @@
       {% if user.is_authenticated %}
       <details style="position:relative">
         <summary class="ghost" style="list-style:none">{{ user.first_name|default:user.username }} ▾</summary>
-        <div class="dropdown">
+        <div class="dropdown start">
           <a href="{% url 'market:panel' %}">{{ t.panel }}</a>
           <a href="{% url 'market:inbox' %}">{{ t.nav_msgs }} <span class="ubadge" data-ub{% if not unread_messages %} hidden{% endif %}>{{ unread_messages }}</span></a>
           <a href="{% url 'market:saved_searches' %}">{{ t.saved_t }}</a>
