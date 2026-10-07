@@ -1,7 +1,7 @@
 from django.db.models import F
 from django.utils import timezone
 
-SKIP_PREFIXES = ("/admin", "/yonetim", "/static", "/media", "/r/", "/odeme/webhook", "/sitemap", "/robots", "/favicon")
+SKIP_PREFIXES = ("/admin", "/yonetim", "/static", "/media", "/r/", "/odeme/webhook", "/sitemap", "/robots", "/favicon", "/saglik")
 BOT_WORDS = ("bot", "crawl", "spider", "slurp", "facebookexternalhit", "preview", "monitor")
 
 
@@ -54,6 +54,29 @@ class ThrottleMiddleware:
                 n = 1
             if n > self.LIMIT:
                 return HttpResponse("Cok fazla deneme. Lutfen birkac dakika sonra tekrar dene.", status=429)
+        return self.get_response(request)
+
+
+class StaffTwoFactorMiddleware:
+    """Yonetici (staff) hesaplari /admin/ ve /yonetim/ alanina girmeden once iki adimli kodu girmek zorundadir.
+    Acil durumda kapatmak icin ortam degiskeni: STAFF_2FA_DISABLED=1"""
+    GUARDED = ("/admin/", "/yonetim/", "/dogrulama-belge/")
+    EXEMPT = ("/admin/login/", "/admin/logout/", "/admin/jsi18n/")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.conf import settings
+        path = request.path_info
+        if (not settings.STAFF_2FA_DISABLED and path.startswith(self.GUARDED)
+                and not path.startswith(self.EXEMPT)):
+            user = getattr(request, "user", None)
+            if (user is not None and user.is_authenticated and user.is_staff
+                    and request.session.get("bb_2fa_user") != user.pk):
+                from urllib.parse import quote
+                from django.http import HttpResponseRedirect
+                return HttpResponseRedirect("/uyelik/iki-adim/?next=" + quote(request.get_full_path()))
         return self.get_response(request)
 
 

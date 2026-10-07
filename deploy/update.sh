@@ -14,6 +14,8 @@ echo ">> Paketler, veritabani, statik dosyalar..."
 ./venv/bin/python manage.py add_categories >/dev/null
 ./venv/bin/python manage.py add_pages >/dev/null
 ./venv/bin/python manage.py fix_ratings >/dev/null
+# Yedek betigi /usr/local/bin'e kopyalandigi icin her guncellemede yenilenir
+[ -f /usr/local/bin/balkanbaazar-backup ] && install -m 755 deploy/backup.sh /usr/local/bin/balkanbaazar-backup
 chown -R www-data:www-data /var/www/balkanbaazar
 systemctl restart balkanbaazar
 # nginx ayarlari, zamanli gorevler (yedek, kayitli arama, video) - tekrar calistirmak guvenli

@@ -2,7 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
 from django.contrib.auth.decorators import login_required
-from . import views, views_account, views_google, views_market, views_staff
+from . import views, views_2fa, views_account, views_google, views_market, views_staff
 
 app_name = "market"
 
@@ -37,6 +37,7 @@ urlpatterns = [
 
     # uyelik
     path("uyelik/kayit/", views_account.signup, name="signup"),
+    path("uyelik/iki-adim/", views_2fa.staff_2fa, name="staff_2fa"),
     path("uyelik/giris/",
          auth_views.LoginView.as_view(template_name="market/account/login.html"),
          name="login"),

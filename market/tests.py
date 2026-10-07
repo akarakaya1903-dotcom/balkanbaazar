@@ -194,3 +194,43 @@ class ApprovalTests(TestCase):
             for key in ("stat_pending", "apply_received", "listing_pending", "product_pending", "pending_note"):
                 with self.subTest(lang=code, key=key):
                     self.assertTrue(T[code].get(key))
+
+
+class StaffTwoFactorTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_totp_rfc_vector_and_replay(self):
+        import base64
+        from . import totp
+        sec = base64.b32encode(b"12345678901234567890").decode()
+        self.assertEqual(totp.verify(sec, "287082", 0, now=59), 1)
+        self.assertIsNone(totp.verify(sec, "287082", 1, now=59))
+        self.assertIsNone(totp.verify(sec, "000000", 0, now=59))
+
+    def test_staff_must_pass_2fa_for_admin_and_panel(self):
+        import time
+        from django.contrib.auth import get_user_model
+        from . import totp
+        from .models import StaffTOTP
+        staff = get_user_model().objects.create_user("yonetici", "y@example.com", "pw12345678", is_staff=True, is_superuser=True)
+        self.client.force_login(staff)
+        for path in ("/admin/", "/yonetim/"):
+            with self.subTest(path=path):
+                r = self.client.get(path)
+                self.assertEqual(r.status_code, 302)
+                self.assertTrue(r["Location"].startswith("/uyelik/iki-adim/"))
+        # kurulum sayfasi acilir, yanlis kod reddedilir, dogru kod gecirir
+        self.assertEqual(self.client.get("/uyelik/iki-adim/").status_code, 200)
+        dev = StaffTOTP.objects.get(user=staff)
+        self.client.post("/uyelik/iki-adim/", {"code": "000000"})
+        self.assertEqual(self.client.get("/admin/").status_code, 302)
+        code = totp._code(dev.secret, int(time.time() // 30))
+        r = self.client.post("/uyelik/iki-adim/", {"code": code, "next": "/admin/"})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(self.client.get("/admin/").status_code, 200)
+
+    def test_normal_user_not_affected_and_health_ok(self):
+        self.assertEqual(self.client.get("/saglik/").content, b"ok")
+        self.assertEqual(self.client.get("/").status_code, 200)

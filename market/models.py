@@ -719,6 +719,20 @@ class UserProfile(models.Model):
         return f"{self.user} ({'dogrulandi' if self.email_verified else 'dogrulanmadi'})"
 
 
+class StaffTOTP(models.Model):
+    """Yonetici hesaplari icin iki adimli dogrulama (TOTP) cihazi."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="totp")
+    secret = models.CharField(max_length=64)
+    confirmed = models.BooleanField(default=False)
+    last_step = models.BigIntegerField(default=0)
+    failed = models.PositiveSmallIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user} ({'aktif' if self.confirmed else 'kurulmadi'})"
+
+
 def email_is_verified(user):
     if user.is_staff:
         return True

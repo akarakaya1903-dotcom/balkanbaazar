@@ -44,7 +44,22 @@ def robots(request):
     return HttpResponse(body, content_type="text/plain")
 
 
+def health(request):
+    """Calisma kontrolu (UptimeRobot vb. icin): veritabani yanitliyorsa 200, degilse 503."""
+    from django.db import connection
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+    except Exception:
+        return HttpResponse("db-error", status=503, content_type="text/plain")
+    resp = HttpResponse("ok", content_type="text/plain")
+    resp["Cache-Control"] = "no-store"
+    return resp
+
+
 urlpatterns = [
+    path("saglik/", health, name="health"),
     path("admin/", admin.site.urls),
     path("sitemap.xml", index, {"sitemaps": SITEMAPS}),
     path("sitemap-<section>.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),

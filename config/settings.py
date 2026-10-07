@@ -27,6 +27,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "market.middleware.StaffTwoFactorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "market.middleware.VisitorCounterMiddleware",
@@ -176,6 +177,8 @@ LISTING_DAYS = int(os.environ.get("LISTING_DAYS", "60"))
 # Sunucu hatalari (500) yoneticilere e-posta ile bildirilir (DEBUG kapaliyken)
 ADMINS = [("Yonetici", e) for e in STAFF_NOTIFY_EMAILS]
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Yonetici iki adimli dogrulama. Telefon kaybi gibi acil durumda sunucuda .env'ye STAFF_2FA_DISABLED=1 yazip servisi yeniden baslat.
+STAFF_2FA_DISABLED = os.environ.get("STAFF_2FA_DISABLED", "0") == "1"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
