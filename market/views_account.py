@@ -56,14 +56,13 @@ def shop_apply(request):
         application = form.save(commit=False)
         application.applicant = request.user
         application.save()
-        # Magaza aninda acilir; firma hemen urun ekleyebilir.
-        shop = application.approve()
+        # Magaza yonetici onayina kadar acilmaz (Shop kaydi onayda olusur).
         from .tracking import bb_event
         bb_event(request, "SubmitApplication")
-        emails.notify_application_approved(application, shop)
+        emails.notify_application_received(application)
         emails.notify_staff_new_application(application)
-        messages.success(request, "Magazan acildi. Ilk urununu ekleyebilirsin.")
-        return redirect("market:panel_product_new")
+        messages.success(request, "Basvurun alindi. Yonetici onayindan sonra magazan acilacak, e-posta ile haber verecegiz.")
+        return render(request, "market/account/apply_done.html", {"application": application})
     return render(request, "market/account/apply.html", {"form": form})
 
 
@@ -120,6 +119,12 @@ def panel_product_form(request, pk=None):
             messages.error(request, photo_err)
     if request.method == "POST" and photo_err is None and form.is_valid() and formset.is_valid() and variant_formset.is_valid():
         saved_item = form.save()
+        if not item:
+            # Yeni urun yonetici onayina kadar yayinlanmaz.
+            saved_item.is_active = False
+            saved_item.pending_review = True
+            saved_item.save(update_fields=["is_active", "pending_review"])
+            emails.notify_staff_pending_listing(saved_item)
         images = formset.save(commit=False)
         for img in images:
             img.listing = saved_item
@@ -132,7 +137,7 @@ def panel_product_form(request, pk=None):
             v.save()
         for obj in variant_formset.deleted_objects:
             obj.delete()
-        messages.success(request, "Urun kaydedildi.")
+        messages.success(request, "Urun kaydedildi. Yonetici onayindan sonra yayinlanacak." if not item else "Urun kaydedildi.")
         from .videos import start_video_job
         start_video_job(saved_item)
         return redirect("market:panel_products")

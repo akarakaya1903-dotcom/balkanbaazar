@@ -53,15 +53,29 @@ class ListingAdmin(admin.ModelAdmin):
     list_display = ("title", "mode", "country", "city", "price_eur", "category", "shop",
                     "is_active", "pending_review", "track_stock", "stock", "featured_until")
     list_filter = ("pending_review", "mode", "country", "condition", "delivery", "is_active", "track_stock")
-    actions = ["approve_listings"]
+    actions = ["approve_listings", "reject_listings"]
     search_fields = ("title", "description")
     autocomplete_fields = ("city",)
     inlines = [ListingImageInline, ListingVariantInline]
 
     @admin.action(description="Secili ilanlari onayla ve yayinla")
     def approve_listings(self, request, queryset):
+        from . import emails
+        items = list(queryset.filter(pending_review=True))
         n = queryset.update(is_active=True, pending_review=False)
+        for item in items:
+            emails.notify_listing_approved(item)
         self.message_user(request, f"{n} ilan yayinlandi.")
+
+    @admin.action(description="Secili bekleyen ilanlari reddet (sahibine e-posta gider, ilan silinir)")
+    def reject_listings(self, request, queryset):
+        from . import emails
+        n = 0
+        for item in queryset.filter(pending_review=True):
+            emails.notify_listing_rejected(item)
+            item.delete()
+            n += 1
+        self.message_user(request, f"{n} bekleyen ilan reddedildi.")
 
 
 @admin.register(Coupon)
@@ -92,17 +106,24 @@ class ShopApplicationAdmin(admin.ModelAdmin):
 
     @admin.action(description="Secili basvurulari onayla ve magazayi ac")
     def approve_selected(self, request, queryset):
+        from . import emails
         created = 0
         for application in queryset.filter(status=ApplicationStatus.PENDING):
-            application.approve()
+            shop = application.approve()
+            emails.notify_application_approved(application, shop)
             created += 1
         self.message_user(request, f"{created} magaza acildi (ilk 3 ay ucretsiz).")
 
     @admin.action(description="Secili basvurulari reddet")
     def reject_selected(self, request, queryset):
+        from . import emails
+        pending = list(queryset.filter(status=ApplicationStatus.PENDING))
         updated = queryset.filter(status=ApplicationStatus.PENDING).update(
             status=ApplicationStatus.REJECTED
         )
+        for application in pending:
+            application.status = ApplicationStatus.REJECTED
+            emails.notify_application_rejected(application)
         self.message_user(request, f"{updated} basvuru reddedildi.")
 
 
@@ -195,6 +216,7 @@ def _dashboard_index(request, extra_context=None):
         {"label": "Bugunku ziyaretci", "value": stat.visitors if stat else 0, "url": link("admin:market_dailystat_changelist")},
         {"label": "Toplam uye", "value": User.objects.count(), "url": link("admin:auth_user_changelist")},
         {"label": "Bugun yeni uye", "value": User.objects.filter(date_joined__date=today).count(), "url": link("admin:auth_user_changelist")},
+        {"label": "Onay bekleyen ilan", "value": Listing.objects.filter(pending_review=True).count(), "url": link("admin:market_listing_changelist") + "?pending_review__exact=1"},
         {"label": "Aktif ilan", "value": Listing.objects.filter(is_active=True).count(), "url": link("admin:market_listing_changelist")},
         {"label": "Magaza", "value": Shop.objects.count(), "url": link("admin:market_shop_changelist")},
         {"label": "Bekleyen basvuru", "value": ShopApplication.objects.filter(status=ApplicationStatus.PENDING).count(), "url": link("admin:market_shopapplication_changelist")},

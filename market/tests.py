@@ -151,3 +151,26 @@ class PixelTests(TestCase):
         self.assertContains(resp, "fbevents.js")
         self.assertContains(resp, "123456789012345")
         self.assertContains(resp, "bbConsentLoad")  # onay verilmeden yuklenmez: yukleme bbConsentLoad ile tetiklenir
+
+
+class ApprovalTests(TestCase):
+    """Onay bekleyen ilan yayina girmez; yenile butonuyla onay atlatilamaz."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_pending_listing_is_not_public_and_cannot_be_renewed(self):
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create_user("satici", "s@example.com", "pw12345678")
+        base = Listing.objects.filter(is_active=True, mode=Mode.USED).first()
+        item = Listing.objects.create(
+            mode=Mode.USED, title="Bekleyen ilan", price_eur=10, country=base.country,
+            category=base.category, owner=user, is_active=False, pending_review=True,
+        )
+        self.assertNotIn(item, Listing.objects.filter(is_active=True))
+        self.client.force_login(user)
+        self.client.post(reverse("market:renew_listing", args=[item.pk]))
+        item.refresh_from_db()
+        self.assertFalse(item.is_active)
+        self.assertTrue(item.pending_review)

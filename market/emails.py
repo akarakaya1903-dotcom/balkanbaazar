@@ -233,6 +233,32 @@ def notify_staff_pending_listing(listing):
           settings.STAFF_NOTIFY_EMAILS)
 
 
+def _listing_owner_email(listing):
+    owner = listing.owner or (listing.shop.owner if listing.shop_id else None)
+    return (owner.email, owner) if owner and owner.email else (None, owner)
+
+
+def notify_listing_approved(listing):
+    to, _ = _listing_owner_email(listing)
+    if not to:
+        return
+    link = _site(f"/ilan/{listing.pk}/{listing.slug}/")
+    _send(f"[Balkan Baazar] Ilanin yayinda: {listing.title}",
+          f"Merhaba,\n\n\"{listing.title}\" ilanin onaylandi ve yayinlandi:\n{link}\n\n— Balkan Baazar\n\n---\n\n"
+          f"Your listing \"{listing.title}\" was approved and is now live:\n{link}\n\n— Balkan Baazar", [to])
+
+
+def notify_listing_rejected(listing, reason=""):
+    to, _ = _listing_owner_email(listing)
+    if not to:
+        return
+    extra = f"\nNot: {reason}\n" if reason else ""
+    _send(f"[Balkan Baazar] Ilanin yayinlanmadi: {listing.title}",
+          f"Merhaba,\n\n\"{listing.title}\" ilanin inceleme sonucunda yayinlanmadi.{extra}\n"
+          "Duzeltip yeniden ilan verebilirsin.\n\n— Balkan Baazar\n\n---\n\n"
+          f"Your listing \"{listing.title}\" was not approved.{extra}\nYou can fix it and post again.\n\n— Balkan Baazar", [to])
+
+
 def verification_link(user):
     from django.core import signing
     token = signing.dumps({"u": user.pk, "e": user.email}, salt="bb-verify")

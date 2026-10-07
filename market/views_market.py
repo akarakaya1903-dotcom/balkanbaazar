@@ -73,9 +73,7 @@ def my_listing_form(request, pk=None):
             img.save()
         for obj in formset.deleted_objects:
             obj.delete()
-        from .models import SiteSettings
-        _ss = SiteSettings.objects.first()
-        if not item and _ss and _ss.moderate_new_listings:
+        if not item:  # yeni ilanlar her zaman yonetici onayindan gecer
             saved.is_active = False
             saved.pending_review = True
             saved.save(update_fields=["is_active", "pending_review"])
@@ -668,11 +666,10 @@ def report_listing(request, pk):
 @login_required
 def renew_listing(request, pk):
     item = get_object_or_404(Listing, pk=pk, owner=request.user)
-    if request.method == "POST":
+    if request.method == "POST" and not item.pending_review:
         item.is_active = True
-        item.pending_review = False
         item.created_at = timezone.now()
-        item.save(update_fields=["is_active", "pending_review", "created_at"])
+        item.save(update_fields=["is_active", "created_at"])
         messages.success(request, "Ilan yenilendi.")
     return redirect("market:my_listings")
 
