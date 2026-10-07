@@ -97,7 +97,7 @@
     <div class="rhead">
       <h2>{% if root %}{% catname root lang %}{% if sub %} · {% catname sub lang %}{% endif %}
           {% else %}{% if mode == 'shop' %}{{ t.all_p }}{% else %}{{ t.all_l }}{% endif %}{% endif %}</h2>
-      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {{ country.name_local }}</span>
+      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {% countryname country lang %}</span>
       {% if user.is_authenticated %}<form method="post" action="{% url 'market:save_search' %}" style="margin:0">{% csrf_token %}<input type="hidden" name="qs" value="{{ search_qs }}"><input type="hidden" name="label" value="{{ search_label }}"><button class="btn-line" type="submit" style="padding:6px 12px;font-size:13px">🔔 {{ t.save_search }}</button></form>
       {% else %}<a class="btn-line" href="{% url 'market:login' %}" style="padding:6px 12px;font-size:13px">🔔 {{ t.save_search }}</a>{% endif %}
       <form method="get" action="{% url 'market:listings' %}">

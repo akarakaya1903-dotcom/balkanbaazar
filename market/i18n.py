@@ -923,3 +923,22 @@ def msg(request, key):
     from django.conf import settings
     lang = getattr(request, "lang_override", None) or request.session.get("lang", settings.DEFAULT_LANG)
     return tr(lang if lang in T else settings.DEFAULT_LANG, key)
+
+
+# ---------------------------------------------------------------------------
+# Baslik / erisilebilirlik etiketleri (10 dil)
+# ---------------------------------------------------------------------------
+MISC = {
+"tr": {"hq_city":"SKOPJE · ÜSKÜP","lang_label":"Dil","country_label":"Ülke","theme_label":"Tema"},
+"en": {"hq_city":"SKOPJE","lang_label":"Language","country_label":"Country","theme_label":"Theme"},
+"mk": {"hq_city":"СКОПЈЕ","lang_label":"Јазик","country_label":"Држава","theme_label":"Тема"},
+"sq": {"hq_city":"SHKUP","lang_label":"Gjuha","country_label":"Shteti","theme_label":"Tema"},
+"sr": {"hq_city":"СКОПЉЕ","lang_label":"Језик","country_label":"Држава","theme_label":"Тема"},
+"bg": {"hq_city":"СКОПИЕ","lang_label":"Език","country_label":"Държава","theme_label":"Тема"},
+"el": {"hq_city":"ΣΚΟΠΙΑ","lang_label":"Γλώσσα","country_label":"Χώρα","theme_label":"Θέμα"},
+"bs": {"hq_city":"SKOPLJE","lang_label":"Jezik","country_label":"Država","theme_label":"Tema"},
+}
+MISC["hr"] = dict(MISC["bs"])
+MISC["cnr"] = dict(MISC["bs"])
+for _code, _m in MISC.items():
+    T.setdefault(_code, {}).update(_m)

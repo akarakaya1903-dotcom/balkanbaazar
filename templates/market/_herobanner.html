@@ -57,12 +57,14 @@
         <a class="cta-outline" href="{% url 'market:my_listing_new' %}"><span>📢</span>{{ t.post }}</a>
       </div>
 
+      {% if show_stats %}
       <div class="hero2-stats">
         <div><b>{{ total_listings }}</b><span>{{ t.s1 }}</span></div>
         <div><b>{{ total_shops }}</b><span>{{ t.s2 }}</span></div>
         <div><b>8</b><span>{{ t.s3 }}</span></div>
         <div><b>10</b><span>{{ t.s4 }}</span></div>
       </div>
+      {% endif %}
     </div>
 
     <div class="hero2-right">

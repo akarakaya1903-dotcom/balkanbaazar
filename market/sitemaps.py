@@ -34,7 +34,7 @@ class ShopSitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        return Shop.objects.all()
+        return Shop.objects.listed()
 
     def location(self, obj):
         return reverse("market:shop_detail", args=[obj.slug])

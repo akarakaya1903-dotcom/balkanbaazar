@@ -37,7 +37,7 @@
     <div class="bar1">
       <a class="logo" href="{% url 'market:home' %}">
         <img src="{% static 'img/logo-96.png' %}" alt="" width="34" height="34" style="border-radius:9px;display:block">
-        <span><b>{{ t.brand }}</b><small>SKOPJE · ÜSKÜP</small></span>
+        <span><b>{{ t.brand }}</b><small>{{ t.hq_city }}</small></span>
       </a>
       <form class="search" action="{% url 'market:listings' %}" method="get" role="search">
         <input type="search" name="q" value="{{ f.q|default:'' }}" placeholder="{{ t.search_ph }}" aria-label="{{ t.search }}">
@@ -45,7 +45,7 @@
         <button type="submit">{{ t.search }}</button>
       </form>
       <details class="hideS" style="position:relative">
-        <summary class="pill" style="list-style:none">{% include "market/_flag.html" with c=country %} {% countryname country lang %} ▾</summary>
+        <summary class="pill" style="list-style:none" aria-label="{{ t.country_label }}" title="{{ t.country_label }}">{% include "market/_flag.html" with c=country %} {% countryname country lang %} ▾</summary>
         <div class="dropdown wide">
           {% for c in countries %}
           <a href="{% url 'market:set_country' c.code %}">
@@ -55,7 +55,7 @@
         </div>
       </details>
       <details style="position:relative">
-        <summary class="pill" style="list-style:none">{{ lang|upper }} ▾</summary>
+        <summary class="pill" style="list-style:none" aria-label="{{ t.lang_label }}" title="{{ t.lang_label }}">🌐 {{ lang|upper }} ▾</summary>
         <div class="dropdown">
           {% for code, name in languages %}
           <a href="/{{ code }}{{ request.path_info }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"><span>{{ name }}</span>
@@ -63,7 +63,7 @@
           {% endfor %}
         </div>
       </details>
-      <button class="pill" data-theme-toggle title="tema" aria-label="tema">◑</button>
+      <button class="pill" data-theme-toggle title="{{ t.theme_label }}" aria-label="{{ t.theme_label }}">◑</button>
     </div>
     <div class="bar2">
       <nav class="mode">

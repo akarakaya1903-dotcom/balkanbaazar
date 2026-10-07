@@ -2,7 +2,7 @@
 {% block title %}{{ t.trending }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><section class="sect">
-  <div class="rhead"><h2>🔥 {{ t.trending }}</h2><span class="cnt">{{ country.flag }} {{ country.name_local }}</span></div>
+  <div class="rhead"><h2>🔥 {{ t.trending }}</h2><span class="cnt">{{ country.flag }} {% countryname country lang %}</span></div>
   <div class="grid">{% for item in items %}{% include "market/_card.html" %}{% empty %}
     <div class="empty"><h3>{{ t.none }}</h3></div>{% endfor %}</div>
 </section></div>

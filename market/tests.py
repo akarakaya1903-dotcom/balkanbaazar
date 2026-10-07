@@ -255,3 +255,50 @@ class VisitorCounterTests(TestCase):
         c2.get("/")
         stat.refresh_from_db()
         self.assertEqual(stat.new_visitors, 1)   # yoksayilan tarayici sayilmadi
+
+
+class SiteCleanupTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_empty_shop_hidden_from_public_lists_and_sitemap(self):
+        from .models import Country, Shop, Listing
+        c = Country.objects.get(code="MK")
+        empty = Shop.objects.create(name="Bos Magaza Testi", country=c)
+        self.assertNotIn(empty, Shop.objects.listed())
+        body = self.client.get("/magazalar/").content.decode()
+        self.assertNotIn("Bos Magaza Testi", body)
+        self.assertNotIn(empty.slug, self.client.get("/sitemap-shops.xml").content.decode())
+        # urunu onay bekliyorsa hala gizli, yayina girince gorunur
+        base = Listing.objects.filter(mode=Mode.SHOP, is_active=True).first()
+        item = Listing.objects.create(mode=Mode.SHOP, title="Test urun", price_eur=5, country=c,
+                                      category=base.category, shop=empty, is_active=False, pending_review=True)
+        self.assertNotIn(empty, Shop.objects.listed())
+        item.is_active, item.pending_review = True, False
+        item.save()
+        self.assertIn(empty, Shop.objects.listed())
+
+    def test_country_names_localized(self):
+        from .models import Country
+        mk = Country.objects.get(code="MK")
+        self.assertEqual(mk.display_name("mk"), "Северна Македонија")
+        self.assertEqual(mk.display_name("sq"), "Maqedonia e Veriut")
+        self.assertEqual(mk.display_name("tr"), mk.name_tr)
+
+    def test_home_meta_uses_language_specific_text_not_turkish_override(self):
+        from .models import SiteSettings
+        ss = SiteSettings.objects.first() or SiteSettings.objects.create()
+        ss.seo_title = "TURKCE OZEL BASLIK"
+        ss.seo_description = "TURKCE OZEL ACIKLAMA"
+        ss.save()
+        self.assertContains(self.client.get("/tr/"), "TURKCE OZEL BASLIK")
+        self.assertNotContains(self.client.get("/en/"), "TURKCE OZEL BASLIK")
+        self.assertNotContains(self.client.get("/mk/"), "TURKCE OZEL ACIKLAMA")
+
+    def test_stats_strip_hidden_when_few_listings(self):
+        from django.test import override_settings
+        with override_settings(STATS_MIN_LISTINGS=10**9):
+            self.assertNotContains(self.client.get("/tr/"), "hero2-stats")
+        with override_settings(STATS_MIN_LISTINGS=1):
+            self.assertContains(self.client.get("/tr/"), "hero2-stats")

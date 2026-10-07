@@ -10,6 +10,27 @@ class Mode(models.TextChoices):
     SHOP = "shop", "Magaza"
 
 
+COUNTRY_NAMES = {
+    "MK": {"mk": "Северна Македонија", "sq": "Maqedonia e Veriut", "sr": "Северна Македонија", "bs": "Sjeverna Makedonija",
+           "hr": "Sjeverna Makedonija", "cnr": "Sjeverna Makedonija", "bg": "Северна Македония", "el": "Βόρεια Μακεδονία"},
+    "AL": {"mk": "Албанија", "sq": "Shqipëri", "sr": "Албанија", "bs": "Albanija", "hr": "Albanija", "cnr": "Albanija",
+           "bg": "Албания", "el": "Αλβανία"},
+    "XK": {"mk": "Косово", "sq": "Kosovë", "sr": "Косово", "bs": "Kosovo", "hr": "Kosovo", "cnr": "Kosovo",
+           "bg": "Косово", "el": "Κόσοβο"},
+    "RS": {"mk": "Србија", "sq": "Serbi", "sr": "Србија", "bs": "Srbija", "hr": "Srbija", "cnr": "Srbija",
+           "bg": "Сърбия", "el": "Σερβία"},
+    "ME": {"mk": "Црна Гора", "sq": "Mali i Zi", "sr": "Црна Гора", "bs": "Crna Gora", "hr": "Crna Gora", "cnr": "Crna Gora",
+           "bg": "Черна гора", "el": "Μαυροβούνιο"},
+    "BA": {"mk": "Босна и Херцеговина", "sq": "Bosnja dhe Hercegovina", "sr": "Босна и Херцеговина",
+           "bs": "Bosna i Hercegovina", "hr": "Bosna i Hercegovina", "cnr": "Bosna i Hercegovina",
+           "bg": "Босна и Херцеговина", "el": "Βοσνία-Ερζεγοβίνη"},
+    "BG": {"mk": "Бугарија", "sq": "Bullgari", "sr": "Бугарска", "bs": "Bugarska", "hr": "Bugarska", "cnr": "Bugarska",
+           "bg": "България", "el": "Βουλγαρία"},
+    "GR": {"mk": "Грција", "sq": "Greqi", "sr": "Грчка", "bs": "Grčka", "hr": "Grčka", "cnr": "Grčka",
+           "bg": "Гърция", "el": "Ελλάδα"},
+}
+
+
 class Country(models.Model):
     """8 Balkan ulkesi. Para birimi ve kur burada tutulur."""
     code = models.CharField(max_length=2, primary_key=True)
@@ -37,7 +58,7 @@ class Country(models.Model):
             return self.name_tr
         if lang == "en":
             return self.name_en
-        return self.name_local
+        return COUNTRY_NAMES.get(self.code, {}).get(lang) or self.name_local
 
     def to_local(self, eur):
         return float(eur) * float(self.rate_per_eur)
@@ -99,6 +120,12 @@ class ShopPlan(models.TextChoices):
     FULL = "full", "29 EUR / ay"
 
 
+class ShopQuerySet(models.QuerySet):
+    def listed(self):
+        """Herkese acik listelerde yalniz yayinda en az bir urunu olan magazalar gorunur."""
+        return self.filter(listings__is_active=True, listings__pending_review=False).distinct()
+
+
 class Shop(models.Model):
     owner = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="shops"
@@ -118,6 +145,8 @@ class Shop(models.Model):
     verified = models.BooleanField(default=False)
     plan = models.CharField(max_length=8, choices=ShopPlan.choices, default=ShopPlan.TRIAL)
     opened_at = models.DateTimeField(default=timezone.now)
+
+    objects = ShopQuerySet.as_manager()
 
     class Meta:
         ordering = ["-verified", "-rating", "name"]
@@ -148,7 +177,7 @@ class Shop(models.Model):
 
     @property
     def product_count(self):
-        return self.listings.count()
+        return self.listings.filter(is_active=True, pending_review=False).count()
 
 
 class Condition(models.TextChoices):

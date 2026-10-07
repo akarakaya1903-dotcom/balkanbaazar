@@ -5,7 +5,7 @@
 <div class="wrap">
   <section class="sect">
     <div class="rhead"><h2>{{ t.shops }}</h2>
-      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {{ country.name_local }}</span></div>
+      <span class="cnt">{{ total }} {{ t.res }} · {{ country.flag }} {% countryname country lang %}</span></div>
     <div class="rail">
       {% for s in page_obj %}
       <a class="shop" href="{% url 'market:shop_detail' s.slug %}">

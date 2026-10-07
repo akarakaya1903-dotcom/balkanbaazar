@@ -173,6 +173,8 @@ MAX_VIDEO_SECONDS = int(os.environ.get("MAX_VIDEO_SECONDS", "240"))
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 LISTING_DAYS = int(os.environ.get("LISTING_DAYS", "60"))
+# Ana sayfadaki "aktif ilan / magaza" sayi seridi, toplam ilan bu sayiya ulasana kadar gizlenir.
+STATS_MIN_LISTINGS = int(os.environ.get("STATS_MIN_LISTINGS", "30"))
 
 # Sunucu hatalari (500) yoneticilere e-posta ile bildirilir (DEBUG kapaliyken)
 ADMINS = [("Yonetici", e) for e in STAFF_NOTIFY_EMAILS]

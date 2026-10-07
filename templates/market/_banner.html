@@ -29,12 +29,14 @@
       <a class="ghost" href="{% url 'market:shop_apply' %}">{{ t.openshop }}</a>
     </div>
 
+    {% if show_stats %}
     <div class="bstats">
       <div><b>{{ total_listings }}</b><span>{{ t.s1 }}</span></div>
       <div><b>{{ total_shops }}</b><span>{{ t.s2 }}</span></div>
       <div><b>8</b><span>{{ t.s3 }}</span></div>
       <div><b>10</b><span>{{ t.s4 }}</span></div>
     </div>
+    {% endif %}
   </div>
 
   <svg class="ridge" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">

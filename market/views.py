@@ -44,7 +44,8 @@ def _nav_categories(mode, country, count="listings"):
     """Kategori seridi icin: alt kategoriler + secili ulkedeki sayilar."""
     qs = Category.objects.filter(mode=mode, parent__isnull=True).prefetch_related("children")
     if count == "shops":
-        return qs.annotate(n=Count("shops", filter=Q(shops__country=country), distinct=True))
+        return qs.annotate(n=Count("shops", filter=Q(shops__country=country, shops__listings__is_active=True,
+                                                      shops__listings__pending_review=False), distinct=True))
     return qs.annotate(
         n=Count("listings", filter=Q(listings__country=country, listings__is_active=True),
                 distinct=True)
@@ -63,7 +64,7 @@ def home(request):
         stats.append({
             "country": c,
             "listings": Listing.objects.filter(country=c, is_active=True).count(),
-            "shops": Shop.objects.filter(country=c).count(),
+            "shops": Shop.objects.listed().filter(country=c).count(),
         })
     stats.sort(key=lambda x: -(x["listings"] + x["shops"]))
     ctx = {
@@ -80,10 +81,12 @@ def home(request):
                     .annotate(boosted=Case(When(featured_until__gte=timezone.now(), then=1),
                                            default=0, output_field=IntegerField()))
                     .order_by("-boosted", "-created_at")[:8],
-        "featured_shops": [sh for sh in Shop.objects.filter(country=country).select_related("city")[:24] if sh.product_count][:6],
+        "featured_shops": list(Shop.objects.listed().filter(country=country).select_related("city")[:6]),
         "total_listings": Listing.objects.filter(is_active=True).count(),
-        "total_shops": Shop.objects.count(),
+        "total_shops": Shop.objects.listed().count(),
     }
+    # Ilan/magaza sayisi az iken sayi seridi siteyi bos gosterir; esik asilinca otomatik acilir.
+    ctx["show_stats"] = ctx["total_listings"] >= settings.STATS_MIN_LISTINGS
     ctx["trending"] = _trending_qs(country)[:8]
     return render(request, "market/home.html", ctx)
 
@@ -210,7 +213,7 @@ def listings(request, _o=None):
         "root": root, "sub": sub, "cities": City.objects.filter(country=country),
         "f": {"q": q, "city": city, "cond": cond, "deliv": deliv,
               "min": pmin, "max": pmax, "sort": sort},
-        "featured_shops": Shop.objects.filter(country=country,
+        "featured_shops": Shop.objects.listed().filter(country=country,
                                               **({"category": root} if root else {}))[:4]
         if mode == Mode.SHOP else [],
         "total": page.paginator.count,
@@ -253,7 +256,7 @@ def listing_detail(request, pk, slug):
 
 def shops(request):
     lang, country = _current(request)
-    qs = Shop.objects.filter(country=country).select_related("city", "category")
+    qs = Shop.objects.listed().filter(country=country).select_related("city", "category")
     cat_slug = request.GET.get("cat", "")
     root = None
     if cat_slug:
@@ -317,7 +320,7 @@ def seo_listing(request, mode, cat, sub=None, city=None):
     t = T.get(lang) or T["en"]
     cat_name = (subcat or root).name(lang)
     mode_label = t.get("used", "") if mode == Mode.USED else t.get("shops", "")
-    place = city_obj.name if city_obj else (country.name_local if country else "")
+    place = city_obj.name if city_obj else (country.display_name(lang) if country else "")
     title = f"{cat_name} · {mode_label} · {place} — {t.get('brand', 'Balkan Baazar')}"
     desc = f"{cat_name} — {mode_label}, {place}. {t.get('heroP', '')}"[:160]
     override["seo"] = {"title": title, "description": desc, "h1": f"{cat_name} · {mode_label} · {place}"}
