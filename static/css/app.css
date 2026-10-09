@@ -435,3 +435,8 @@ summary::-webkit-details-marker{display:none}
 .hcat .ic{font-size:26px}
 .hcat span:last-child{font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap}
 .hcat.more .ic{color:var(--sea);font-weight:800}
+
+.fseo{margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)}
+.fseo-row{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:10px;font-size:12.5px}
+.fseo-row a{opacity:.78;white-space:nowrap}
+.fseo-row a:hover{opacity:1;text-decoration:underline}

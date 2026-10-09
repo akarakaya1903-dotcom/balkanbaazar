@@ -130,6 +130,11 @@
       {% footer_pages "f2" as p2 %}{% if p2 %}<div><h5>{{ t.f2 }}</h5><ul>{% for p in p2 %}<li><a href="{% url 'market:page' p.slug %}">{{ p|ptitle:lang }}</a></li>{% endfor %}</ul></div>{% endif %}
       <div><h5>{{ t.f3 }}</h5><ul>{% for c in countries %}<li><a href="{% url 'market:set_country' c.code %}">{% countryname c lang %}</a></li>{% endfor %}</ul></div>
     </div>
+    {% footer_seo country lang as fseo %}{% if fseo.cats %}
+    <nav class="fseo" aria-label="{{ t.cat }}">
+      <div class="fseo-row">{% for c in fseo.cats %}<a href="{{ c.url }}">{{ c.name }}</a>{% endfor %}</div>
+      {% if fseo.combos %}<div class="fseo-row">{% for c in fseo.combos %}<a href="{{ c.url }}">{{ c.name }}</a>{% endfor %}</div>{% endif %}
+    </nav>{% endif %}
     <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span>{% if visit_stats %}<span>{{ t.visits_today }}: <b>{{ visit_stats.today }}</b> · {{ t.visits_total }}: <b>{{ visit_stats.total }}</b></span>{% endif %}</div>
   </div>
 </footer>

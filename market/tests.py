@@ -402,3 +402,30 @@ class WelcomeMailTests(TestCase):
         u = User.objects.create_user("yeni2", "y2@example.com", "x12345678")
         emails.welcome_user(u, "xx")
         self.assertIn("Welcome", mail.outbox[0].subject)
+
+
+class FooterSeoLinksTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_footer_has_crawlable_category_and_city_links(self):
+        from django.core.cache import cache
+        cache.clear()
+        body = self.client.get("/mk/").content.decode()
+        self.assertIn('class="fseo"', body)
+        self.assertIn("/mk/kategori/used/", body)
+        self.assertNotIn("/mk/mk/", body)
+        self.assertIn("/mk/sehir/", body)
+
+    def test_footer_links_open(self):
+        import re
+        from django.core.cache import cache
+        cache.clear()
+        body = self.client.get("/mk/").content.decode()
+        links = re.findall(r'<div class="fseo-row">(.*?)</div>', body, re.S)
+        hrefs = re.findall(r'href="(/mk/[^"]+)"', "".join(links))
+        self.assertTrue(hrefs)
+        for h in hrefs[:6]:
+            with self.subTest(h=h):
+                self.assertIn(self.client.get(h).status_code, (200, 302))

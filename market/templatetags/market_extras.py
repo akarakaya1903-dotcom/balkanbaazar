@@ -83,6 +83,33 @@ def footer_pages(group):
         return []
 
 
+@register.simple_tag
+def footer_seo(country, lang):
+    """Alt bilgi icin tarayici dostu ic baglantilar: ana kategoriler + 'kategori sehir' birlesimleri."""
+    from django.core.cache import cache
+    from market.models import City, Category, Mode
+    code = getattr(country, "code", "") or ""
+    key = f"footer_seo:{code}:{lang}"
+    data = cache.get(key)
+    if data is not None:
+        return data
+    cats, combos = [], []
+    try:
+        roots = list(Category.objects.filter(mode=Mode.USED, parent__isnull=True)[:10])
+        for r in roots:
+            cats.append({"name": r.name(lang), "url": seo_url(Mode.USED, r.slug)})
+        cities = list(City.objects.filter(country=country)[:3]) if country else []
+        for city in cities:
+            for r in roots[:3]:
+                combos.append({"name": f"{r.name(lang)} · {city.name}",
+                               "url": seo_url(Mode.USED, r.slug, city=city.name)})
+    except Exception:
+        cats, combos = [], []
+    data = {"cats": cats, "combos": combos}
+    cache.set(key, data, 600)
+    return data
+
+
 @register.filter
 def digits(value):
     """Telefondaki rakam disi karakterleri atar (wa.me baglantisi icin)."""
@@ -120,9 +147,9 @@ def listing_jsonld(context, item):
         lang = context.get("lang") or "en"
         root = item.category.parent or item.category
         crumbs = [("Balkan Baazar", request.build_absolute_uri("/" + lang + "/"))]
-        crumbs.append((root.name(lang), request.build_absolute_uri("/" + lang + seo_url(item.mode, root.slug))))
+        crumbs.append((root.name(lang), request.build_absolute_uri(seo_url(item.mode, root.slug))))
         if item.category.parent:
-            crumbs.append((item.category.name(lang), request.build_absolute_uri("/" + lang + seo_url(item.mode, root.slug, item.category.slug))))
+            crumbs.append((item.category.name(lang), request.build_absolute_uri(seo_url(item.mode, root.slug, item.category.slug))))
         crumbs.append((item.title, url))
         scripts.append({"@context": "https://schema.org", "@type": "BreadcrumbList",
                         "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": u}
