@@ -10,7 +10,7 @@
         {% if item and item.image %}
         <div class="imgpreview"><img src="{{ item.image.url }}" alt=""></div>
         {% endif %}
-        {% include "market/_form.html" %}
+        {% include "market/_form.html" with skip="video" %}
 
         <h3 class="gtitle">{{ t.gallery }}</h3>
         <p class="small">{{ t.galleryH }}</p>
@@ -32,6 +32,13 @@
         <input type="file" id="multiPhotos" accept="image/*" multiple hidden>
         <button class="btn-sea" type="button" id="pickPhotos" style="margin-top:6px">{{ t.pick_photos }}</button>
         <button class="btn-line" type="button" id="addPhoto" style="margin-top:6px">+ {{ t.add_photo }}</button>
+
+      <label class="field" style="margin-top:14px">
+        <span>{{ form.video.label }}</span>
+        {{ form.video }}
+        {% if form.video.help_text %}<em class="fhelp">{{ form.video.help_text|safe }}</em>{% endif %}
+        {% if form.video.errors %}<em class="ferr">{{ form.video.errors|striptags }}</em>{% endif %}
+      </label>
         <script>
       (function(){
         var cells=[].slice.call(document.querySelectorAll('.gcell[data-new="1"]')),

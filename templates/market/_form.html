@@ -1,9 +1,9 @@
 {% if form.non_field_errors %}<div class="formerr">{{ form.non_field_errors }}</div>{% endif %}
 {% for field in form %}
-<label class="field">
+{% if field.name != skip %}<label class="field">
   <span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>
   {{ field }}
   {% if field.help_text %}<em class="fhelp">{{ field.help_text|safe }}</em>{% endif %}
   {% if field.errors %}<em class="ferr">{{ field.errors|striptags }}</em>{% endif %}
-</label>
+</label>{% endif %}
 {% endfor %}
