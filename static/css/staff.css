@@ -84,3 +84,7 @@
 .stf-tag.ok{background:#E9F3EA;color:var(--olive)}
 .stf-tag.danger{background:#FBEAE3;color:#9C3C1B}
 .stf-rateinput{width:90px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.stf-side{background:#1d2b33}
+.stf-nav{gap:0;padding:6px 0}
+.stf-nav a{border-radius:0;border-bottom:1px solid rgba(255,255,255,.07);padding:13px 18px}
+.stf-nav a.on{background:#E4A13B;color:#1a1a1a}

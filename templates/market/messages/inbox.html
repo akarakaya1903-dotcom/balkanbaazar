@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ t.inbox_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
-<div class="wrap"><section class="sect">
+<div class="wrap"><div class="panelgrid">{% include "market/account/_menav.html" with section='inbox' %}<section class="sect">
   <div class="rhead"><h2>{{ t.inbox_t }}</h2></div>
   {% include "market/_push_button.html" %}
   <div class="stf-table" id="convList">
@@ -18,5 +18,5 @@
     <div class="empty"><h3>{{ t.no_conv }}</h3><p>{{ t.no_convH }}</p></div>
     {% endfor %}
   </div>
-</section></div>
+</section></div></div>
 {% endblock %}

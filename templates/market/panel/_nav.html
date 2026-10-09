@@ -8,13 +8,13 @@
     </div>
   </div>
   <nav>
-    <a href="{% url 'market:panel' %}" class="{% if section == 'dash' %}on{% endif %}">{{ t.dash }}</a>
-    <a href="{% url 'market:panel_products' %}" class="{% if section == 'products' %}on{% endif %}">{{ t.my_products }}</a>
-    <a href="{% url 'market:panel_product_new' %}" class="{% if section == 'new' %}on{% endif %}">{{ t.new_product }}</a>
-    <a href="{% url 'market:panel_orders' %}" class="{% if section == 'orders' %}on{% endif %}">{{ t.incoming_orders }}</a>
-    <a href="{% url 'market:panel_settings' %}" class="{% if section == 'settings' %}on{% endif %}">{{ t.shop_set }}</a>
-    <a href="{% url 'market:panel_billing' %}" class="{% if section == 'billing' %}on{% endif %}">{{ t.billing }}</a>
-    <a href="{% url 'market:panel_verification' %}" class="{% if section == 'verify' %}on{% endif %}">✔ {{ t.ver_nav }}</a>
-    <a href="{% url 'market:shop_detail' shop.slug %}">{{ t.vis }} →</a>
+    <a href="{% url 'market:panel' %}" class="{% if section == 'dash' %}on{% endif %}">{% icon 'home' %}{{ t.dash }}</a>
+    <a href="{% url 'market:panel_products' %}" class="{% if section == 'products' %}on{% endif %}">{% icon 'list' %}{{ t.my_products }}</a>
+    <a href="{% url 'market:panel_product_new' %}" class="{% if section == 'new' %}on{% endif %}">{% icon 'plus' %}{{ t.new_product }}</a>
+    <a href="{% url 'market:panel_orders' %}" class="{% if section == 'orders' %}on{% endif %}">{% icon 'cart' %}{{ t.incoming_orders }}</a>
+    <a href="{% url 'market:panel_settings' %}" class="{% if section == 'settings' %}on{% endif %}">{% icon 'gear' %}{{ t.shop_set }}</a>
+    <a href="{% url 'market:panel_billing' %}" class="{% if section == 'billing' %}on{% endif %}">{% icon 'card' %}{{ t.billing }}</a>
+    <a href="{% url 'market:panel_verification' %}" class="{% if section == 'verify' %}on{% endif %}">{% icon 'check' %}{{ t.ver_nav }}</a>
+    <a href="{% url 'market:shop_detail' shop.slug %}">{% icon 'eye' %}{{ t.vis }}</a>
   </nav>
 </aside>

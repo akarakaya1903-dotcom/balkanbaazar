@@ -1,4 +1,4 @@
-{% extends "base_staff.html" %}
+{% extends "base_staff.html" %}{% load market_extras %}
 {% block title %}{{ t.mg_dash }}{% endblock %}
 {% block stfcontent %}
 <div class="stf-head">
@@ -17,14 +17,11 @@
   </div>
 </section>
 
-<div class="stf-stats">
-  <div class="stf-stat hi">
-    <b>{{ pending_count }}</b><span>{{ t.mg_pending_apps }}</span>
-    {% if pending_count %}<a href="{% url 'market:staff_applications' %}">{{ t.mg_view }} →</a>{% endif %}
-  </div>
-  <div class="stf-stat"><b>{{ shop_count }}</b><span>{{ t.mg_total_shops }}</span></div>
-  <div class="stf-stat"><b>{{ listing_count }}</b><span>{{ t.mg_total_listings }}</span></div>
-  <div class="stf-stat"><b>{{ user_count }}</b><span>{{ t.mg_total_users }}</span></div>
+<div class="ft-grid">
+  <div class="ft c5"><div class="ft-top">{% icon 'mail' 28 %}<b>{{ pending_count }}</b><span>{{ t.mg_pending_apps }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:staff_applications' %}">{{ t.mg_view }}</a></div></div>
+  <div class="ft c1"><div class="ft-top">{% icon 'store' 28 %}<b>{{ shop_count }}</b><span>{{ t.mg_total_shops }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:staff_shops' %}">{{ t.mg_view }}</a></div></div>
+  <div class="ft c3"><div class="ft-top">{% icon 'list' 28 %}<b>{{ listing_count }}</b><span>{{ t.mg_total_listings }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:staff_listings' %}">{{ t.mg_view }}</a></div></div>
+  <div class="ft c4"><div class="ft-top">{% icon 'users' 28 %}<b>{{ user_count }}</b><span>{{ t.mg_total_users }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'admin:auth_user_changelist' %}">{{ t.mg_view }}</a></div></div>
 </div>
 
 <div class="stf-cols">

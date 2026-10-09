@@ -5,11 +5,11 @@
   {% include "market/panel/_nav.html" with section='dash' %}
   <main>
     <div class="rhead"><h2>{{ t.dash }}</h2><span class="cnt">{{ shop.name }}</span></div>
-    <div class="stats4">
-      <div class="statbox"><b>{{ product_count }}</b><span>{{ t.stat_products }}</span></div>
-      <div class="statbox"><b>{{ active_count }}</b><span>{{ t.stat_active }}</span></div>
-      <div class="statbox"><b>{{ total_views }}</b><span>{{ t.stat_views }}</span></div>
-      <div class="statbox"><b>{{ total_favs }}</b><span>{{ t.stat_favs }}</span></div>
+    <div class="ft-grid">
+      <div class="ft c1"><div class="ft-top">{% icon 'list' 28 %}<b>{{ product_count }}</b><span>{{ t.stat_products }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:panel_products' %}">{{ t.my_products }}</a></div></div>
+      <div class="ft c3"><div class="ft-top">{% icon 'check' 28 %}<b>{{ active_count }}</b><span>{{ t.stat_active }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:panel_products' %}">{{ t.my_products }}</a></div></div>
+      <div class="ft c4"><div class="ft-top">{% icon 'eye' 28 %}<b>{{ total_views }}</b><span>{{ t.stat_views }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:panel_orders' %}">{{ t.incoming_orders }}</a></div></div>
+      <div class="ft c2"><div class="ft-top">{% icon 'heart' 28 %}<b>{{ total_favs }}</b><span>{{ t.stat_favs }}</span></div><div class="ft-bot"><a class="ft-btn" href="{% url 'market:panel_product_new' %}">{{ t.new_product }}</a></div></div>
     </div>
 
     <div class="planbox">

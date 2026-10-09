@@ -516,3 +516,15 @@ class AdminPanelTabsTests(TestCase):
         body = r.content.decode()
         for needle in ('id="bbp"', 'data-tab="listings"', 'data-tab="shops"', 'data-tab="people"', "Yapılacaklar"):
             self.assertIn(needle, body)
+
+
+class DashboardLayoutTests(TestCase):
+    def test_customer_and_shop_panels_render(self):
+        from django.contrib.auth import get_user_model
+        u = get_user_model().objects.create_user("musteri", "m@x.com", "Pass12345!", first_name="Ada")
+        self.client.force_login(u)
+        for path in ("/mk/uyelik/profil/", "/mk/ilanlarim/", "/mk/favorilerim/", "/mk/kayitli-aramalar/", "/mk/mesajlar/"):
+            r = self.client.get(path)
+            self.assertIn(r.status_code, (200, 302), path)
+            if r.status_code == 200:
+                self.assertIn('class="pnav"', r.content.decode(), path)

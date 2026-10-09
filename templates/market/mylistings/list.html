@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load market_extras %}
 {% block title %}{{ t.my_listings_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
-<div class="wrap"><section class="sect">
+<div class="wrap"><div class="panelgrid">{% include "market/account/_menav.html" with section='listings' %}<section class="sect">
   <div class="rhead"><h2>{{ t.my_listings_t }}</h2>
     <a class="solid" style="margin-left:auto" href="{% url 'market:my_listing_new' %}">{{ t.new_listing }}</a></div>
   <div class="grid">
@@ -33,5 +33,5 @@
          href="{% url 'market:my_listing_new' %}">{{ t.new_listing }}</a></div>
     {% endfor %}
   </div>
-</section></div>
+</section></div></div>
 {% endblock %}

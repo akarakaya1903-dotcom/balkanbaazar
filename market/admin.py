@@ -213,14 +213,14 @@ def _dashboard_index(request, extra_context=None):
             return "#"
     User = get_user_model()
     stats = [
-        {"label": "Bugunku ziyaretci", "value": stat.visitors if stat else 0, "url": link("admin:market_dailystat_changelist")},
-        {"label": "Toplam uye", "value": User.objects.count(), "url": link("admin:auth_user_changelist")},
-        {"label": "Bugun yeni uye", "value": User.objects.filter(date_joined__date=today).count(), "url": link("admin:auth_user_changelist")},
-        {"label": "Onay bekleyen ilan", "value": Listing.objects.filter(pending_review=True).count(), "url": link("admin:market_listing_changelist") + "?pending_review__exact=1"},
-        {"label": "Aktif ilan", "value": Listing.objects.filter(is_active=True).count(), "url": link("admin:market_listing_changelist")},
-        {"label": "Magaza", "value": Shop.objects.count(), "url": link("admin:market_shop_changelist")},
-        {"label": "Bekleyen basvuru", "value": ShopApplication.objects.filter(status=ApplicationStatus.PENDING).count(), "url": link("admin:market_shopapplication_changelist")},
-        {"label": "Bugunku siparis", "value": Order.objects.filter(created_at__date=today).count(), "url": link("admin:market_order_changelist")},
+        {"icon": "eye", "label": "Bugunku ziyaretci", "value": stat.visitors if stat else 0, "url": link("admin:market_dailystat_changelist")},
+        {"icon": "users", "label": "Toplam uye", "value": User.objects.count(), "url": link("admin:auth_user_changelist")},
+        {"icon": "user", "label": "Bugun yeni uye", "value": User.objects.filter(date_joined__date=today).count(), "url": link("admin:auth_user_changelist")},
+        {"icon": "flag", "label": "Onay bekleyen ilan", "value": Listing.objects.filter(pending_review=True).count(), "url": link("admin:market_listing_changelist") + "?pending_review__exact=1"},
+        {"icon": "list", "label": "Aktif ilan", "value": Listing.objects.filter(is_active=True).count(), "url": link("admin:market_listing_changelist")},
+        {"icon": "store", "label": "Magaza", "value": Shop.objects.count(), "url": link("admin:market_shop_changelist")},
+        {"icon": "mail", "label": "Bekleyen basvuru", "value": ShopApplication.objects.filter(status=ApplicationStatus.PENDING).count(), "url": link("admin:market_shopapplication_changelist")},
+        {"icon": "cart", "label": "Bugunku siparis", "value": Order.objects.filter(created_at__date=today).count(), "url": link("admin:market_order_changelist")},
     ]
     from .admin_panel import build_tabs
     tabs, todo = build_tabs(request)

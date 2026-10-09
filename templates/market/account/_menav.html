@@ -1,0 +1,16 @@
+{% load market_extras %}
+<aside class="pnav">
+  <div class="pme">
+    <div class="av">{{ user.first_name|default:user.username|slice:":1"|upper }}</div>
+    <div><b>{{ user.first_name|default:user.username }}</b><span>{{ user.email }}</span></div>
+  </div>
+  <nav>
+    <a href="{% url 'market:profile' %}" class="{% if section == 'profile' %}on{% endif %}">{% icon 'user' %}{{ t.profile }}</a>
+    <a href="{% url 'market:my_listings' %}" class="{% if section == 'listings' %}on{% endif %}">{% icon 'list' %}{{ t.my_listings_t }}</a>
+    <a href="{% url 'market:my_favorites' %}" class="{% if section == 'favs' %}on{% endif %}">{% icon 'heart' %}{{ t.favorites_t }}</a>
+    <a href="{% url 'market:inbox' %}" class="{% if section == 'inbox' %}on{% endif %}">{% icon 'chat' %}{{ t.inbox_t }}</a>
+    <a href="{% url 'market:saved_searches' %}" class="{% if section == 'saved' %}on{% endif %}">{% icon 'search' %}{{ t.saved_t }}</a>
+    <a href="{% url 'market:password_change' %}">{% icon 'shield' %}{{ t.password|default:"Şifre" }}</a>
+  </nav>
+  <a class="pnew" href="{% url 'market:my_listing_new' %}">＋ {{ t.new_listing }}</a>
+</aside>

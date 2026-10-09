@@ -259,3 +259,11 @@ def asset(path):
         _ASSET_V[path] = v
     url = static(path)
     return url + ("?v=" + _ASSET_V[path] if _ASSET_V[path] else "")
+
+
+@register.simple_tag
+def icon(key, size=18):
+    """Cizgi ikon (panellerde). Anahtarlar market/admin_panel.py icindeki _P sozlugunde."""
+    from market.admin_panel import _P
+    d = _P.get(key, _P["dots"])
+    return mark_safe('<svg width="%s" height="%s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="%s"/></svg>' % (size, size, d))

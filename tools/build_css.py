@@ -5,7 +5,7 @@ import re
 
 root = pathlib.Path(__file__).resolve().parent.parent / "static" / "css"
 parts = []
-for name in ("app.css", "theme.css", "theme2.css"):
+for name in ("app.css", "theme.css", "theme2.css", "flat.css"):
     css = (root / name).read_text(encoding="utf-8")
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
     css = re.sub(r"\s*\n\s*", "\n", css).strip()
