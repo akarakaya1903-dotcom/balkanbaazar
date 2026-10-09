@@ -429,3 +429,15 @@ class FooterSeoLinksTests(TestCase):
         for h in hrefs[:6]:
             with self.subTest(h=h):
                 self.assertIn(self.client.get(h).status_code, (200, 302))
+
+
+class GuidePagesTests(TestCase):
+    def test_guides_created_and_open(self):
+        from django.core.management import call_command
+        from market.models import Page
+        call_command("add_guides", verbosity=0)
+        self.assertEqual(Page.objects.filter(slug__in=["guvenli-alisveris-rehberi", "ikinci-el-araba-rehberi", "ilan-nasil-verilir"]).count(), 3)
+        call_command("add_guides", verbosity=0)  # idempotent
+        for lang in ("tr", "mk", "sq", "en"):
+            r = self.client.get(f"/{lang}/sayfa/ilan-nasil-verilir/")
+            self.assertEqual(r.status_code, 200)
