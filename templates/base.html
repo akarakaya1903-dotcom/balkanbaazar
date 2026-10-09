@@ -187,6 +187,7 @@ var box=document.getElementById("msgBox");if(box){box.scrollTop=box.scrollHeight
 <button type="button" id="toTop" class="totop" aria-label="Top" hidden>↑</button>
 <script>(function(){var b=document.getElementById("toTop");window.addEventListener("scroll",function(){b.hidden=window.scrollY<600;},{passive:true});b.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});})();</script>
 <button type="button" id="botBtn" class="botbtn" aria-label="{{ t.brand }} Help" aria-expanded="false" aria-controls="botBox"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></button>
+<div id="botHi" class="bothi" hidden><button type="button" id="botHiOpen"></button><button type="button" id="botHiX" aria-label="Close">×</button></div>
 <section id="botBox" class="botbox" hidden role="dialog" aria-label="Help">
   <header><strong id="botTitle"></strong><button type="button" id="botClose" aria-label="Close">×</button></header>
   <div id="botLog" class="botlog" aria-live="polite"></div>
@@ -205,7 +206,13 @@ function ask(text){var t=norm(text),best=-1,score=0;d.qa.forEach(function(q,i){v
  if(best>-1){msg(text,"me");msg(d.qa[best].a,"bot",d.qa[best].l&&d.links[d.qa[best].l]?d.links[d.qa[best].l]:null,d.ui.more);}else{msg(text,"me");msg(d.ui.none,"bot",d.links.contact,d.ui.contact);}}
 d.qa.forEach(function(q,i){var b=document.createElement("button");b.type="button";b.textContent=q.q;b.addEventListener("click",function(){answer(i);});chips.appendChild(b);});
 function toggle(open){box.hidden=!open;btn.setAttribute("aria-expanded",open?"true":"false");if(open&&!started){started=true;msg(d.ui.hello,"bot");}if(open){inp.focus();}}
-btn.addEventListener("click",function(){toggle(box.hidden);});
+var hi=document.getElementById("botHi"),hiOpen=document.getElementById("botHiOpen");
+function hideHi(){hi.hidden=true;}
+btn.addEventListener("click",function(){hideHi();toggle(box.hidden);});
+hiOpen.textContent=d.ui.wave;hiOpen.addEventListener("click",function(){hideHi();toggle(true);});
+document.getElementById("botHiX").addEventListener("click",hideHi);
+var seen=false;try{seen=sessionStorage.getItem("bb_hi")==="1";}catch(e){}
+if(!seen){setTimeout(function(){if(box.hidden){hi.hidden=false;try{sessionStorage.setItem("bb_hi","1");}catch(e){}setTimeout(hideHi,12000);}},2500);}
 document.getElementById("botClose").addEventListener("click",function(){toggle(false);});
 document.getElementById("botForm").addEventListener("submit",function(e){e.preventDefault();var v=inp.value.trim();if(v){ask(v);inp.value="";}});
 })();</script>

@@ -3,10 +3,10 @@
 Her giris: (soru, cevap, anahtar kelimeler, link_anahtari). link_anahtari: post|safe|car|ad|contact|shops"""
 
 UI = {
-    "tr": {"title": "Yardım", "hello": "Merhaba! Sana nasıl yardımcı olabilirim? Bir soru seç ya da yaz.", "ph": "Sorunu yaz…", "none": "Bunu tam anlayamadım. Aşağıdaki sorulardan birini seçebilir ya da bize yazabilirsin.", "more": "Daha fazlası", "contact": "Bize yaz"},
-    "en": {"title": "Help", "hello": "Hi! How can I help? Pick a question or type your own.", "ph": "Type your question…", "none": "I did not quite get that. Pick one of the questions below or write to us.", "more": "Read more", "contact": "Contact us"},
-    "mk": {"title": "Помош", "hello": "Здраво! Како можам да помогнам? Избери прашање или напиши свое.", "ph": "Напиши прашање…", "none": "Не разбрав сосема. Избери едно од прашањата подолу или пиши ни.", "more": "Повеќе", "contact": "Пиши ни"},
-    "sq": {"title": "Ndihmë", "hello": "Përshëndetje! Si mund të ndihmoj? Zgjidh një pyetje ose shkruaj të tuajën.", "ph": "Shkruaj pyetjen…", "none": "Nuk e kuptova mirë. Zgjidh një nga pyetjet më poshtë ose na shkruaj.", "more": "Më shumë", "contact": "Na shkruaj"},
+    "tr": {"title": "Yardım", "hello": "Merhaba! Sana nasıl yardımcı olabilirim? Bir soru seç ya da yaz.", "ph": "Sorunu yaz…", "none": "Bunu tam anlayamadım. Aşağıdaki sorulardan birini seçebilir ya da bize yazabilirsin.", "more": "Daha fazlası", "contact": "Bize yaz", "wave": "👋 Hoş geldin! Yardımcı olabilir miyim?"},
+    "en": {"title": "Help", "hello": "Hi! How can I help? Pick a question or type your own.", "ph": "Type your question…", "none": "I did not quite get that. Pick one of the questions below or write to us.", "more": "Read more", "contact": "Contact us", "wave": "👋 Welcome! Can I help you?"},
+    "mk": {"title": "Помош", "hello": "Здраво! Како можам да помогнам? Избери прашање или напиши свое.", "ph": "Напиши прашање…", "none": "Не разбрав сосема. Избери едно од прашањата подолу или пиши ни.", "more": "Повеќе", "contact": "Пиши ни", "wave": "👋 Добре дојде! Може ли да помогнам?"},
+    "sq": {"title": "Ndihmë", "hello": "Përshëndetje! Si mund të ndihmoj? Zgjidh një pyetje ose shkruaj të tuajën.", "ph": "Shkruaj pyetjen…", "none": "Nuk e kuptova mirë. Zgjidh një nga pyetjet më poshtë ose na shkruaj.", "more": "Më shumë", "contact": "Na shkruaj", "wave": "👋 Mirë se erdhe! Mund të të ndihmoj?"},
 }
 
 QA = {
@@ -47,6 +47,56 @@ QA = {
         ("Pse nuk shfaqet shpallja ime?", "Mund të jetë në pritje të miratimit ose të ketë skaduar. Kontrollo statusin te “Shpalljet e mia” dhe rinovoje nëse ka skaduar.", "nuk shfaqet miratim skaduar shpallja ime", ""),
     ],
 }
+
+UI.update({
+    "sr": {"title": "Помоћ", "hello": "Здраво! Како могу да помогнем? Изабери питање или напиши своје.", "ph": "Напиши питање…", "none": "Нисам најбоље разумео. Изабери једно од питања испод или нам пиши.", "more": "Више", "contact": "Пиши нам", "wave": "👋 Добродошли! Могу ли да помогнем?"},
+    "bs": {"title": "Pomoć", "hello": "Zdravo! Kako mogu pomoći? Odaberi pitanje ili napiši svoje.", "ph": "Napiši pitanje…", "none": "Nisam najbolje razumio. Odaberi jedno od pitanja ispod ili nam piši.", "more": "Više", "contact": "Piši nam", "wave": "👋 Dobrodošli! Mogu li pomoći?"},
+    "hr": {"title": "Pomoć", "hello": "Bok! Kako vam mogu pomoći? Odaberite pitanje ili napišite svoje.", "ph": "Napišite pitanje…", "none": "Nisam baš razumio. Odaberite jedno od pitanja ispod ili nam pišite.", "more": "Više", "contact": "Pišite nam", "wave": "👋 Dobrodošli! Mogu li pomoći?"},
+    "cnr": {"title": "Pomoć", "hello": "Zdravo! Kako mogu pomoći? Izaberi pitanje ili napiši svoje.", "ph": "Napiši pitanje…", "none": "Nijesam najbolje razumio. Izaberi jedno od pitanja ispod ili nam piši.", "more": "Više", "contact": "Piši nam", "wave": "👋 Dobrodošli! Mogu li pomoći?"},
+    "bg": {"title": "Помощ", "hello": "Здравей! Как мога да помогна? Избери въпрос или напиши свой.", "ph": "Напиши въпрос…", "none": "Не разбрах напълно. Избери някой от въпросите по-долу или ни пиши.", "more": "Повече", "contact": "Пиши ни", "wave": "👋 Добре дошли! Мога ли да помогна?"},
+    "el": {"title": "Βοήθεια", "hello": "Γεια σου! Πώς μπορώ να βοηθήσω; Διάλεξε μια ερώτηση ή γράψε τη δική σου.", "ph": "Γράψε την ερώτησή σου…", "none": "Δεν κατάλαβα καλά. Διάλεξε μία από τις ερωτήσεις παρακάτω ή γράψε μας.", "more": "Περισσότερα", "contact": "Επικοινωνία", "wave": "👋 Καλώς ήρθες! Μπορώ να βοηθήσω;"},
+})
+
+_BS = [
+    ("Kako objaviti oglas?", "Pritisni “Objavi” u meniju, odaberi kategoriju, dodaj naslov, cijenu i najmanje 1 fotografiju (najviše 20). Prvi oglas traje oko 2 minute. Cijenu možeš unijeti u svojoj valuti ili u eurima.", "oglas objavi prodati dodati kako postaviti", "post"),
+    ("Da li je objava oglasa besplatna?", "Objava privatnog oglasa je besplatna i bez provizije. Dodatne usluge, poput isticanja, navedene su posebno.", "besplatno cijena cena provizija plaćanje košta", ""),
+    ("Kako da me ne prevare?", "Ne plaćaj unaprijed bez viđenja artikla, nađi se na javnom mjestu, ne dijeli ličnu kartu ni podatke o kartici i budi oprezan s previše niskim cijenama. Na sumnjivom oglasu koristi “Prijavi”.", "prevara sigurno lažno prijava kapara", "safe"),
+    ("Kako otvoriti trgovinu?", "Napravi račun i prijavi se na stranici za otvaranje trgovine. Prijava se pregleda, a nakon odobrenja možeš dodavati proizvode i primati narudžbe.", "trgovina prodavnica radnja biznis prodavač prijava", "shops"),
+    ("Kako se plaća?", "Trenutno nema online plaćanja karticom. Narudžbe iz trgovina plaćaju se pri dostavi. Kod privatnih oglasa plaćanje i dostava dogovaraju se između kupca i prodavca.", "plaćanje kartica dostava gotovina", ""),
+    ("Na šta paziti pri kupovini polovnog auta?", "Provjeri dokumente, kilometražu i servisnu historiju, napravi probnu vožnju i pitaj za dugove ili kazne. Pročitaj naš vodič.", "auto automobil vozilo polovni", "car"),
+    ("Zašto se moj oglas ne vidi?", "Možda čeka odobrenje ili mu je istekao rok. Provjeri status na stranici “Moji oglasi” i obnovi ga ako je istekao.", "ne vidi odobrenje istekao moj oglas", ""),
+]
+
+QA.update({
+    "bs": _BS, "hr": _BS, "cnr": _BS,
+    "sr": [
+        ("Како да објавим оглас?", "Притисни „Објави“ у менију, изабери категорију, додај наслов, цену и бар 1 фотографију (највише 20). Први оглас траје око 2 минута. Цену можеш да унесеш у својој валути или у еврима.", "оглас објави продати додати како", "post"),
+        ("Да ли је објава огласа бесплатна?", "Објава приватног огласа је бесплатна и без провизије. Додатне услуге, попут истицања, наведене су посебно.", "бесплатно цена провизија плаћање кошта", ""),
+        ("Како да ме не преваре?", "Не плаћај унапред без виђења артикла, нађи се на јавном месту, не дели личну карту ни податке о картици и буди опрезан са превише ниским ценама. На сумњивом огласу користи „Пријави“.", "превара безбедно лажно пријава капара", "safe"),
+        ("Како да отворим радњу?", "Направи налог и пријави се на страници за отварање радње. Пријава се прегледа, а након одобрења можеш да додајеш производе и примаш поруџбине.", "радња продавница бизнис продавац пријава", "shops"),
+        ("Како се плаћа?", "Тренутно нема онлајн плаћања картицом. Поруџбине из радњи плаћају се при достави. Код приватних огласа плаћање и достава договарају се између купца и продавца.", "плаћање картица достава готовина", ""),
+        ("На шта пазити при куповини половног аута?", "Провери документа, километражу и сервисну историју, направи пробну вожњу и питај за дугове или казне. Прочитај наш водич.", "ауто аутомобил возило половни", "car"),
+        ("Зашто се мој оглас не види?", "Можда чека одобрење или му је истекао рок. Провери статус на страници „Моји огласи“ и обнови га ако је истекао.", "не види одобрење истекао мој оглас", ""),
+    ],
+    "bg": [
+        ("Как да публикувам обява?", "Натисни „Публикувай“ в менюто, избери категория, добави заглавие, цена и поне 1 снимка (най-много 20). Първата обява отнема около 2 минути. Цената можеш да въведеш в своята валута или в евро.", "обява публикувам продавам добавя как", "post"),
+        ("Безплатно ли е публикуването?", "Публикуването на обява от физическо лице е безплатно и без комисиона. Допълнителните услуги, като подчертаване, са посочени отделно.", "безплатно цена комисиона плащане струва", ""),
+        ("Как да не ме измамят?", "Не плащай предварително, без да си видял артикула, срещни се на обществено място, не споделяй лична карта или данни за карта и внимавай с твърде ниски цени. При съмнителна обява използвай „Докладвай“.", "измама сигурно фалшив докладвай капаро", "safe"),
+        ("Как да отворя магазин?", "Направи профил и кандидатствай от страницата за отваряне на магазин. Заявката се преглежда, а след одобрение можеш да добавяш продукти и да получаваш поръчки.", "магазин бизнис продавач кандидатствай", "shops"),
+        ("Как се плаща?", "Към момента няма онлайн плащане с карта. Поръчките от магазини се плащат при доставка. При обяви от физически лица плащането и доставката се уговарят между купувача и продавача.", "плащане карта доставка наложен", ""),
+        ("Какво да проверя при купуване на кола втора ръка?", "Провери документите, километража и сервизната история, направи тестово шофиране и питай за задължения или глоби. Прочети нашето ръководство.", "кола автомобил превозно средство втора ръка", "car"),
+        ("Защо не се вижда моята обява?", "Може да чака одобрение или да е изтекла. Провери статуса на страницата „Моите обяви“ и я поднови, ако е изтекла.", "не се вижда одобрение изтекла моята обява", ""),
+    ],
+    "el": [
+        ("Πώς δημοσιεύω αγγελία;", "Πάτησε «Πώληση» στο μενού, διάλεξε κατηγορία, πρόσθεσε τίτλο, τιμή και τουλάχιστον 1 φωτογραφία (έως 20). Η πρώτη αγγελία παίρνει περίπου 2 λεπτά. Την τιμή μπορείς να τη βάλεις στο νόμισμά σου ή σε ευρώ.", "αγγελία δημοσίευση πώληση προσθήκη πώς", "post"),
+        ("Είναι δωρεάν η δημοσίευση;", "Η δημοσίευση ιδιωτικής αγγελίας είναι δωρεάν και χωρίς προμήθεια. Οι προαιρετικές υπηρεσίες, όπως η προβολή, αναγράφονται ξεχωριστά.", "δωρεάν τιμή προμήθεια πληρωμή κόστος", ""),
+        ("Πώς να μην με εξαπατήσουν;", "Μην πληρώνεις προκαταβολικά χωρίς να δεις το προϊόν, συναντήσου σε δημόσιο χώρο, μην μοιράζεσαι ταυτότητα ή στοιχεία κάρτας και πρόσεχε τις πολύ χαμηλές τιμές. Στις ύποπτες αγγελίες χρησιμοποίησε το «Αναφορά».", "απάτη ασφαλές πλαστό αναφορά προκαταβολή", "safe"),
+        ("Πώς ανοίγω κατάστημα;", "Φτιάξε λογαριασμό και κάνε αίτηση από τη σελίδα ανοίγματος καταστήματος. Η αίτηση ελέγχεται και μετά την έγκριση μπορείς να προσθέτεις προϊόντα και να λαμβάνεις παραγγελίες.", "κατάστημα επιχείρηση πωλητής αίτηση", "shops"),
+        ("Πώς γίνεται η πληρωμή;", "Προς το παρόν δεν υπάρχει online πληρωμή με κάρτα. Οι παραγγελίες καταστημάτων πληρώνονται κατά την παράδοση. Στις ιδιωτικές αγγελίες η πληρωμή και η παράδοση συμφωνούνται μεταξύ αγοραστή και πωλητή.", "πληρωμή κάρτα παράδοση μετρητά", ""),
+        ("Τι να προσέξω αγοράζοντας μεταχειρισμένο αυτοκίνητο;", "Έλεγξε τα έγγραφα, τα χιλιόμετρα και το ιστορικό service, κάνε δοκιμαστική οδήγηση και ρώτα για οφειλές ή πρόστιμα. Διάβασε τον οδηγό μας.", "αυτοκίνητο όχημα μεταχειρισμένο αμάξι", "car"),
+        ("Γιατί δεν εμφανίζεται η αγγελία μου;", "Ίσως περιμένει έγκριση ή έχει λήξει. Δες την κατάσταση στη σελίδα «Οι αγγελίες μου» και ανανέωσέ την αν έληξε.", "δεν εμφανίζεται έγκριση έληξε αγγελία μου", ""),
+    ],
+})
 
 LINK_SLUGS = {"safe": "guvenli-alisveris-rehberi", "car": "ikinci-el-araba-rehberi", "ad": "ilan-nasil-verilir"}
 
