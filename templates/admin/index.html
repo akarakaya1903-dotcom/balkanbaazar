@@ -1,7 +1,51 @@
 {% extends "admin/index.html" %}
 {% block content %}
-<div class="bb-stats">
-  {% for s in bb_stats %}<a class="bb-card" href="{{ s.url }}"><b>{{ s.value }}</b><span>{{ s.label }}</span></a>{% endfor %}
+<div class="bbp" id="bbp">
+  <nav class="bbp-tabs" role="tablist">
+    <button type="button" role="tab" data-tab="home" class="on">⌂ Özet</button>
+    {% for t in bb_tabs %}<button type="button" role="tab" data-tab="{{ t.key }}">{{ t.icon }} {{ t.title }}{% if t.badge %}<i class="bbp-badge">{{ t.badge }}</i>{% endif %}</button>{% endfor %}
+  </nav>
+
+  <section class="bbp-pane on" data-pane="home">
+    <div class="bb-stats">
+      {% for s in bb_stats %}<a class="bb-card" href="{{ s.url }}"><b>{{ s.value }}</b><span>{{ s.label }}</span></a>{% endfor %}
+    </div>
+    <h3 class="bbp-h">Yapılacaklar</h3>
+    <div class="bbp-todo">
+      {% for x in bb_todo %}<a href="{{ x.url }}" class="{% if x.count %}hot{% endif %}"><b>{{ x.count }}</b><span>{{ x.label }}</span></a>{% endfor %}
+    </div>
+    <h3 class="bbp-h">Kısayollar</h3>
+    <div class="bbp-quick">
+      <a href="/yonetim/">Mağaza yönetimi paneli</a>
+      <a href="/" target="_blank">Siteyi aç ↗</a>
+      <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console ↗</a>
+      <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">PageSpeed ↗</a>
+    </div>
+  </section>
+
+  {% for t in bb_tabs %}
+  <section class="bbp-pane" data-pane="{{ t.key }}">
+    <div class="bbp-grid">
+      {% for c in t.cards %}
+      <div class="bbp-item">
+        <a class="bbp-main" href="{{ c.url }}"><span class="bbp-ic">{{ c.icon }}</span><span><b>{{ c.label }}</b><small>{{ c.desc }}</small></span></a>
+        {% if c.add %}<a class="bbp-add" href="{{ c.add }}" title="Yeni ekle">＋</a>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
 </div>
-{{ block.super }}
+<script>
+(function(){
+var root=document.getElementById("bbp"),tabs=root.querySelectorAll("[data-tab]"),panes=root.querySelectorAll("[data-pane]");
+function show(k){var ok=false;tabs.forEach(function(t){if(t.dataset.tab===k){ok=true;}});if(!ok){k="home";}
+ tabs.forEach(function(t){t.classList.toggle("on",t.dataset.tab===k);t.setAttribute("aria-selected",t.dataset.tab===k);});
+ panes.forEach(function(p){p.classList.toggle("on",p.dataset.pane===k);});
+ try{history.replaceState(null,"","#"+k);}catch(e){}}
+tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.tab);});});
+show((location.hash||"").replace("#","")||"home");
+})();
+</script>
 {% endblock %}
+{% block sidebar %}{% endblock %}

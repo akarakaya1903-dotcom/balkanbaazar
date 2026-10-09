@@ -222,7 +222,9 @@ def _dashboard_index(request, extra_context=None):
         {"label": "Bekleyen basvuru", "value": ShopApplication.objects.filter(status=ApplicationStatus.PENDING).count(), "url": link("admin:market_shopapplication_changelist")},
         {"label": "Bugunku siparis", "value": Order.objects.filter(created_at__date=today).count(), "url": link("admin:market_order_changelist")},
     ]
-    context = {"bb_stats": stats}
+    from .admin_panel import build_tabs
+    tabs, todo = build_tabs(request)
+    context = {"bb_stats": stats, "bb_tabs": tabs, "bb_todo": todo}
     context.update(extra_context or {})
     return _orig_index(request, context)
 

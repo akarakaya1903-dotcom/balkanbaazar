@@ -501,3 +501,18 @@ class EmptyPageNoindexTests(TestCase):
         r = self.client.get(f"/mk/kategori/used/{root.slug}/")
         self.assertEqual(r.status_code, 200)
         self.assertIn('name="robots" content="noindex', r.content.decode())
+
+
+class AdminPanelTabsTests(TestCase):
+    def test_admin_index_has_tabs(self):
+        from django.contrib.auth import get_user_model
+        su = get_user_model().objects.create_superuser("root", "r@x.com", "x")
+        self.client.force_login(su)
+        sess = self.client.session
+        sess["bb_2fa_user"] = su.pk
+        sess.save()
+        r = self.client.get("/admin/")
+        self.assertEqual(r.status_code, 200)
+        body = r.content.decode()
+        for needle in ('id="bbp"', 'data-tab="listings"', 'data-tab="shops"', 'data-tab="people"', "Yapılacaklar"):
+            self.assertIn(needle, body)
