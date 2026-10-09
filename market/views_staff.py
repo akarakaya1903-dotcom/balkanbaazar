@@ -189,3 +189,16 @@ def countries(request):
                       n_shops=Count("shops", distinct=True),
                       n_listings=Count("listings", distinct=True),
                   ), "stf": "countries"})
+
+
+@staff_gate
+@require_POST
+def clear_cache(request):
+    """Sunucu onbellegini (footer linkleri vb.) ve dosya surum numaralarini temizler."""
+    from django.core.cache import cache
+
+    from .templatetags import market_extras
+    cache.clear()
+    market_extras._ASSET_V.clear()
+    messages.success(request, "Onbellek temizlendi. Footer linkleri ve dosya surumleri yeniden hesaplanacak.")
+    return redirect("market:staff_dashboard")

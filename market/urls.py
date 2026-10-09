@@ -87,6 +87,7 @@ urlpatterns = [
     path("yonetim/ilan/<int:pk>/durum/", views_staff.listing_toggle_active, name="staff_listing_toggle"),
     path("yonetim/ilan/<int:pk>/sil/", views_staff.listing_delete, name="staff_listing_delete"),
     path("yonetim/ulkeler/", views_staff.countries, name="staff_countries"),
+    path("yonetim/onbellek-temizle/", views_staff.clear_cache, name="staff_clear_cache"),
 
     # bireysel ilan verme
     path("ilanlarim/", views_market.my_listings, name="my_listings"),

@@ -6,6 +6,17 @@
   <p>{{ t.brand }} — {{ t.manage }}</p>
 </div>
 
+<section class="stf-card" style="margin-bottom:16px">
+  <div class="stf-cardhead"><h2>Önbellek</h2></div>
+  <div class="stf-row">
+    <div><b>Site önbelleğini temizle</b><span>Footer kategori linkleri ve dosya sürümleri yenilenir. Ziyaretçilerin tarayıcı önbelleği temizlenmez; CSS/JS güncellemeleri zaten otomatik yenilenir.</span></div>
+    <div class="stf-rowact">
+      <form method="post" action="{% url 'market:staff_clear_cache' %}" onsubmit="return confirm('Site önbelleği temizlensin mi?')">{% csrf_token %}
+        <button class="stf-btn ok">Önbelleği temizle</button></form>
+    </div>
+  </div>
+</section>
+
 <div class="stf-stats">
   <div class="stf-stat hi">
     <b>{{ pending_count }}</b><span>{{ t.mg_pending_apps }}</span>

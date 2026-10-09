@@ -471,3 +471,21 @@ class FaqBotTests(TestCase):
             self.assertIn('id="botBtn"', body)
             self.assertIn('id="bot-data"', body)
             self.assertIn("/sayfa/ilan-nasil-verilir/", body)
+
+
+class ClearCacheTests(TestCase):
+    def test_staff_can_clear_cache(self):
+        from django.contrib.auth import get_user_model
+        U = get_user_model()
+        staff = U.objects.create_user("stf", password="x", is_staff=True)
+        norm = U.objects.create_user("nrm", password="x")
+        url = "/mk/yonetim/onbellek-temizle/"
+        self.client.force_login(norm)
+        self.assertEqual(self.client.post(url).status_code, 403)
+        self.client.force_login(staff)
+        sess = self.client.session
+        sess["bb_2fa_user"] = staff.pk
+        sess.save()
+        self.assertEqual(self.client.get(url).status_code, 405)
+        r = self.client.post(url)
+        self.assertEqual(r.status_code, 302)
