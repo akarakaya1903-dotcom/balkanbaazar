@@ -76,7 +76,7 @@
       <a class="cattile" href="{% url 'market:set_country' s.country.code %}">
         <span class="ic">{% include "market/_flag.html" with c=s.country %}</span>
         <span>{% countryname s.country lang %}<br>
-          <small style="color:var(--ink-3);font-weight:500">{% if s.listings or s.shops %}{{ s.listings }} {{ t.listings_in }} · {{ s.shops }} {{ t.shops_in }}{% else %}{{ t.soon }}{% endif %}</small></span>
+          <small style="color:var(--ink-3);font-weight:500">{% if s.listings or s.shops %}{{ s.listings }} {{ t.listings_in }} · {{ s.shops }} {{ t.shops_in }}{% else %}{{ t.first_cta }}{% endif %}</small></span>
       </a>
       {% endfor %}
     </div>
