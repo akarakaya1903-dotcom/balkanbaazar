@@ -9,6 +9,9 @@ $py = if (Test-Path ".\venv\Scripts\python.exe") { ".\venv\Scripts\python.exe" }
 function Adim($t) { Write-Host ""; Write-Host ">> $t" -ForegroundColor Cyan }
 function Hata($t) { Write-Host ""; Write-Host "HATA: $t" -ForegroundColor Red; exit 1 }
 
+Adim "0/5 CSS birlestiriliyor"
+& $py tools/build_css.py
+
 Adim "1/5 Migrasyon dosyalari olusturuluyor"
 & $py manage.py makemigrations market
 if ($LASTEXITCODE -ne 0) { Hata "makemigrations basarisiz. Yukaridaki hatayi bana gonder." }
