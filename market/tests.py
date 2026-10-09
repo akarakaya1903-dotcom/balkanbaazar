@@ -581,3 +581,24 @@ class EventMailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Bicikleta", mail.outbox[0].subject)
         self.assertIn("/sq/ilanlarim/", mail.outbox[0].body)
+
+
+class AccountMsgsI18nTests(TestCase):
+    def test_all_keys_all_languages(self):
+        from .i18n import T
+        from .i18n_msgs import DATA
+        for lang in ("tr", "en", "mk", "sq", "sr", "bs", "hr", "cnr", "bg", "el"):
+            for key in DATA:
+                self.assertTrue(T[lang].get(key), f"{lang}:{key}")
+
+    def test_placeholders_kept(self):
+        from .i18n import T
+        for lang in T:
+            self.assertIn("{title}", T[lang]["m_added_cart"])
+            self.assertIn("{days}", T[lang]["m_boosted"])
+
+    def test_password_reset_page_translated(self):
+        from django.urls import reverse
+        url = reverse("market:password_reset")
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)

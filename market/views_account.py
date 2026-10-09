@@ -22,7 +22,7 @@ def signup(request):
         return redirect("market:panel")
     from . import antispam
     if request.method == "POST" and antispam.looks_like_bot(request):
-        messages.error(request, "Form gonderilemedi, sayfayi yenileyip tekrar dene.")
+        messages.error(request, msg(request, "m_form_fail"))
         return redirect("market:signup")
     form = SignUpForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -33,7 +33,7 @@ def signup(request):
         from .tracking import bb_event
         bb_event(request, "CompleteRegistration", {"status": True})
         emails.send_verification(user, emails.lang_of(request))
-        messages.success(request, "Hesabin hazir. E-postani dogrulamak icin gelen kutuna bak.")
+        messages.success(request, msg(request, "m_acct_ready"))
         return redirect("market:panel")
     return render(request, "market/account/signup.html", {"form": form})
 
@@ -139,7 +139,7 @@ def panel_product_form(request, pk=None):
             v.save()
         for obj in variant_formset.deleted_objects:
             obj.delete()
-        messages.success(request, msg(request, "product_pending") if not item else "Urun kaydedildi.")
+        messages.success(request, msg(request, "product_pending") if not item else msg(request, "m_product_saved"))
         from .videos import start_video_job
         start_video_job(saved_item)
         return redirect("market:panel_products")
@@ -154,7 +154,7 @@ def panel_product_delete(request, pk):
     item = get_object_or_404(Listing, pk=pk, shop=shop)
     if request.method == "POST":
         item.delete()
-        messages.success(request, "Urun silindi.")
+        messages.success(request, msg(request, "m_product_deleted"))
         return redirect("market:panel_products")
     return render(request, "market/panel/product_delete.html", {"item": item, "shop": shop})
 
@@ -167,7 +167,7 @@ def panel_settings(request):
     form = ShopSettingsForm(request.POST or None, instance=shop)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Magaza bilgileri guncellendi.")
+        messages.success(request, msg(request, "m_shop_updated"))
         return redirect("market:panel_settings")
     return render(request, "market/panel/settings.html", {"form": form, "shop": shop})
 
@@ -203,7 +203,7 @@ def panel_order_ship(request, item_id):
             item.shipped_at = timezone.now()
             item.save(update_fields=["carrier", "tracking_number", "shipped_at"])
             emails.notify_order_shipped(item)
-            messages.success(request, "Kargo bilgisi kaydedildi.")
+            messages.success(request, msg(request, "m_ship_saved"))
     return redirect("market:panel_orders")
 
 
@@ -220,7 +220,7 @@ def profile(request):
     form = ProfileForm(request.POST or None, instance=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Profil guncellendi.")
+        messages.success(request, msg(request, "m_profile_updated"))
         return redirect("market:profile")
     from .models import email_is_verified
     return render(request, "market/account/profile.html", {"form": form, "verified": email_is_verified(request.user)})
@@ -244,7 +244,7 @@ class PwChange(auth_views.PasswordChangeView):
     def form_valid(self, form):
         response = super().form_valid(form)
         emails.notify_password_changed(self.request.user)
-        messages.success(self.request, "Sifren degistirildi.")
+        messages.success(self.request, msg(self.request, "m_pw_changed"))
         return response
 
 
@@ -253,14 +253,14 @@ def delete_account(request):
     """Hesabi anonimlestirip kapatir. Siparis gecmisi satici icin korunur, kisisel veriler silinir."""
     user = request.user
     if Shop.objects.filter(owner=user).exists():
-        messages.error(request, "Magaza sahibi hesaplar icin silme talebini e-posta ile ilet.")
+        messages.error(request, msg(request, "m_shop_owner_delete"))
         return redirect("market:profile")
     if request.method == "POST":
         has_pw = user.has_usable_password()
         ok = (user.check_password(request.POST.get("password", "")) if has_pw
               else request.POST.get("confirm", "").strip().lower() == (user.email or "").lower())
         if not ok:
-            messages.error(request, "Dogrulama basarisiz.")
+            messages.error(request, msg(request, "m_verify_failed"))
             return redirect("market:delete_account")
         Listing.objects.filter(owner=user).update(is_active=False, seller_name="", seller_phone="")
         uid = user.pk
@@ -273,7 +273,7 @@ def delete_account(request):
         user.save()
         from django.contrib.auth import logout
         logout(request)
-        messages.success(request, "Hesabin silindi.")
+        messages.success(request, msg(request, "m_acct_deleted"))
         return redirect("market:home")
     return render(request, "market/account/delete_account.html", {"has_pw": user.has_usable_password()})
 
@@ -285,12 +285,12 @@ def verify_email(request, token):
         data = signing.loads(token, salt="bb-verify", max_age=3 * 86400)
         user = get_user_model().objects.get(pk=data["u"], email=data["e"])
     except Exception:
-        messages.error(request, "Dogrulama baglantisi gecersiz ya da suresi dolmus.")
+        messages.error(request, msg(request, "m_verify_link_bad"))
         return redirect("market:profile" if request.user.is_authenticated else "market:login")
     prof, _ = UserProfile.objects.get_or_create(user=user)
     prof.email_verified = True
     prof.save(update_fields=["email_verified"])
-    messages.success(request, "E-postan dogrulandi.")
+    messages.success(request, msg(request, "m_email_verified"))
     return redirect("market:profile" if request.user.is_authenticated else "market:login")
 
 
@@ -298,7 +298,7 @@ def verify_email(request, token):
 def resend_verification(request):
     if request.method == "POST":
         emails.send_verification(request.user, emails.lang_of(request))
-        messages.success(request, "Dogrulama e-postasi gonderildi.")
+        messages.success(request, msg(request, "m_verify_sent"))
     return redirect("market:profile")
 
 
@@ -314,13 +314,13 @@ def panel_verification(request):
         doc = request.FILES.get("document")
         ext = os.path.splitext(doc.name)[1].lower() if doc else ""
         if not doc or ext not in (".pdf", ".jpg", ".jpeg", ".png"):
-            messages.error(request, "PDF, JPG veya PNG belge yükle / Upload a PDF, JPG or PNG document.")
+            messages.error(request, msg(request, "m_doc_type"))
         elif doc.size > 8 * 1024 * 1024:
-            messages.error(request, "Belge en fazla 8 MB olabilir / Max 8 MB.")
+            messages.error(request, msg(request, "m_doc_size"))
         else:
             vr = VerificationRequest.objects.create(shop=shop, document=doc, note=request.POST.get("note", "")[:500])
             emails.notify_staff_verification(vr)
-            messages.success(request, "Başvurun alındı, inceleyip dönüş yapacağız / Request received.")
+            messages.success(request, msg(request, "m_verif_received"))
             return redirect("market:panel_verification")
     return render(request, "market/panel/verification.html", {
         "shop": shop, "pending": pending, "last": shop.verification_requests.first()})

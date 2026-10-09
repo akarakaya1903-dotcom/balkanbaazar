@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Sifre degistir — {{ t.brand }}{% endblock %}
+{% block title %}{{ t.a_pw_change_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
-<h1>Şifre değiştir</h1>
-<form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">Kaydet</button></form>
+<h1>{{ t.a_pw_change_t }}</h1>
+<form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">{{ t.save }}</button></form>
 </div></div></div>
 {% endblock %}

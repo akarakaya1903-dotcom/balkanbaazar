@@ -48,11 +48,11 @@ def my_listing_form(request, pk=None):
     item = get_object_or_404(Listing, pk=pk, owner=request.user) if pk else None
     from .models import email_is_verified
     if not pk and not email_is_verified(request.user):
-        messages.error(request, "Ilan vermek icin once e-postani dogrulaman gerekiyor.")
+        messages.error(request, msg(request, "m_need_verify"))
         return redirect("market:profile")
     from . import antispam
     if request.method == "POST" and not pk and antispam.looks_like_bot(request):
-        messages.error(request, "Form gonderilemedi, sayfayi yenileyip tekrar dene.")
+        messages.error(request, msg(request, "m_form_fail"))
         return redirect("market:my_listing_new")
     form = IndividualListingForm(
         request.POST or None, request.FILES or None, instance=item, country=country
@@ -82,7 +82,7 @@ def my_listing_form(request, pk=None):
             emails.notify_listing_received(saved, emails.lang_of(request))
             messages.success(request, msg(request, "listing_pending"))
         else:
-            messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")
+            messages.success(request, msg(request, "m_listing_published") if not item else msg(request, "m_listing_updated"))
         start_video_job(saved)
         if not item:
             from .tracking import bb_event
@@ -97,7 +97,7 @@ def my_listing_delete(request, pk):
     item = get_object_or_404(Listing, pk=pk, owner=request.user)
     if request.method == "POST":
         item.delete()
-        messages.success(request, "İlan silindi.")
+        messages.success(request, msg(request, "m_listing_deleted"))
         return redirect("market:my_listings")
     return render(request, "market/mylistings/delete.html", {"item": item})
 
@@ -154,20 +154,20 @@ def cart_add(request, pk):
     if item.variants.exists():
         variant = item.variants.filter(pk=variant_id).first()
         if not variant:
-            messages.error(request, "Lütfen önce bir seçenek (beden/renk) seç.")
+            messages.error(request, msg(request, "m_pick_option"))
             return redirect("market:listing_detail", pk=item.pk, slug=item.slug)
         if variant.stock <= 0:
-            messages.error(request, "Bu seçenek stokta yok.")
+            messages.error(request, msg(request, "m_option_oos"))
             return redirect("market:listing_detail", pk=item.pk, slug=item.slug)
     elif item.track_stock and (item.stock or 0) <= 0:
-        messages.error(request, "Bu ürün şu anda stokta yok.")
+        messages.error(request, msg(request, "m_out_of_stock"))
         return redirect("market:listing_detail", pk=item.pk, slug=item.slug)
 
     cart = _cart_dict(request)
     key = _cart_key(pk, variant.pk if variant else None)
     cart[key] = int(cart.get(key, 0)) + 1
     request.session.modified = True
-    messages.success(request, f"{item.title} sepete eklendi.")
+    messages.success(request, msg(request, "m_added_cart").format(title=item.title))
     return redirect(request.META.get("HTTP_REFERER") or "market:cart")
 
 
@@ -258,7 +258,7 @@ def checkout(request):
                 line["item"].stock if line["item"].track_stock else None
             )
             if available is not None and available < line["qty"]:
-                messages.error(request, f"{line['item'].title}: yeterli stok kalmadı.")
+                messages.error(request, msg(request, "m_stock_short").format(title=line['item'].title))
                 return redirect("market:cart")
 
         order = Order.objects.create(
@@ -310,7 +310,7 @@ def checkout(request):
                 )
             except Exception:
                 log.exception("Stripe checkout session olusturulamadi")
-                messages.error(request, "Ödeme başlatılamadı, lütfen tekrar dene.")
+                messages.error(request, msg(request, "m_pay_fail"))
                 order.delete()
                 return redirect("market:cart")
             order.stripe_session_id = session.id
@@ -395,7 +395,7 @@ def order_cancel(request, pk):
         order.cancelled_at = timezone.now()
         order.save(update_fields=["status", "cancelled_at"])
         emails.notify_order_cancelled(order)
-        messages.success(request, "Siparişin iptal edildi.")
+        messages.success(request, msg(request, "m_order_cancelled"))
     return redirect("market:my_orders")
 
 
@@ -434,7 +434,7 @@ def block_user(request, pk):
     target = get_object_or_404(User, pk=pk)
     if request.method == "POST" and target != request.user:
         UserBlock.objects.get_or_create(blocker=request.user, blocked=target)
-        messages.success(request, "Kullanici engellendi.")
+        messages.success(request, msg(request, "m_user_blocked"))
     return redirect("market:inbox")
 
 
@@ -443,10 +443,10 @@ def start_conversation(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id, pending_review=False)
     other = _listing_owner(listing)
     if not other or other == request.user:
-        messages.error(request, "Bu ilan için mesajlaşma şu anda kullanılamıyor.")
+        messages.error(request, msg(request, "m_msg_unavailable"))
         return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
     if _is_blocked(request.user, other):
-        messages.error(request, "Bu kullanici ile mesajlasamazsin.")
+        messages.error(request, msg(request, "m_cannot_msg"))
         return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
     a, b = sorted([request.user, other], key=lambda u: u.pk)
     conversation, _ = Conversation.objects.get_or_create(
@@ -475,16 +475,16 @@ def message_thread(request, pk):
         Conversation.objects.select_related("listing", "participant_a", "participant_b"), pk=pk
     )
     if request.user not in (conversation.participant_a, conversation.participant_b):
-        messages.error(request, "Bu sohbete erişimin yok.")
+        messages.error(request, msg(request, "m_no_chat_access"))
         return redirect("market:inbox")
     if request.method == "POST":
         body = request.POST.get("body", "").strip()
         from datetime import timedelta
         if body and _is_blocked(request.user, conversation.other(request.user)):
-            messages.error(request, "Bu kullanici ile mesajlasamazsin.")
+            messages.error(request, msg(request, "m_cannot_msg"))
             return redirect("market:inbox")
         if body and Message.objects.filter(sender=request.user, created_at__gte=timezone.now() - timedelta(seconds=60)).count() >= 8:
-            messages.error(request, "Cok hizli mesaj gonderiyorsun, biraz bekle.")
+            messages.error(request, msg(request, "m_msg_rate"))
             return redirect("market:message_thread", pk=pk)
         if body:
             msg = Message.objects.create(conversation=conversation, sender=request.user, body=body)
@@ -518,7 +518,7 @@ def _can_boost(user, listing):
 def boost_options(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
     if not _can_boost(request.user, listing):
-        messages.error(request, "Bu ilanı öne çıkaramazsın.")
+        messages.error(request, msg(request, "m_cannot_boost"))
         return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
     return render(request, "market/boost/options.html",
                   {"listing": listing, "packages": settings.BOOST_PACKAGES})
@@ -528,7 +528,7 @@ def boost_options(request, listing_id):
 def boost_checkout(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
     if not _can_boost(request.user, listing):
-        messages.error(request, "Bu ilanı öne çıkaramazsın.")
+        messages.error(request, msg(request, "m_cannot_boost"))
         return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
     try:
         days = int(request.POST.get("days", 0))
@@ -536,7 +536,7 @@ def boost_checkout(request, listing_id):
         days = 0
     package = next((p for p in settings.BOOST_PACKAGES if p["days"] == days), None)
     if not package:
-        messages.error(request, "Geçersiz paket.")
+        messages.error(request, msg(request, "m_bad_pack"))
         return redirect("market:boost_options", listing_id=listing.pk)
 
     boost = Boost.objects.create(
@@ -568,7 +568,7 @@ def boost_checkout(request, listing_id):
             )
         except Exception:
             log.exception("Stripe boost session olusturulamadi")
-            messages.error(request, "Ödeme başlatılamadı, lütfen tekrar dene.")
+            messages.error(request, msg(request, "m_pay_fail"))
             boost.delete()
             return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
         boost.stripe_session_id = session.id
@@ -577,7 +577,7 @@ def boost_checkout(request, listing_id):
 
     # Demo akis: Stripe tanimli degilse dogrudan uygula.
     boost.apply()
-    messages.success(request, f"{listing.title} {boost.days} gün süreyle öne çıkarıldı.")
+    messages.success(request, msg(request, "m_boosted").format(title=listing.title, days=boost.days))
     return redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
 
 
@@ -596,7 +596,7 @@ def boost_payment_success(request):
         except Exception:
             log.exception("Stripe boost session dogrulanamadi")
     if boost.status == BoostStatus.PAID:
-        messages.success(request, f"{boost.listing.title} {boost.days} gün süreyle öne çıkarıldı.")
+        messages.success(request, msg(request, "m_boosted").format(title=boost.listing.title, days=boost.days))
     return redirect("market:listing_detail", pk=boost.listing.pk, slug=boost.listing.slug)
 
 
@@ -647,7 +647,7 @@ def review_create(request, order_item_id):
             order_item=item, listing=item.listing, author=request.user,
             rating=int(form.cleaned_data["rating"]), comment=form.cleaned_data["comment"],
         )
-        messages.success(request, "Yorumun için teşekkürler.")
+        messages.success(request, msg(request, "m_review_thanks"))
         return redirect("market:my_orders")
     return render(request, "market/review_form.html", {"form": form, "item": item})
 
@@ -661,9 +661,9 @@ def report_listing(request, pk):
         if text:
             rep = ListingReport.objects.create(listing=item, reporter=request.user, message=text)
             emails.notify_staff_report(rep)
-            messages.success(request, "Sikayetin alindi, tesekkurler.")
+            messages.success(request, msg(request, "m_report_thanks"))
         else:
-            messages.error(request, "Lutfen sikayet metnini yaz.")
+            messages.error(request, msg(request, "m_report_empty"))
     return redirect("market:listing_detail", pk=item.pk, slug=item.slug)
 
 
@@ -674,7 +674,7 @@ def renew_listing(request, pk):
         item.is_active = True
         item.created_at = timezone.now()
         item.save(update_fields=["is_active", "created_at"])
-        messages.success(request, "Ilan yenilendi.")
+        messages.success(request, msg(request, "m_listing_renewed"))
     return redirect("market:my_listings")
 
 
@@ -733,12 +733,12 @@ def save_search(request):
     label = request.POST.get("label", "").strip()[:120] or "Arama"
     country = _current_country(request)
     if SavedSearch.objects.filter(user=request.user).count() >= 10 and not SavedSearch.objects.filter(user=request.user, params=qs).exists():
-        messages.error(request, "En fazla 10 arama kaydedebilirsin.")
+        messages.error(request, msg(request, "m_max_saved"))
     else:
         mode = QueryDict(qs).get("mode") or Mode.USED
         SavedSearch.objects.get_or_create(user=request.user, params=qs,
                                           defaults={"label": label, "country": country, "mode": mode})
-        messages.success(request, "Arama kaydedildi. Yeni ilan gelince haber vereceğiz.")
+        messages.success(request, msg(request, "m_search_saved"))
     return redirect(reverse("market:listings") + ("?" + qs if qs else ""))
 
 
@@ -769,7 +769,7 @@ def review_seller(request, pk):
         if 1 <= rating <= 5:
             SellerReview.objects.create(seller=seller, author=request.user, rating=rating,
                                         comment=request.POST.get("comment", "").strip()[:500])
-            messages.success(request, "Degerlendirmen kaydedildi, tesekkurler.")
+            messages.success(request, msg(request, "m_seller_review_saved"))
     return redirect("market:seller_profile", pk=seller.pk)
 
 

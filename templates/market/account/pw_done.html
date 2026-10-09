@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Gonderildi — {{ t.brand }}{% endblock %}
+{% block title %}{{ t.a_chk_mail_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
-<h1>E-postanı kontrol et</h1>
-<p>Bu adres kayıtlıysa şifre sıfırlama bağlantısı gönderildi. Gelmediyse spam klasörüne bak.</p>
-<p class="authalt"><a href="{% url 'market:login' %}">Girişe dön</a></p>
+<h1>{{ t.a_chk_mail_t }}</h1>
+<p>{{ t.a_chk_mail_p }}</p>
+<p class="authalt"><a href="{% url 'market:login' %}">{{ t.a_back_login }}</a></p>
 </div></div></div>
 {% endblock %}

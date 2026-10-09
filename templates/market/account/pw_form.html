@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Sifre sifirla — {{ t.brand }}{% endblock %}
+{% block title %}{{ t.a_pw_reset_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
-<h1>Şifre sıfırla</h1>
-<p class="small">Kayıtlı e-posta adresini yaz, sana şifre sıfırlama bağlantısı gönderelim.</p>
-<form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">Bağlantı gönder</button></form>
+<h1>{{ t.a_pw_reset_t }}</h1>
+<p class="small">{{ t.a_pw_reset_p }}</p>
+<form method="post" novalidate>{% csrf_token %}{% include "market/_form.html" %}<button class="btn-sea" type="submit">{{ t.a_send_link }}</button></form>
 </div></div></div>
 {% endblock %}

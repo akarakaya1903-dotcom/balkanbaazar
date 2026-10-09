@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Hesabı sil — {{ t.brand }}{% endblock %}
+{% block title %}{{ t.a_del_t }} — {{ t.brand }}{% endblock %}
 {% block content %}
 <div class="wrap"><div class="authwrap"><div class="authbox">
-<h1>Hesabı sil</h1>
-<p>Hesabın kapatılır, kişisel bilgilerin (ad, e-posta) silinir ve ilanların yayından kaldırılır. Bu işlem geri alınamaz.</p>
+<h1>{{ t.a_del_t }}</h1>
+<p>{{ t.a_del_p }}</p>
 <form method="post">{% csrf_token %}
-  {% if has_pw %}<label>Şifren<input type="password" name="password" required autocomplete="current-password"></label>
-  {% else %}<label>Onay için e-posta adresini yaz<input type="email" name="confirm" required></label>{% endif %}
-  <button class="btn-sea" type="submit" style="background:#C0392B;margin-top:10px">Hesabımı kalıcı olarak sil</button>
+  {% if has_pw %}<label>{{ t.a_pw_label }}<input type="password" name="password" required autocomplete="current-password"></label>
+  {% else %}<label>{{ t.a_del_email }}<input type="email" name="confirm" required></label>{% endif %}
+  <button class="btn-sea" type="submit" style="background:#C0392B;margin-top:10px">{{ t.a_del_btn }}</button>
 </form>
-<p class="authalt"><a href="{% url 'market:profile' %}">Vazgeç</a></p>
+<p class="authalt"><a href="{% url 'market:profile' %}">{{ t.a_cancel }}</a></p>
 </div></div></div>
 {% endblock %}

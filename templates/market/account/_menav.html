@@ -10,7 +10,7 @@
     <a href="{% url 'market:my_favorites' %}" class="{% if section == 'favs' %}on{% endif %}">{% icon 'heart' %}{{ t.favorites_t }}</a>
     <a href="{% url 'market:inbox' %}" class="{% if section == 'inbox' %}on{% endif %}">{% icon 'chat' %}{{ t.inbox_t }}</a>
     <a href="{% url 'market:saved_searches' %}" class="{% if section == 'saved' %}on{% endif %}">{% icon 'search' %}{{ t.saved_t }}</a>
-    <a href="{% url 'market:password_change' %}">{% icon 'shield' %}{{ t.password|default:"Şifre" }}</a>
+    <a href="{% url 'market:password_change' %}">{% icon 'shield' %}{{ t.a_pw_short }}</a>
   </nav>
   <a class="pnew" href="{% url 'market:my_listing_new' %}">＋ {{ t.new_listing }}</a>
 </aside>

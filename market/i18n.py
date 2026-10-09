@@ -987,3 +987,9 @@ def seo_text(lang, mode, cat, place, brand="Balkan Baazar"):
     tpl = (SEO_TPL.get(lang) or SEO_TPL["en"])["used" if mode == "used" else "shop"]
     f = lambda s: s.format(cat=cat, place=place, brand=brand)
     return f(tpl[0])[:70], f(tpl[1])[:160]
+
+
+# Hesap sayfalari ve uyari mesajlari (i18n_msgs.py)
+from .i18n_msgs import build as _build_msgs
+for _lang, _d in _build_msgs().items():
+    T.setdefault(_lang, {}).update(_d)

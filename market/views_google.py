@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 from . import emails
+from .i18n import msg
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -44,7 +45,7 @@ def google_callback(request):
         raise Http404
     expected = request.session.pop("g_state", None)
     if not expected or request.GET.get("state") != expected or "code" not in request.GET:
-        messages.error(request, "Google girisi tamamlanamadi, tekrar dene.")
+        messages.error(request, msg(request, "m_g_fail"))
         return redirect("market:login")
     try:
         token = requests.post(TOKEN_URL, data={
@@ -57,11 +58,11 @@ def google_callback(request):
         info = requests.get(INFO_URL, headers={"Authorization": f"Bearer {token['access_token']}"},
                             timeout=10).json()
     except Exception:
-        messages.error(request, "Google ile baglanti kurulamadi.")
+        messages.error(request, msg(request, "m_g_conn"))
         return redirect("market:login")
     email = (info.get("email") or "").strip().lower()
     if not email or not info.get("email_verified"):
-        messages.error(request, "Google hesabinin e-postasi dogrulanmamis.")
+        messages.error(request, msg(request, "m_g_unverified"))
         return redirect("market:login")
     User = get_user_model()
     user = User.objects.filter(email__iexact=email).first()
@@ -88,5 +89,5 @@ def google_callback(request):
         emails.welcome_user(user, emails.lang_of(request))
         from .tracking import bb_event
         bb_event(request, "CompleteRegistration", {"status": True})
-        messages.success(request, "Hesabin hazir.")
+        messages.success(request, msg(request, "m_acct_ready"))
     return redirect("market:panel")
