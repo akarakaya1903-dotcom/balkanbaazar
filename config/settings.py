@@ -160,8 +160,8 @@ BOOST_PACKAGES = [
 ]
 
 # Ilan basina fotograf siniri (kapak dahil toplam)
-MIN_LISTING_IMAGES = int(os.environ.get("MIN_LISTING_IMAGES", "20"))
-MAX_LISTING_IMAGES = int(os.environ.get("MAX_LISTING_IMAGES", "50"))
+MIN_LISTING_IMAGES = int(os.environ.get("MIN_LISTING_IMAGES", "1"))
+MAX_LISTING_IMAGES = int(os.environ.get("MAX_LISTING_IMAGES", "20"))
 
 # Cok fotografli / videolu yuklemeler
 DATA_UPLOAD_MAX_NUMBER_FILES = 300
