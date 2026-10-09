@@ -7,7 +7,6 @@ client_body_timeout 600s;
 send_timeout 600s;
 UP_EOF
 cat > /etc/nginx/conf.d/balkanbaazar-speed.conf <<'SP_EOF'
-gzip on;
 gzip_comp_level 5;
 gzip_min_length 512;
 gzip_vary on;
