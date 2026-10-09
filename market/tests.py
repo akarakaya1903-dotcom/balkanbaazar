@@ -489,3 +489,15 @@ class ClearCacheTests(TestCase):
         self.assertEqual(self.client.get(url).status_code, 405)
         r = self.client.post(url)
         self.assertEqual(r.status_code, 302)
+
+
+class EmptyPageNoindexTests(TestCase):
+    def test_empty_category_page_is_noindex(self):
+        from market.models import Category, Listing, Mode
+        Listing.objects.all().delete()
+        root = Category.objects.filter(mode=Mode.USED, parent__isnull=True).first()
+        if not root:
+            self.skipTest("kategori yok")
+        r = self.client.get(f"/mk/kategori/used/{root.slug}/")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('name="robots" content="noindex', r.content.decode())

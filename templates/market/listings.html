@@ -3,7 +3,7 @@
 
 {% block meta_desc %}{% if seo %}{{ seo.description }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 {% block og_title %}{% if seo %}{{ seo.title }}{% else %}{{ block.super }}{% endif %}{% endblock %}
-{% block robots_meta %}{% if request.GET and not seo %}<meta name="robots" content="noindex,follow">{% endif %}{% endblock %}
+{% block robots_meta %}{% if page_obj.paginator.count == 0 or request.GET and not seo %}<meta name="robots" content="noindex,follow">{% endif %}{% endblock %}
 {% block catstrip %}{% include "market/_catnav.html" %}{% endblock %}
 
 {% block content %}
