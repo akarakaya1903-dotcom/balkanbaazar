@@ -161,86 +161,8 @@ class ShopSettingsForm(forms.ModelForm):
         )
 
 
-class ProductForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
-    """Magaza sahibinin urun formu. mode/country/shop otomatik doldurulur."""
-
-    class Meta:
-        model = Listing
-        fields = ("title", "category", "price_eur", "city", "description", "image", "video",
-                  "delivery", "free_shipping", "is_active", "track_stock", "stock")
-        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
-        labels = {
-            "title": "Urun adi", "category": "Kategori", "price_eur": "Fiyat (EUR)", "city": "Sehir",
-            "description": "Aciklama", "image": "Kapak gorseli", "delivery": "Teslimat",
-            "free_shipping": "Ucretsiz kargo", "is_active": "Yayinda", "track_stock": "Stok takibi",
-            "stock": "Stok adedi",
-        }
-
-    def __init__(self, *args, shop=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.shop = shop or self.instance.shop
-        self.fields["category"].queryset = Category.objects.filter(
-            mode=Mode.SHOP, parent__isnull=False
-        ).select_related("parent")
-        self.fields["category"].label_from_instance = (
-            lambda obj: f"{obj.parent.name('tr')} › {obj.name('tr')}"
-        )
-        self.fields["city"].queryset = City.objects.filter(country=self.shop.country)
-        self.fields["city"].required = False
-        self._init_attrs()
-        self._init_combo()
-
-    def save(self, commit=True):
-        item = super().save(commit=False)
-        item.mode = Mode.SHOP
-        item.shop = self.shop
-        item.country = self.shop.country
-        item.condition = "new"
-        item.attrs = self.collect_attrs(item.category)
-        self._persist_city(item)
-        root = item.category.parent or item.category
-        item.icon = root.icon
-        item.hue = self.shop.hue
-        if commit:
-            item.save()
-        return item
-
-
-class ListingImageForm(forms.ModelForm):
-    class Meta:
-        model = ListingImage
-        fields = ("image",)
-
-
-ListingImageFormSet = forms.modelformset_factory(
-    ListingImage, form=ListingImageForm, extra=49, max_num=49, validate_max=True, can_delete=True
-)
-
-
-class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
-    """Bireysel (ikinci el) ilan formu — sahibinden mantiginda."""
-
-    class Meta:
-        model = Listing
-        fields = ("title", "category", "price_input", "price_currency", "city", "condition", "delivery",
-                  "description", "image", "video", "seller_phone")
-        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
-        labels = {"price_input": "Fiyat"}
-
-    def __init__(self, *args, country=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.country = country or self.instance.country
-        self._init_price()
-        self.fields["category"].queryset = Category.objects.filter(
-            mode=Mode.USED, parent__isnull=False
-        ).select_related("parent")
-        self.fields["category"].label_from_instance = (
-            lambda obj: f"{obj.parent.name('tr')} › {obj.name('tr')}"
-        )
-        self.fields["city"].queryset = City.objects.filter(country=self.country)
-        self.fields["city"].required = False
-        self._init_attrs()
-        self._init_combo()
+class PriceCurrencyMixin:
+    """Fiyat + para birimi: ulkenin kendi parasi (orn. MKD) ve EUR secilebilir; Euro karsiligi otomatik hesaplanir."""
 
     def _init_price(self):
         """Fiyat + para birimi: EUR ve ulkenin kendi parasi (orn. MKD) secilebilir."""
@@ -267,9 +189,7 @@ class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.
             raise forms.ValidationError("Gecerli bir fiyat gir.")
         return value
 
-    def save(self, commit=True, owner=None):
-        item = super().save(commit=False)
-        item.mode = Mode.USED
+    def _apply_price(self, item):
         # girilen fiyati ortak Euro karsiligina cevir (arama, filtre ve siralama icin)
         amount = self.cleaned_data["price_input"]
         cur = self.cleaned_data["price_currency"]
@@ -277,6 +197,96 @@ class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.
         item.price_currency = cur
         item.price_input = amount
         item.price_eur = amount if cur == "EUR" else round(float(amount) / rate, 2)
+
+
+class ProductForm(PriceCurrencyMixin, CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
+    """Magaza sahibinin urun formu. mode/country/shop otomatik doldurulur."""
+
+    class Meta:
+        model = Listing
+        fields = ("title", "category", "price_input", "price_currency", "city", "description", "image", "video",
+                  "delivery", "free_shipping", "is_active", "track_stock", "stock")
+        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        labels = {
+            "title": "Urun adi", "category": "Kategori", "price_input": "Fiyat", "city": "Sehir",
+            "description": "Aciklama", "image": "Kapak gorseli", "delivery": "Teslimat",
+            "free_shipping": "Ucretsiz kargo", "is_active": "Yayinda", "track_stock": "Stok takibi",
+            "stock": "Stok adedi",
+        }
+
+    def __init__(self, *args, shop=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shop = shop or self.instance.shop
+        self.country = self.shop.country
+        self._init_price()
+        self.fields["category"].queryset = Category.objects.filter(
+            mode=Mode.SHOP, parent__isnull=False
+        ).select_related("parent")
+        self.fields["category"].label_from_instance = (
+            lambda obj: f"{obj.parent.name('tr')} › {obj.name('tr')}"
+        )
+        self.fields["city"].queryset = City.objects.filter(country=self.shop.country)
+        self.fields["city"].required = False
+        self._init_attrs()
+        self._init_combo()
+
+    def save(self, commit=True):
+        item = super().save(commit=False)
+        item.mode = Mode.SHOP
+        item.shop = self.shop
+        item.country = self.shop.country
+        item.condition = "new"
+        self._apply_price(item)
+        item.attrs = self.collect_attrs(item.category)
+        self._persist_city(item)
+        root = item.category.parent or item.category
+        item.icon = root.icon
+        item.hue = self.shop.hue
+        if commit:
+            item.save()
+        return item
+
+
+class ListingImageForm(forms.ModelForm):
+    class Meta:
+        model = ListingImage
+        fields = ("image",)
+
+
+ListingImageFormSet = forms.modelformset_factory(
+    ListingImage, form=ListingImageForm, extra=49, max_num=49, validate_max=True, can_delete=True
+)
+
+
+class IndividualListingForm(PriceCurrencyMixin, CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.ModelForm):
+    """Bireysel (ikinci el) ilan formu — sahibinden mantiginda."""
+
+    class Meta:
+        model = Listing
+        fields = ("title", "category", "price_input", "price_currency", "city", "condition", "delivery",
+                  "description", "image", "video", "seller_phone")
+        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        labels = {"price_input": "Fiyat"}
+
+    def __init__(self, *args, country=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.country = country or self.instance.country
+        self._init_price()
+        self.fields["category"].queryset = Category.objects.filter(
+            mode=Mode.USED, parent__isnull=False
+        ).select_related("parent")
+        self.fields["category"].label_from_instance = (
+            lambda obj: f"{obj.parent.name('tr')} › {obj.name('tr')}"
+        )
+        self.fields["city"].queryset = City.objects.filter(country=self.country)
+        self.fields["city"].required = False
+        self._init_attrs()
+        self._init_combo()
+
+    def save(self, commit=True, owner=None):
+        item = super().save(commit=False)
+        item.mode = Mode.USED
+        self._apply_price(item)
         item.attrs = self.collect_attrs(item.category)
         self._persist_city(item)
         item.country = self.country

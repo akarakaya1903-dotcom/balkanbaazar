@@ -346,3 +346,22 @@ class ListingCurrencyTests(TestCase):
         item = Listing.objects.filter(mode=Mode.USED).first()
         item.price_input, item.price_currency = None, ""
         self.assertEqual(item.display_price(), item.country.format_price(item.price_eur))
+
+
+class ProductCurrencyTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def test_shop_product_price_in_local_currency(self):
+        from .forms import ProductForm
+        from .models import Shop
+        shop = Shop.objects.filter(country__code="MK").first()
+        cat = Category.objects.filter(mode=Mode.SHOP, parent__isnull=False).first()
+        form = ProductForm({"title": "Urun", "category": cat.pk, "price_input": "3000",
+                            "price_currency": "MKD", "delivery": "hand"}, shop=shop)
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save(commit=False)
+        self.assertEqual(item.price_currency, "MKD")
+        self.assertAlmostEqual(float(item.price_eur), 3000 / float(shop.country.rate_per_eur), places=1)
+        self.assertIn("3.000", item.display_price())
