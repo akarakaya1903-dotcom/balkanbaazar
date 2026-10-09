@@ -387,6 +387,22 @@ padding:10px 16px;border-radius:12px;min-width:84px;text-align:center}
 .fseo-row{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:10px;font-size:12.5px}
 .fseo-row a{opacity:.78;white-space:nowrap}
 .fseo-row a:hover{opacity:1;text-decoration:underline}
+.botbtn{position:fixed;left:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:57;width:48px;height:48px;border-radius:50%;border:0;background:var(--primary,#F28C28);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.3);cursor:pointer}
+.botbox{position:fixed;left:14px;bottom:calc(142px + env(safe-area-inset-bottom,0px));z-index:58;width:min(340px,calc(100vw - 28px));max-height:min(480px,calc(100vh - 220px));display:flex;flex-direction:column;background:#fff;color:#1b2b34;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.28);overflow:hidden}
+.botbox[hidden]{display:none}
+.botbox header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--secondary,#0D2A3A);color:#fff}
+.botbox header button{background:none;border:0;color:#fff;font-size:22px;line-height:1;cursor:pointer}
+.botlog{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px}
+.bm{max-width:88%;padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.45}
+.bm.bot{background:#eef3f5;align-self:flex-start}
+.bm.me{background:var(--primary,#F28C28);color:#fff;align-self:flex-end}
+.bl{display:block;margin-top:6px;font-weight:700;color:var(--secondary,#0D2A3A)}
+.botchips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;max-height:120px;overflow:auto;border-top:1px solid #e3eaee}
+.botchips button{border:1px solid #cfdbe1;background:#fff;border-radius:999px;padding:5px 10px;font-size:12.5px;cursor:pointer;text-align:left}
+.botform{display:flex;border-top:1px solid #e3eaee}
+.botform input{flex:1;border:0;padding:11px 12px;font-size:14px;outline:none;min-width:0}
+.botform button{border:0;background:none;padding:0 14px;font-size:18px;color:var(--primary,#F28C28);cursor:pointer}
+@media (min-width:769px){.botbtn{bottom:20px}.botbox{bottom:80px}}
 body{background:radial-gradient(900px 340px at 8% -4%,rgba(21,154,166,.14),transparent 62%),radial-gradient(800px 320px at 100% 0,rgba(228,161,59,.16),transparent 60%),var(--bg);background-attachment:fixed}
 header.top{box-shadow:0 4px 18px rgba(13,42,58,.10)}
 .btn-sea{background:linear-gradient(135deg,var(--sea-2),var(--sea));box-shadow:0 6px 16px rgba(16,112,126,.28);transition:transform .15s,box-shadow .15s}

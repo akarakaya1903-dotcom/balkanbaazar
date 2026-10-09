@@ -219,3 +219,17 @@ def thumb(fieldfile):
     except Exception:
         pass
     return fieldfile.url
+
+
+@register.simple_tag
+def faq_bot(lang):
+    """Yardim botu icin JSON verisi (soru/cevap + arayuz metinleri + link adresleri)."""
+    from django.urls import reverse
+
+    from market.faq_bot import LINK_SLUGS, bot_data
+    ui, qa = bot_data(lang)
+    links = {k: reverse("market:page", args=[slug]) for k, slug in LINK_SLUGS.items()}
+    links["post"] = reverse("market:my_listing_new")
+    links["shops"] = reverse("market:shop_apply")
+    links["contact"] = reverse("market:page", args=["iletisim"])
+    return {"ui": ui, "qa": qa, "links": links}

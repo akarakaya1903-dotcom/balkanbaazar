@@ -457,3 +457,17 @@ class ThumbTests(TestCase):
                     return False
 
         self.assertEqual(thumb(FF()), "/media/listings/yok.jpg")
+
+
+class FaqBotTests(TestCase):
+    def test_bot_on_pages_all_langs(self):
+        from django.core.management import call_command
+        call_command("add_pages", verbosity=0)
+        call_command("add_guides", verbosity=0)
+        for lang in ("tr", "en", "mk", "sq", "sr", "el"):
+            r = self.client.get(f"/{lang}/")
+            self.assertEqual(r.status_code, 200)
+            body = r.content.decode()
+            self.assertIn('id="botBtn"', body)
+            self.assertIn('id="bot-data"', body)
+            self.assertIn("/sayfa/ilan-nasil-verilir/", body)

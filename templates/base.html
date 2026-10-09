@@ -186,6 +186,29 @@ var box=document.getElementById("msgBox");if(box){box.scrollTop=box.scrollHeight
 {% endif %}
 <button type="button" id="toTop" class="totop" aria-label="Top" hidden>↑</button>
 <script>(function(){var b=document.getElementById("toTop");window.addEventListener("scroll",function(){b.hidden=window.scrollY<600;},{passive:true});b.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});})();</script>
+<button type="button" id="botBtn" class="botbtn" aria-label="{{ t.brand }} Help" aria-expanded="false" aria-controls="botBox"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></button>
+<section id="botBox" class="botbox" hidden role="dialog" aria-label="Help">
+  <header><strong id="botTitle"></strong><button type="button" id="botClose" aria-label="Close">×</button></header>
+  <div id="botLog" class="botlog" aria-live="polite"></div>
+  <div id="botChips" class="botchips"></div>
+  <form id="botForm" class="botform"><input id="botIn" type="text" maxlength="200" autocomplete="off"><button type="submit" aria-label="Send">➤</button></form>
+</section>
+{% faq_bot lang as bot_json %}{{ bot_json|json_script:"bot-data" }}
+<script>(function(){
+var d;try{d=JSON.parse(document.getElementById("bot-data").textContent);}catch(e){return;}
+var btn=document.getElementById("botBtn"),box=document.getElementById("botBox"),log=document.getElementById("botLog"),chips=document.getElementById("botChips"),inp=document.getElementById("botIn"),started=false;
+document.getElementById("botTitle").textContent=d.ui.title;inp.placeholder=d.ui.ph;
+function msg(text,who,link,label){var m=document.createElement("div");m.className="bm "+who;m.textContent=text;if(link){var a=document.createElement("a");a.href=link;a.textContent=label;a.className="bl";m.appendChild(a);}log.appendChild(m);log.scrollTop=log.scrollHeight;}
+function answer(i){var q=d.qa[i];msg(q.q,"me");msg(q.a,"bot",q.l&&d.links[q.l]?d.links[q.l]:null,d.ui.more);}
+function norm(s){return (s||"").toLowerCase().replace(/[?!.,]/g," ");}
+function ask(text){var t=norm(text),best=-1,score=0;d.qa.forEach(function(q,i){var n=0;q.k.split(" ").forEach(function(w){if(w.length>2&&t.indexOf(w)>-1){n++;}});if(n>score){score=n;best=i;}});
+ if(best>-1){msg(text,"me");msg(d.qa[best].a,"bot",d.qa[best].l&&d.links[d.qa[best].l]?d.links[d.qa[best].l]:null,d.ui.more);}else{msg(text,"me");msg(d.ui.none,"bot",d.links.contact,d.ui.contact);}}
+d.qa.forEach(function(q,i){var b=document.createElement("button");b.type="button";b.textContent=q.q;b.addEventListener("click",function(){answer(i);});chips.appendChild(b);});
+function toggle(open){box.hidden=!open;btn.setAttribute("aria-expanded",open?"true":"false");if(open&&!started){started=true;msg(d.ui.hello,"bot");}if(open){inp.focus();}}
+btn.addEventListener("click",function(){toggle(box.hidden);});
+document.getElementById("botClose").addEventListener("click",function(){toggle(false);});
+document.getElementById("botForm").addEventListener("submit",function(e){e.preventDefault();var v=inp.value.trim();if(v){ask(v);inp.value="";}});
+})();</script>
 <nav class="bnav" aria-label="Menu">
   <a href="{% url 'market:home' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>{{ t.nav_home }}</span></a>
   <a href="{% url 'market:listings' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>{{ t.nav_browse }}</span></a>
