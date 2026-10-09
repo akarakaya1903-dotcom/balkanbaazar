@@ -226,7 +226,10 @@ class Listing(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, blank=True)
     description = models.TextField(blank=True)
-    price_eur = models.DecimalField(max_digits=12, decimal_places=2)
+    price_eur = models.DecimalField(max_digits=12, decimal_places=2)  # arama/siralama icin ortak Euro karsiligi
+    # Ilan verenin girdigi orijinal fiyat ve para birimi (bos ise fiyat Euro'dan ulke parasina cevrilir)
+    price_input = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    price_currency = models.CharField(max_length=3, blank=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="listings")
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(
@@ -283,6 +286,31 @@ class Listing(models.Model):
 
     def local_price(self, country=None):
         return (country or self.country).format_price(self.price_eur)
+
+    @staticmethod
+    def _fmt(amount, symbol):
+        text = f"{float(amount):,.0f}".replace(",", ".")
+        return f"€ {text}" if symbol == "€" else f"{text} {symbol}"
+
+    def display_price(self, viewer=None):
+        """Ilan verenin girdigi fiyati girdigi para biriminde yazar; yoksa goruntuleyenin ulkesine cevirir."""
+        if self.price_input is not None and self.price_currency:
+            if self.price_currency == "EUR":
+                return self._fmt(self.price_input, "€")
+            c = self.country
+            return self._fmt(self.price_input, c.symbol if c.currency == self.price_currency else self.price_currency)
+        return (viewer or self.country).format_price(self.price_eur)
+
+    def alt_price(self, viewer=None):
+        """Girilen para biriminden farkli, yaklasik karsilik (ilan detayinda kucuk yazi)."""
+        if self.price_input is None or not self.price_currency:
+            return ""
+        c = self.country
+        if self.price_currency == "EUR":
+            if c.currency == "EUR":
+                return ""
+            return "≈ " + c.format_price(self.price_eur)
+        return "≈ " + self._fmt(self.price_eur, "€")
 
     @property
     def age_days(self):

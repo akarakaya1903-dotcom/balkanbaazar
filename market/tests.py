@@ -302,3 +302,47 @@ class SiteCleanupTests(TestCase):
             self.assertNotContains(self.client.get("/tr/"), "hero2-stats")
         with override_settings(STATS_MIN_LISTINGS=1):
             self.assertContains(self.client.get("/tr/"), "hero2-stats")
+
+
+class ListingCurrencyTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed", verbosity=0)
+
+    def _form(self, country_code, amount, currency):
+        from .forms import IndividualListingForm
+        from .models import Country
+        c = Country.objects.get(code=country_code)
+        cat = Category.objects.filter(mode=Mode.USED, parent__isnull=False).first()
+        data = {"title": "Test", "category": cat.pk, "price_input": amount,
+                "price_currency": currency, "condition": "used", "delivery": "hand"}
+        return IndividualListingForm(data, country=c), c
+
+    def test_mkd_price_kept_as_entered_and_converted_to_eur(self):
+        form, c = self._form("MK", "6000", "MKD")
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save(commit=False)
+        self.assertEqual(item.price_currency, "MKD")
+        self.assertEqual(float(item.price_input), 6000.0)
+        self.assertAlmostEqual(float(item.price_eur), 6000 / float(c.rate_per_eur), places=1)
+        self.assertIn("6.000", item.display_price())      # girilen fiyat aynen gorunur
+        self.assertTrue(item.alt_price().startswith("≈ €"))
+
+    def test_eur_price_in_mk(self):
+        form, c = self._form("MK", "100", "EUR")
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save(commit=False)
+        self.assertEqual(float(item.price_eur), 100.0)
+        self.assertEqual(item.display_price(), "€ 100")
+
+    def test_currency_choices_follow_country(self):
+        form, c = self._form("MK", "10", "EUR")
+        codes = [k for k, _ in form.fields["price_currency"].choices]
+        self.assertEqual(codes, [c.currency, "EUR"])
+        bad, _ = self._form("MK", "10", "USD")
+        self.assertFalse(bad.is_valid())
+
+    def test_legacy_listing_without_input_still_converts(self):
+        item = Listing.objects.filter(mode=Mode.USED).first()
+        item.price_input, item.price_currency = None, ""
+        self.assertEqual(item.display_price(), item.country.format_price(item.price_eur))

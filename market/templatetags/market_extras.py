@@ -14,9 +14,17 @@ register = template.Library()
 @register.simple_tag
 def price(listing, country):
     """Ilan fiyatini secili ulkenin para biriminde yazar."""
+    if listing.price_input is not None and listing.price_currency:
+        return listing.display_price(country)
     if country is None:
         return f"€ {listing.price_eur:,.0f}".replace(",", ".")
     return country.format_price(listing.price_eur)
+
+
+@register.simple_tag
+def price_alt(listing):
+    """Girilen para biriminden farkli yaklasik karsilik (yoksa bos)."""
+    return listing.alt_price()
 
 
 @register.simple_tag

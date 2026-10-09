@@ -222,13 +222,15 @@ class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.
 
     class Meta:
         model = Listing
-        fields = ("title", "category", "price_eur", "city", "condition", "delivery",
+        fields = ("title", "category", "price_input", "price_currency", "city", "condition", "delivery",
                   "description", "image", "video", "seller_phone")
         widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        labels = {"price_input": "Fiyat"}
 
     def __init__(self, *args, country=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.country = country or self.instance.country
+        self._init_price()
         self.fields["category"].queryset = Category.objects.filter(
             mode=Mode.USED, parent__isnull=False
         ).select_related("parent")
@@ -240,9 +242,41 @@ class IndividualListingForm(CityAddMixin, AttrFormMixin, VideoCleanMixin, forms.
         self._init_attrs()
         self._init_combo()
 
+    def _init_price(self):
+        """Fiyat + para birimi: EUR ve ulkenin kendi parasi (orn. MKD) secilebilir."""
+        c = self.country
+        choices = [("EUR", "EUR (€)")]
+        if c and c.currency != "EUR":
+            choices.insert(0, (c.currency, f"{c.currency} ({c.symbol})"))
+        self.fields["price_currency"] = forms.ChoiceField(
+            label="Para birimi", choices=choices, initial=choices[0][0], required=True)
+        self.fields["price_input"].required = True
+        self.fields["price_input"].min_value = 0
+        inst = self.instance
+        if inst.pk and not self.is_bound:
+            if inst.price_input is not None and inst.price_currency:
+                self.initial["price_input"] = inst.price_input
+                self.initial["price_currency"] = inst.price_currency
+            else:
+                self.initial["price_input"] = inst.price_eur
+                self.initial["price_currency"] = "EUR"
+
+    def clean_price_input(self):
+        value = self.cleaned_data["price_input"]
+        if value is None or value < 0:
+            raise forms.ValidationError("Gecerli bir fiyat gir.")
+        return value
+
     def save(self, commit=True, owner=None):
         item = super().save(commit=False)
         item.mode = Mode.USED
+        # girilen fiyati ortak Euro karsiligina cevir (arama, filtre ve siralama icin)
+        amount = self.cleaned_data["price_input"]
+        cur = self.cleaned_data["price_currency"]
+        rate = float(self.country.rate_per_eur) or 1.0
+        item.price_currency = cur
+        item.price_input = amount
+        item.price_eur = amount if cur == "EUR" else round(float(amount) / rate, 2)
         item.attrs = self.collect_attrs(item.category)
         self._persist_city(item)
         item.country = self.country

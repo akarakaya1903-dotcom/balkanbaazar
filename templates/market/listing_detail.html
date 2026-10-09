@@ -80,7 +80,7 @@
         {% attr_rows item lang as arows %}{% if arows %}<table class="attrtbl"><caption>{{ t.attrs_title }}</caption>{% for k, v in arows %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}</table>{% endif %}
         {% if item.owner and not item.shop %}<div style="margin:2px 0 8px;font-size:13px"><a href="{% url 'market:seller_profile' item.owner.pk %}" style="color:var(--sea);font-weight:600">👤 {{ item.owner.first_name|default:item.owner.username }}</a></div>{% endif %}
         <div class="dprice" style="margin-top:10px">{% price item country %}</div>
-        {% if country.currency != 'EUR' %}<div class="eur">≈ {% eur item %}</div>{% endif %}
+        {% if item.price_input and item.price_currency %}{% price_alt item as palt %}{% if palt %}<div class="eur">{{ palt }}</div>{% endif %}{% elif country.currency != 'EUR' %}<div class="eur">≈ {% eur item %}</div>{% endif %}
         {% if item.mode == 'shop' and item.review_count %}
         <p style="color:var(--ink-3);font-size:13px"><span class="star">★</span> {{ item.avg_rating }} ({{ item.review_count }} {{ t.reviews_n }})</p>
         {% endif %}

@@ -175,6 +175,11 @@ def countries(request):
                 try:
                     country.rate_per_eur = float(raw.replace(",", "."))
                     country.save(update_fields=["rate_per_eur"])
+                    if country.rate_per_eur and country.currency != "EUR":
+                        for it in Listing.objects.filter(country=country, price_currency=country.currency,
+                                                         price_input__isnull=False):
+                            it.price_eur = round(float(it.price_input) / float(country.rate_per_eur), 2)
+                            it.save(update_fields=["price_eur"])
                 except ValueError:
                     pass
         messages.success(request, "Kurlar güncellendi.")
