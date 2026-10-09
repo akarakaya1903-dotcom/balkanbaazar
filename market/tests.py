@@ -365,3 +365,14 @@ class ProductCurrencyTests(TestCase):
         self.assertEqual(item.price_currency, "MKD")
         self.assertAlmostEqual(float(item.price_eur), 3000 / float(shop.country.rate_per_eur), places=1)
         self.assertIn("3.000", item.display_price())
+
+
+class CategorySeoTextTests(TestCase):
+    def test_seo_text_all_languages(self):
+        from .i18n import seo_text
+        for lang in ["tr", "en", "mk", "sq", "sr", "bs", "hr", "cnr", "bg", "el", "xx"]:
+            for mode in ("used", "shop"):
+                title, desc = seo_text(lang, mode, "Kategori", "Skopje")
+                self.assertIn("Kategori", title)
+                self.assertIn("Skopje", desc)
+                self.assertLessEqual(len(desc), 160)

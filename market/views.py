@@ -321,7 +321,7 @@ def seo_listing(request, mode, cat, sub=None, city=None):
     cat_name = (subcat or root).name(lang)
     mode_label = t.get("used", "") if mode == Mode.USED else t.get("shops", "")
     place = city_obj.name if city_obj else (country.display_name(lang) if country else "")
-    title = f"{cat_name} · {mode_label} · {place} — {t.get('brand', 'Balkan Baazar')}"
-    desc = f"{cat_name} — {mode_label}, {place}. {t.get('heroP', '')}"[:160]
+    from .i18n import seo_text
+    title, desc = seo_text(lang, mode, cat_name, place, t.get("brand", "Balkan Baazar"))
     override["seo"] = {"title": title, "description": desc, "h1": f"{cat_name} · {mode_label} · {place}"}
     return listings(request, override)

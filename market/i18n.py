@@ -942,3 +942,48 @@ MISC["hr"] = dict(MISC["bs"])
 MISC["cnr"] = dict(MISC["bs"])
 for _code, _m in MISC.items():
     T.setdefault(_code, {}).update(_m)
+
+
+# --- Kategori / sehir sayfalari icin aranan kelimelere gore SEO sablonlari ({cat} {place} {brand}) ---
+_SR_USED = ("{cat} {place} – besplatni oglasi | {brand}",
+            "Oglasi za {cat} – {place}. Objavi besplatan oglas bez provizije. Kupuj i prodaj na Balkanu.")
+SEO_TPL = {
+    "tr": {"used": ("{place} {cat} ilanları – ücretsiz ikinci el | {brand}",
+                    "{place} bölgesinde {cat} ilanları. Ücretsiz ilan ver, komisyon yok. Balkanlarda ikinci el al-sat."),
+           "shop": ("{place} {cat} mağazaları ve ürünleri | {brand}",
+                    "{place} bölgesindeki {cat} mağazaları ve yeni ürünler. 8 Balkan ülkesinde, 10 dilde.")},
+    "en": {"used": ("{cat} for sale in {place} – free classifieds | {brand}",
+                    "Buy and sell {cat} in {place}. Post a free ad with no commission on the Balkan marketplace."),
+           "shop": ("{cat} shops in {place} | {brand}",
+                    "Browse {cat} shops and new products in {place}. Open your own shop free for 3 months.")},
+    "mk": {"used": ("{cat} во {place} – бесплатни огласи | {brand}",
+                    "Огласи за {cat} во {place}. Објави бесплатен оглас без провизија. Купи и продај на Балканот."),
+           "shop": ("{cat} – продавници во {place} | {brand}",
+                    "Продавници и нови производи за {cat} во {place}. Отвори своја продавница, првите 3 месеци бесплатно.")},
+    "sq": {"used": ("{cat} në {place} – shpallje falas | {brand}",
+                    "Shpallje për {cat} në {place}. Posto shpallje falas, pa komision. Bli dhe shit në Ballkan."),
+           "shop": ("{cat} – dyqane në {place} | {brand}",
+                    "Dyqane dhe produkte të reja për {cat} në {place}. Hap dyqanin tënd, 3 muajt e parë falas.")},
+    "sr": {"used": _SR_USED,
+           "shop": ("{cat} – prodavnice {place} | {brand}",
+                    "Prodavnice i novi proizvodi za {cat} – {place}. Otvori svoju prodavnicu, prva 3 meseca besplatno.")},
+    "bg": {"used": ("{cat} в {place} – безплатни обяви | {brand}",
+                    "Обяви за {cat} в {place}. Публикувай безплатна обява без комисионна. Купувай и продавай на Балканите."),
+           "shop": ("{cat} – магазини в {place} | {brand}",
+                    "Магазини и нови продукти за {cat} в {place}. Отвори свой магазин, първите 3 месеца безплатно.")},
+    "el": {"used": ("{cat} σε {place} – δωρεάν αγγελίες | {brand}",
+                    "Αγγελίες για {cat} σε {place}. Δημοσίευσε δωρεάν αγγελία χωρίς προμήθεια. Αγόρασε και πούλησε στα Βαλκάνια."),
+           "shop": ("{cat} – καταστήματα σε {place} | {brand}",
+                    "Καταστήματα και νέα προϊόντα για {cat} σε {place}. Άνοιξε το κατάστημά σου, 3 μήνες δωρεάν.")},
+}
+_BCS_SHOP = ("{cat} – prodavnice {place} | {brand}",
+             "Prodavnice i novi proizvodi za {cat} – {place}. Otvori svoju prodavnicu, prva 3 mjeseca besplatno.")
+for _l in ("bs", "hr", "cnr"):
+    SEO_TPL[_l] = {"used": _SR_USED, "shop": _BCS_SHOP}
+
+
+def seo_text(lang, mode, cat, place, brand="Balkan Baazar"):
+    """Aranan kelimelere gore (basliklar, aciklama) uretir; dil yoksa Ingilizce."""
+    tpl = (SEO_TPL.get(lang) or SEO_TPL["en"])["used" if mode == "used" else "shop"]
+    f = lambda s: s.format(cat=cat, place=place, brand=brand)
+    return f(tpl[0])[:70], f(tpl[1])[:160]
