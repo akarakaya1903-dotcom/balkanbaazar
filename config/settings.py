@@ -193,3 +193,6 @@ VAPID_SUBJECT = os.environ.get("VAPID_SUBJECT", "mailto:maglobal@balkanbaazar.co
 
 # Dogrulama belgeleri gibi herkese kapali dosyalar (media disinda tutulur)
 PRIVATE_ROOT = Path(os.environ.get("PRIVATE_ROOT", BASE_DIR / "private"))
+
+# Statik dosyalar tarayicida 1 gun onbellekte kalsin (hiz).
+WHITENOISE_MAX_AGE = 0 if DEBUG else 86400

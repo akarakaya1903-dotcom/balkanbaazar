@@ -6,6 +6,14 @@ cat > /etc/nginx/conf.d/balkanbaazar-upload.conf <<'UP_EOF'
 client_body_timeout 600s;
 send_timeout 600s;
 UP_EOF
+cat > /etc/nginx/conf.d/balkanbaazar-speed.conf <<'SP_EOF'
+gzip on;
+gzip_comp_level 5;
+gzip_min_length 512;
+gzip_vary on;
+gzip_proxied any;
+gzip_types text/css application/javascript application/json application/xml text/xml image/svg+xml text/plain application/manifest+json;
+SP_EOF
 sed -i -E 's/client_max_body_size [0-9]+M;/client_max_body_size 500M;/' "$SITE"
 if ! grep -q "location /media/" "$SITE"; then
   sed -i -E 's|^(\s*)location / \{|\1location /media/ {\n\1    alias /var/www/balkanbaazar/media/;\n\1    expires 7d;\n\1}\n\n\1location / {|' "$SITE"
@@ -20,6 +28,7 @@ cat > /etc/cron.d/balkanbaazar <<'CRON_EOF'
 */30 * * * * root cd /var/www/balkanbaazar && set -a && . /etc/balkanbaazar.env && set +a && ./venv/bin/python manage.py notify_saved_searches >> /var/log/balkanbaazar-saved.log 2>&1
 */5 * * * * root cd /var/www/balkanbaazar && set -a && . /etc/balkanbaazar.env && set +a && ./venv/bin/python manage.py check_site >> /var/log/balkanbaazar-monitor.log 2>&1
 CRON_EOF
+sed -i -E 's/expires 7d;/expires 30d;/' "$SITE"
 systemctl daemon-reload
 nginx -t
 systemctl reload nginx

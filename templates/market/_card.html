@@ -3,7 +3,7 @@
 <a href="{% url 'market:listing_detail' item.pk item.slug %}">
   <div class="thumbwrap">
     {% if item.image %}
-    <img class="thumbimg" src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+    <img class="thumbimg" src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy" decoding="async">
     {% else %}
     <div class="thumb" style="{{ item.hue|tile }}">{{ item.icon }}</div>
     {% endif %}
