@@ -717,3 +717,8 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .pnav .pme b{color:#fff;display:block;font-size:14px}.pnav .pme span{color:#9fb2bb;font-size:12px}
 .pnav .pnew{display:block;margin:12px;padding:10px;text-align:center;border-radius:4px;background:#6FAE46;color:#fff!important;font-weight:800;font-size:13px}
 @media(max-width:860px){.panelgrid{grid-template-columns:1fr}.pnav nav{display:flex;overflow-x:auto}.pnav nav a{white-space:nowrap;border-bottom:0;border-right:1px solid rgba(255,255,255,.07)}}
+.catrow,.hcat-card,.curs,.gal-thumbs,.bnav,.tablewrap{scrollbar-width:none;-ms-overflow-style:none}
+.catrow::-webkit-scrollbar,.hcat-card::-webkit-scrollbar,.curs::-webkit-scrollbar,.gal-thumbs::-webkit-scrollbar,.bnav::-webkit-scrollbar,.tablewrap::-webkit-scrollbar{display:none;width:0;height:0}
+.catrow,.hcat-card{-webkit-user-select:none;user-select:none;cursor:grab}
+.catrow.drag,.hcat-card.drag{cursor:grabbing}
+.catrow a,.hcat-card a{-webkit-user-drag:none}
