@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="{% static 'css/site.css' %}">
+<link rel="stylesheet" href="{% asset 'css/site.css' %}">
 </head>
 <body>
 <header class="top">
@@ -137,7 +137,7 @@
     <div class="fbot"><span>© {% now "Y" %} {% if site_settings and site_settings.company_name %}{{ site_settings.company_name }}{% else %}{{ t.brand }}{% endif %}</span>{% if visit_stats %}<span>{{ t.visits_today }}: <b>{{ visit_stats.today }}</b> · {{ t.visits_total }}: <b>{{ visit_stats.total }}</b></span>{% endif %}</div>
   </div>
 </footer>
-<script src="{% static 'js/app.js' %}"></script>
+<script src="{% asset 'js/app.js' %}"></script>
 <script>
 window.bbQueue=[];
 window.bbTrack=function(n,p,c){if(window.fbq){c?fbq("trackCustom",n,p||{}):fbq("track",n,p||{});}else{bbQueue.push([n,p,c]);}};
@@ -186,7 +186,7 @@ var box=document.getElementById("msgBox");if(box){box.scrollTop=box.scrollHeight
 {% endif %}
 <button type="button" id="toTop" class="totop" aria-label="Top" hidden>↑</button>
 <script>(function(){var b=document.getElementById("toTop");window.addEventListener("scroll",function(){b.hidden=window.scrollY<600;},{passive:true});b.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});})();</script>
-<button type="button" id="botBtn" class="botbtn" aria-label="{{ t.brand }} Help" aria-expanded="false" aria-controls="botBox"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></button>
+<button type="button" id="botBtn" class="botbtn" aria-label="{{ t.brand }} Help" aria-expanded="false" aria-controls="botBox"><span class="botface" aria-hidden="true">🤖</span><span class="botwave" aria-hidden="true">👋</span></button>
 <div id="botHi" class="bothi" hidden><button type="button" id="botHiOpen"></button><button type="button" id="botHiX" aria-label="Close">×</button></div>
 <section id="botBox" class="botbox" hidden role="dialog" aria-label="Help">
   <header><strong id="botTitle"></strong><button type="button" id="botClose" aria-label="Close">×</button></header>

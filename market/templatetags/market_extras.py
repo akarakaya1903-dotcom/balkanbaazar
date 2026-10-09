@@ -233,3 +233,29 @@ def faq_bot(lang):
     links["shops"] = reverse("market:shop_apply")
     links["contact"] = reverse("market:page", args=["iletisim"])
     return {"ui": ui, "qa": qa, "links": links}
+
+
+_ASSET_V = {}
+
+
+@register.simple_tag
+def asset(path):
+    """static adresi + dosya degisince degisen ?v= (tarayici eski CSS'i onbellekte tutmasin)."""
+    import os
+
+    from django.conf import settings
+    from django.contrib.staticfiles import finders
+    from django.templatetags.static import static
+    if path not in _ASSET_V:
+        v = ""
+        try:
+            f = os.path.join(str(settings.STATIC_ROOT), path) if getattr(settings, "STATIC_ROOT", None) else ""
+            if not (f and os.path.exists(f)):
+                f = finders.find(path) or ""
+            if f:
+                v = str(int(os.path.getmtime(f)))
+        except Exception:
+            v = ""
+        _ASSET_V[path] = v
+    url = static(path)
+    return url + ("?v=" + _ASSET_V[path] if _ASSET_V[path] else "")

@@ -410,6 +410,11 @@ padding:10px 16px;border-radius:12px;min-width:84px;text-align:center}
 @keyframes bbpop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (min-width:769px){.bothi{bottom:80px}}
 @media (prefers-reduced-motion:reduce){.bothi{animation:none}}
+.botbtn{width:56px;height:56px;font-size:28px;line-height:1}
+.botface{display:block}
+.botwave{position:absolute;top:-8px;right:-8px;font-size:20px;transform-origin:70% 70%;animation:bbwave 2.4s ease-in-out infinite}
+@keyframes bbwave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-12deg)}50%{transform:rotate(8deg)}}
+@media (prefers-reduced-motion:reduce){.botwave{animation:none}}
 body{background:radial-gradient(900px 340px at 8% -4%,rgba(21,154,166,.14),transparent 62%),radial-gradient(800px 320px at 100% 0,rgba(228,161,59,.16),transparent 60%),var(--bg);background-attachment:fixed}
 header.top{box-shadow:0 4px 18px rgba(13,42,58,.10)}
 .btn-sea{background:linear-gradient(135deg,var(--sea-2),var(--sea));box-shadow:0 6px 16px rgba(16,112,126,.28);transition:transform .15s,box-shadow .15s}
