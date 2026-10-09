@@ -470,3 +470,13 @@ summary::-webkit-details-marker{display:none}
 .botwave{position:absolute;top:-8px;right:-8px;font-size:20px;transform-origin:70% 70%;animation:bbwave 2.4s ease-in-out infinite}
 @keyframes bbwave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-12deg)}50%{transform:rotate(8deg)}}
 @media (prefers-reduced-motion:reduce){.botwave{animation:none}}
+
+/* Genis ekranlarda yan reklam sutunlari (icerigin sag ve solundaki bosluk) */
+.siderail{display:none}
+@media (min-width:1640px){
+  .siderail{display:block;position:fixed;top:120px;width:160px;z-index:20}
+  .siderail.l{left:calc(50% - 640px - 176px)}
+  .siderail.r{right:calc(50% - 640px - 176px)}
+  .siderail a{display:block;position:relative}
+  .siderail img{display:block;width:160px;height:auto;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+}

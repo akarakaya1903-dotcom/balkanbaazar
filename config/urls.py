@@ -44,6 +44,15 @@ def robots(request):
     return HttpResponse(body, content_type="text/plain")
 
 
+def ads_txt(request):
+    """Google AdSense icin ads.txt (yayinci kimligi site ayarlarindan gelir)."""
+    from market.models import SiteSettings
+    ss = SiteSettings.objects.first()
+    pub = (ss.adsense_client if ss else "").replace("ca-", "", 1) if ss and ss.adsense_client else ""
+    body = f"google.com, {pub}, DIRECT, f08c47fec0942fa0\n" if pub else ""
+    return HttpResponse(body, content_type="text/plain")
+
+
 def health(request):
     """Calisma kontrolu (UptimeRobot vb. icin): veritabani yanitliyorsa 200, degilse 503."""
     from django.db import connection
@@ -64,6 +73,7 @@ urlpatterns = [
     path("sitemap.xml", index, {"sitemaps": SITEMAPS}),
     path("sitemap-<section>.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", robots, name="robots"),
+    path("ads.txt", ads_txt, name="ads_txt"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("sw.js", service_worker, name="sw"),
     path("favicon.ico", favicon, name="favicon"),

@@ -683,6 +683,10 @@ class SiteSettings(models.Model):
                                                 help_text="Meta Business > Marka guvenligi > Alan adlari ekraninda verilen meta etiketi kodu.")
     analytics_id = models.CharField("Google Analytics olcum kimligi", max_length=30, blank=True,
                                     help_text="Ornek: G-XXXXXXXXXX. Bos birakirsan analiz kodu eklenmez.")
+    adsense_client = models.CharField("Google AdSense yayinci kimligi", max_length=30, blank=True,
+                                      help_text="Ornek: ca-pub-1234567890123456. AdSense onayi gelince girilir. Bos birakirsan Google reklami gosterilmez.")
+    adsense_slot = models.CharField("AdSense yan sutun reklam birimi kimligi", max_length=20, blank=True,
+                                    help_text="160x600 dikey reklam biriminin sayisal kimligi. Yan sutunlarda kendi banner'in yoksa bu gosterilir.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
                                     help_text="Alt bilgide (c) satirinda gorunur.")
     address = models.TextField("Adres", blank=True)
@@ -706,7 +710,9 @@ class SiteSettings(models.Model):
 class Banner(models.Model):
     """Reklam / kampanya banner'i (Trendyol tarzi kaydirici ve orta serit)."""
     PLACES = [("home_hero", "Ana sayfa ust kaydirici (1400x420 onerilir)"),
-              ("home_mid", "Ana sayfa orta serit (600x300 onerilir, en fazla 3)")]
+              ("home_mid", "Ana sayfa orta serit (600x300 onerilir, en fazla 3)"),
+              ("side_l", "Sol yan sutun (160x600, genis ekranlarda her sayfada)"),
+              ("side_r", "Sag yan sutun (160x600, genis ekranlarda her sayfada)")]
     title = models.CharField("Baslik", max_length=120)
     advertiser = models.CharField("Reklamveren", max_length=120, blank=True)
     image = models.ImageField("Gorsel (web / bilgisayar)", upload_to="banners/")

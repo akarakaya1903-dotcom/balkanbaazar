@@ -216,6 +216,26 @@ if(!seen){setTimeout(function(){if(box.hidden){hi.hidden=false;try{sessionStorag
 document.getElementById("botClose").addEventListener("click",function(){toggle(false);});
 document.getElementById("botForm").addEventListener("submit",function(e){e.preventDefault();var v=inp.value.trim();if(v){ask(v);inp.value="";}});
 })();</script>
+{% banners "side_l" as sl %}{% banners "side_r" as sr %}
+{% if sl or sr or site_settings.adsense_client and site_settings.adsense_slot %}
+<aside class="siderail l" aria-label="{{ t.ad_label }}">
+  {% if sl %}{% with b=sl.0 %}<a href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><img src="{{ b.image.url }}" alt="{{ b.title }}" width="160" height="600" loading="lazy"><span class="adtag">{{ t.ad_label }}</span></a>{% endwith %}
+  {% elif site_settings.adsense_client and site_settings.adsense_slot %}<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px" data-ad-client="{{ site_settings.adsense_client }}" data-ad-slot="{{ site_settings.adsense_slot }}"></ins>{% endif %}
+</aside>
+<aside class="siderail r" aria-label="{{ t.ad_label }}">
+  {% if sr %}{% with b=sr.0 %}<a href="{% url 'market:banner_go' b.pk %}" rel="sponsored"><img src="{{ b.image.url }}" alt="{{ b.title }}" width="160" height="600" loading="lazy"><span class="adtag">{{ t.ad_label }}</span></a>{% endwith %}
+  {% elif site_settings.adsense_client and site_settings.adsense_slot %}<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px" data-ad-client="{{ site_settings.adsense_client }}" data-ad-slot="{{ site_settings.adsense_slot }}"></ins>{% endif %}
+</aside>
+{% if site_settings.adsense_client and site_settings.adsense_slot %}
+<script>(function(){var C="{{ site_settings.adsense_client|escapejs }}",done=false;
+function load(){if(done||window.innerWidth<1640){return;}done=true;var s=document.createElement("script");s.async=true;s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+C;s.crossOrigin="anonymous";document.head.appendChild(s);
+document.querySelectorAll("ins.adsbygoogle").forEach(function(){(window.adsbygoogle=window.adsbygoogle||[]).push({});});}
+var ok=false;try{ok=localStorage.getItem("bb_cookie")==="1";}catch(e){}
+if(ok){load();}
+var btn=document.getElementById("cookieOk");if(btn){btn.addEventListener("click",load);}
+})();</script>
+{% endif %}
+{% endif %}
 <nav class="bnav" aria-label="Menu">
   <a href="{% url 'market:home' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>{{ t.nav_home }}</span></a>
   <a href="{% url 'market:listings' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>{{ t.nav_browse }}</span></a>

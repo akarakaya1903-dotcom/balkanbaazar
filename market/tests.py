@@ -528,3 +528,21 @@ class DashboardLayoutTests(TestCase):
             self.assertIn(r.status_code, (200, 302), path)
             if r.status_code == 200:
                 self.assertIn('class="pnav"', r.content.decode(), path)
+
+
+class SideRailAdsTests(TestCase):
+    def test_ads_txt_and_rails(self):
+        from market.models import SiteSettings
+        r = self.client.get("/ads.txt")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.content.decode(), "")
+        SiteSettings.objects.update_or_create(pk=1, defaults={"adsense_client": "ca-pub-1234567890123456", "adsense_slot": "987654"})
+        self.assertIn("pub-1234567890123456", self.client.get("/ads.txt").content.decode())
+        body = self.client.get("/mk/").content.decode()
+        self.assertIn('class="siderail l"', body)
+        self.assertIn("data-ad-slot=\"987654\"", body)
+
+    def test_no_rails_without_ads(self):
+        from market.models import SiteSettings
+        SiteSettings.objects.update_or_create(pk=1, defaults={"adsense_client": "", "adsense_slot": ""})
+        self.assertNotIn("siderail", self.client.get("/mk/").content.decode().replace(".siderail", ""))

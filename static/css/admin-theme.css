@@ -36,3 +36,11 @@ input[type=text],input[type=password],input[type=email],input[type=url],input[ty
 #nav-sidebar tr.current-model a{color:#1a1a1a!important}
 #nav-sidebar #nav-filter{background:#15222a;border:1px solid rgba(255,255,255,.14);color:#fff}
 .toggle-nav-sidebar{background:#1d2b33!important;border-right:1px solid rgba(255,255,255,.08)!important;color:#E4A13B}
+
+/* Yan menu okunakliligi (guclu secici) */
+#nav-sidebar .module tr,#nav-sidebar .module th,#nav-sidebar .module td,#nav-sidebar .module table,#nav-sidebar .module.current-app{background:transparent!important;color:#e6eef2!important}
+#nav-sidebar .module th a,#nav-sidebar .module td a{color:#e6eef2!important;opacity:1!important;font-size:13.5px}
+#nav-sidebar .addlink,#nav-sidebar .viewlink,#nav-sidebar a.addlink{color:#E4A13B!important}
+#nav-sidebar .addlink::before{filter:none}
+#nav-sidebar tr.current-model th,#nav-sidebar tr.current-model td{background:#E4A13B!important}
+#nav-sidebar tr.current-model th a,#nav-sidebar tr.current-model td a{color:#1a1a1a!important}
