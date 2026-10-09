@@ -2,8 +2,8 @@
 {% block content %}
 <div class="bbp" id="bbp">
   <nav class="bbp-tabs" role="tablist">
-    <button type="button" role="tab" data-tab="home" class="on">⌂ Özet</button>
-    {% for t in bb_tabs %}<button type="button" role="tab" data-tab="{{ t.key }}">{{ t.icon }} {{ t.title }}{% if t.badge %}<i class="bbp-badge">{{ t.badge }}</i>{% endif %}</button>{% endfor %}
+    <button type="button" role="tab" data-tab="home" class="on"><span class="bbp-ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></span>Özet</button>
+    {% for t in bb_tabs %}<button type="button" role="tab" data-tab="{{ t.key }}"><span class="bbp-ti">{{ t.icon }}</span>{{ t.title }}{% if t.badge %}<i class="bbp-badge">{{ t.badge }}</i>{% endif %}</button>{% endfor %}
   </nav>
 
   <section class="bbp-pane on" data-pane="home">
@@ -28,8 +28,12 @@
     <div class="bbp-grid">
       {% for c in t.cards %}
       <div class="bbp-item">
-        <a class="bbp-main" href="{{ c.url }}"><span class="bbp-ic">{{ c.icon }}</span><span><b>{{ c.label }}</b><small>{{ c.desc }}</small></span></a>
-        {% if c.add %}<a class="bbp-add" href="{{ c.add }}" title="Yeni ekle">＋</a>{% endif %}
+        <a class="bbp-main" href="{{ c.url }}">
+          <span class="bbp-ic">{{ c.icon }}</span>
+          <span class="bbp-tx"><b>{{ c.label }}</b><small>{{ c.desc }}</small></span>
+          {% if c.count is not None %}<span class="bbp-n">{{ c.count }}</span>{% endif %}
+        </a>
+        {% if c.add %}<a class="bbp-add" href="{{ c.add }}" title="Yeni ekle">＋ Yeni</a>{% endif %}
       </div>
       {% endfor %}
     </div>
