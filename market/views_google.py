@@ -89,5 +89,5 @@ def google_callback(request):
         emails.welcome_user(user, emails.lang_of(request))
         from .tracking import bb_event
         bb_event(request, "CompleteRegistration", {"status": True})
-        messages.success(request, msg(request, "m_acct_ready"))
+        messages.success(request, msg(request, "m_acct_ready_g"))
     return redirect("market:panel")
