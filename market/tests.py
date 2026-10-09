@@ -376,3 +376,29 @@ class CategorySeoTextTests(TestCase):
                 self.assertIn("Kategori", title)
                 self.assertIn("Skopje", desc)
                 self.assertLessEqual(len(desc), 160)
+
+
+class WelcomeMailTests(TestCase):
+    def test_welcome_and_verify_mail_in_user_language(self):
+        from django.contrib.auth.models import User
+        from django.core import mail
+        from . import emails
+        u = User.objects.create_user("yeni", "yeni@example.com", "x12345678", first_name="Adem")
+        emails.welcome_user(u, "mk")
+        emails.send_verification(u, "sq")
+        self.assertEqual(len(mail.outbox), 2)
+        welcome, verify = mail.outbox
+        self.assertIn("Добредојде", welcome.subject)
+        self.assertIn("/mk/ilanlarim/yeni/", welcome.body)
+        self.assertTrue(welcome.alternatives)                       # logolu HTML surum var
+        self.assertIn("logo-192.png", welcome.alternatives[0][0])
+        self.assertIn("Verifiko", verify.subject)
+        self.assertIn("/uyelik/dogrula/", verify.body)
+
+    def test_unknown_language_falls_back_to_english(self):
+        from django.contrib.auth.models import User
+        from django.core import mail
+        from . import emails
+        u = User.objects.create_user("yeni2", "y2@example.com", "x12345678")
+        emails.welcome_user(u, "xx")
+        self.assertIn("Welcome", mail.outbox[0].subject)

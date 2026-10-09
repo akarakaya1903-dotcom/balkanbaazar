@@ -29,10 +29,10 @@ def signup(request):
         user = form.save()
         login(request, user)
         emails.notify_staff_new_user(user)
-        emails.welcome_user(user)
+        emails.welcome_user(user, emails.lang_of(request))
         from .tracking import bb_event
         bb_event(request, "CompleteRegistration", {"status": True})
-        emails.send_verification(user)
+        emails.send_verification(user, emails.lang_of(request))
         messages.success(request, "Hesabin hazir. E-postani dogrulamak icin gelen kutuna bak.")
         return redirect("market:panel")
     return render(request, "market/account/signup.html", {"form": form})
@@ -296,7 +296,7 @@ def verify_email(request, token):
 @login_required
 def resend_verification(request):
     if request.method == "POST":
-        emails.send_verification(request.user)
+        emails.send_verification(request.user, emails.lang_of(request))
         messages.success(request, "Dogrulama e-postasi gonderildi.")
     return redirect("market:profile")
 

@@ -15,12 +15,20 @@ from django.core.mail import send_mail
 log = logging.getLogger(__name__)
 
 
-def _send(subject, body, to):
+def lang_of(request):
+    """Istek sahibinin sitede sectigi dil (yoksa varsayilan)."""
+    try:
+        return getattr(request, "lang_override", None) or request.session.get("lang") or settings.DEFAULT_LANG
+    except Exception:
+        return settings.DEFAULT_LANG
+
+
+def _send(subject, body, to, html=None):
     to = [addr for addr in (to if isinstance(to, (list, tuple)) else [to]) if addr]
     if not to:
         return
     try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, to, fail_silently=False)
+        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, to, fail_silently=False, html_message=html)
     except Exception:
         log.exception("E-posta gonderilemedi: %s -> %s", subject, to)
 
@@ -199,14 +207,19 @@ def notify_staff_new_user(user):
     _send(f"Yeni uye: {user.username}", body, settings.STAFF_NOTIFY_EMAILS)
 
 
-def welcome_user(user):
+def welcome_user(user, lang=None):
+    """Hos geldin e-postasi: uyenin dilinde, logolu, 'ilk ilanini ver' dugmeli."""
     if not user.email:
         return
+    from .mail_i18n import WELCOME, html_mail, pick
+    lang = lang or settings.DEFAULT_LANG
+    t = pick(WELCOME, lang)
     name = user.first_name or user.username
-    _send("Balkan Baazar - Hos geldin / Welcome",
-          f"Merhaba {name},\n\nBalkan Baazar'a hos geldin. Hesabin hazir: {_site('/')}\n\n"
-          f"Hi {name},\n\nWelcome to Balkan Baazar. Your account is ready: {_site('/')}\n",
-          user.email)
+    code = lang if lang in WELCOME else "en"
+    cta_url = _site(f"/{code}/ilanlarim/yeni/")
+    paras = [t["hello"].format(name=name), t["p1"], t["p2"], t["p3"]]
+    text = "\n\n".join(paras + [f"{t['cta']}: {cta_url}", t["foot"]])
+    _send(t["subject"], text, user.email, html_mail(paras, t["cta"], cta_url, t["foot"]))
 
 
 def notify_password_changed(user):
@@ -265,14 +278,15 @@ def verification_link(user):
     return _site(f"/uyelik/dogrula/{token}/")
 
 
-def send_verification(user):
+def send_verification(user, lang=None):
     if not user.email:
         return
+    from .mail_i18n import VERIFY, html_mail, pick
+    t = pick(VERIFY, lang or settings.DEFAULT_LANG)
     link = verification_link(user)
-    _send("Balkan Baazar - E-postani dogrula / Verify your email",
-          f"Merhaba,\n\nE-posta adresini dogrulamak icin su baglantiya tikla (3 gun gecerli):\n{link}\n\n"
-          f"Hi,\n\nPlease verify your email address with this link (valid for 3 days):\n{link}\n",
-          user.email)
+    paras = [t["p"]]
+    text = "\n\n".join(paras + [f"{t['cta']}: {link}", t["note"]])
+    _send(t["subject"], text, user.email, html_mail(paras, t["cta"], link, t["note"]))
 
 
 def notify_saved_search(search, listings, count):

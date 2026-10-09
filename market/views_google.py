@@ -85,7 +85,7 @@ def google_callback(request):
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     if created:
         emails.notify_staff_new_user(user)
-        emails.welcome_user(user)
+        emails.welcome_user(user, emails.lang_of(request))
         from .tracking import bb_event
         bb_event(request, "CompleteRegistration", {"status": True})
         messages.success(request, "Hesabin hazir.")
