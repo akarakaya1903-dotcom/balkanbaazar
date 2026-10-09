@@ -205,3 +205,17 @@ def cat_icon(c, size=""):
         f'<span class="ic cat-ic {size}" style="background:{bg};color:{fg}">'
         f'<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
         f'stroke-linejoin="round" aria-hidden="true">{icons.ICONS[key]}</svg></span>')
+
+
+@register.filter
+def thumb(fieldfile):
+    """Kucuk onizleme varsa onun adresini, yoksa orijinali dondurur."""
+    try:
+        import os
+        base, _ext = os.path.splitext(fieldfile.name)
+        tname = base + "_t.jpg"
+        if fieldfile.storage.exists(tname):
+            return fieldfile.storage.url(tname)
+    except Exception:
+        pass
+    return fieldfile.url

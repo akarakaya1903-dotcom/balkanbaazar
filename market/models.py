@@ -220,6 +220,30 @@ def _shrink(fieldfile, max_side=1600, quality=82):
         return fieldfile
 
 
+def make_thumb(fieldfile, side=480, quality=78):
+    """Liste kartlari icin kucuk onizleme (<ad>_t.jpg) uretir. Hata olursa sessizce gecer."""
+    try:
+        import os
+        from io import BytesIO
+
+        from django.core.files.base import ContentFile
+        from PIL import Image, ImageOps
+        storage = fieldfile.storage
+        base, _ext = os.path.splitext(fieldfile.name)
+        tname = base + "_t.jpg"
+        if storage.exists(tname):
+            storage.delete(tname)
+        with storage.open(fieldfile.name, "rb") as fh:
+            im = ImageOps.exif_transpose(Image.open(fh)).convert("RGB")
+        im.thumbnail((side, side), Image.LANCZOS)
+        buf = BytesIO()
+        im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+        storage.save(tname, ContentFile(buf.getvalue()))
+        return tname
+    except Exception:
+        return None
+
+
 class Listing(models.Model):
     """Hem ikinci el ilani hem magaza urunu."""
     mode = models.CharField(max_length=8, choices=Mode.choices, db_index=True)
@@ -278,7 +302,10 @@ class Listing(models.Model):
             self.image = _shrink(self.image)
         if self.video and not getattr(self.video, "_committed", True):
             self.video_processed = False
+        new_image = bool(self.image) and not getattr(self.image, "_committed", True)
         super().save(*args, **kwargs)
+        if new_image:
+            make_thumb(self.image)
 
     @property
     def parent_category(self):
@@ -671,6 +698,8 @@ class SiteSettings(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
+        if self.hero_image and not getattr(self.hero_image, "_committed", True):
+            self.hero_image = _shrink(self.hero_image, max_side=1920, quality=76)
         super().save(*args, **kwargs)
 
 
@@ -698,6 +727,13 @@ class Banner(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_place_display()})"
+
+    def save(self, *args, **kwargs):
+        if self.image and not getattr(self.image, "_committed", True):
+            self.image = _shrink(self.image, max_side=1920, quality=78)
+        if self.image_mobile and not getattr(self.image_mobile, "_committed", True):
+            self.image_mobile = _shrink(self.image_mobile, max_side=900, quality=78)
+        super().save(*args, **kwargs)
 
 
 class Page(models.Model):

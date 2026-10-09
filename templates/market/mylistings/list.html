@@ -9,7 +9,7 @@
     <div class="card" style="position:relative">
       <a href="{% url 'market:listing_detail' item.pk item.slug %}">
         <div class="thumbwrap">
-          {% if item.image %}<img class="thumbimg" src="{{ item.image.url }}" alt="">
+          {% if item.image %}<img class="thumbimg" src="{{ item.image|thumb }}" alt="">
           {% else %}<div class="thumb" style="{{ item.hue|tile }}">{{ item.icon }}</div>{% endif %}
         </div>
         <div class="cbody"><span class="tt">{{ item.title }}</span>

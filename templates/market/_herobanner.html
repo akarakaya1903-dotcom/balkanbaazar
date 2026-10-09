@@ -2,7 +2,7 @@
 {# Ana sayfa banner'i: logo, harita+bayrak pin'leri, iki CTA, imza yazisi. #}
 <section class="hero2">
   {% if site_settings and site_settings.hero_image %}
-  <img class="hero2-bg" src="{{ site_settings.hero_image.url }}" alt="{{ t.brand }}" style="object-fit:cover">
+  <img class="hero2-bg" src="{{ site_settings.hero_image.url }}" alt="{{ t.brand }}" style="object-fit:cover" fetchpriority="high" decoding="async">
   <div class="hero2-veil" aria-hidden="true"></div>
   {% else %}
   <svg class="hero2-bg" viewBox="0 0 1400 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">

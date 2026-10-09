@@ -441,3 +441,19 @@ class GuidePagesTests(TestCase):
         for lang in ("tr", "mk", "sq", "en"):
             r = self.client.get(f"/{lang}/sayfa/ilan-nasil-verilir/")
             self.assertEqual(r.status_code, 200)
+
+
+class ThumbTests(TestCase):
+    def test_thumb_filter_falls_back_to_original(self):
+        from market.templatetags.market_extras import thumb
+
+        class FF:
+            name = "listings/yok.jpg"
+            url = "/media/listings/yok.jpg"
+
+            class storage:
+                @staticmethod
+                def exists(n):
+                    return False
+
+        self.assertEqual(thumb(FF()), "/media/listings/yok.jpg")
