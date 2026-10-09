@@ -79,6 +79,7 @@ def my_listing_form(request, pk=None):
             saved.pending_review = True
             saved.save(update_fields=["is_active", "pending_review"])
             emails.notify_staff_pending_listing(saved)
+            emails.notify_listing_received(saved, emails.lang_of(request))
             messages.success(request, msg(request, "listing_pending"))
         else:
             messages.success(request, "İlan yayınlandı." if not item else "İlan güncellendi.")

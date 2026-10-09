@@ -546,3 +546,38 @@ class SideRailAdsTests(TestCase):
         from market.models import SiteSettings
         SiteSettings.objects.update_or_create(pk=1, defaults={"adsense_client": "", "adsense_slot": ""})
         self.assertNotIn("siderail", self.client.get("/mk/").content.decode().replace(".siderail", ""))
+
+
+class EventMailTests(TestCase):
+    def test_all_events_all_languages_format(self):
+        from django.core import mail
+        from . import emails
+        from .mail_i18n import EVENTS
+        for event in EVENTS:
+            for lang in ("tr", "en", "mk", "sq", "sr", "bs", "hr", "cnr", "bg", "el"):
+                emails.event_mail(event, lang, "a@example.com", "Ada", "/panel/", title="Telefon", shop="Dukjan", n=7)
+        self.assertEqual(len(mail.outbox), len(EVENTS) * 10)
+        for m in mail.outbox:
+            self.assertTrue(m.alternatives)
+            self.assertNotIn("{", m.subject)
+            self.assertNotIn("{", m.body)
+
+    def test_welcome_saves_user_language_and_listing_received(self):
+        from django.contrib.auth.models import User
+        from django.core import mail
+        from . import emails
+        from .models import Country, Category, Listing, Mode
+        u = User.objects.create_user("lg", "lg@example.com", "x12345678", first_name="Ada")
+        emails.welcome_user(u, "sq")
+        self.assertEqual(u.profile.lang, "sq")
+        self.assertEqual(emails.user_lang(u), "sq")
+        mail.outbox.clear()
+        class L:  # basit sahte ilan
+            title = "Bicikleta"
+            owner = u
+            shop_id = None
+            shop = None
+        emails.notify_listing_received(L())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Bicikleta", mail.outbox[0].subject)
+        self.assertIn("/sq/ilanlarim/", mail.outbox[0].body)

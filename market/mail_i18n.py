@@ -120,3 +120,66 @@ def html_mail(paragraphs, cta_label, cta_url, foot):
         f'<tr><td style="background:#F6F9FB;padding:16px 28px;font-size:12px;color:#6b7c88;line-height:1.5">{escape(foot)}<br>'
         f'<a href="{site}" style="color:#0B8FA6;text-decoration:none">balkanbaazar.com</a></td></tr>'
         '</table></td></tr></table></body></html>')
+
+
+# ---------------------------------------------------------------------------
+# Olay e-postalari (10 dil). Her kayit: (konu, [paragraflar], dugme yazisi)
+# Yer tutucular: {name} {title} {n} {shop}
+# ---------------------------------------------------------------------------
+_L = "bs"  # bs/hr/cnr ayni Latin metni kullanir
+
+EVENTS = {
+    "listing_received": {
+        "tr": ("İlanın alındı: {title}", ["Merhaba {name},", "“{title}” ilanını aldık. Yönetici incelemesinden sonra yayına girecek, genellikle kısa sürede.", "Yayına girince sana yeni bir e-posta göndereceğiz."], "İlanlarımı gör"),
+        "en": ("We received your ad: {title}", ["Hi {name},", "We received your ad “{title}”. It goes live after a quick review, usually shortly.", "We will email you again as soon as it is published."], "View my ads"),
+        "mk": ("Го примивме огласот: {title}", ["Здраво {name},", "Го примивме твојот оглас „{title}“. Ќе биде објавен по кратка проверка, обично за кратко време.", "Ќе ти испратиме нов е-маил штом биде објавен."], "Моите огласи"),
+        "sq": ("E morëm shpalljen: {title}", ["Përshëndetje {name},", "E morëm shpalljen tënde “{title}”. Do të publikohet pas një shqyrtimi të shkurtër, zakonisht shpejt.", "Do të të dërgojmë një email tjetër sapo të publikohet."], "Shpalljet e mia"),
+        "sr": ("Примили смо оглас: {title}", ["Здраво {name},", "Примили смо твој оглас „{title}“. Биће објављен након кратке провере, обично брзо.", "Послаћемо ти нову поруку чим буде објављен."], "Моји огласи"),
+        "bs": ("Primili smo oglas: {title}", ["Zdravo {name},", "Primili smo tvoj oglas „{title}“. Bit će objavljen nakon kratke provjere, obično brzo.", "Poslat ćemo ti novu poruku čim bude objavljen."], "Moji oglasi"),
+        "bg": ("Получихме обявата: {title}", ["Здравей {name},", "Получихме обявата ти „{title}“. Ще бъде публикувана след кратка проверка, обикновено скоро.", "Ще ти изпратим нов имейл, щом бъде публикувана."], "Моите обяви"),
+        "el": ("Λάβαμε την αγγελία: {title}", ["Γεια σου {name},", "Λάβαμε την αγγελία σου «{title}». Θα δημοσιευτεί μετά από σύντομο έλεγχο, συνήθως σύντομα.", "Θα σου στείλουμε νέο email μόλις δημοσιευτεί."], "Οι αγγελίες μου"),
+    },
+    "listing_approved": {
+        "tr": ("İlanın yayında: {title}", ["Merhaba {name},", "Güzel haber: “{title}” ilanın onaylandı ve yayına girdi.", "İlanına gelen mesajları “Mesajlar” bölümünden takip edebilirsin."], "İlanı gör"),
+        "en": ("Your ad is live: {title}", ["Hi {name},", "Good news: your ad “{title}” was approved and is now live.", "You can follow messages about it in the “Messages” section."], "View the ad"),
+        "mk": ("Огласот е објавен: {title}", ["Здраво {name},", "Добра вест: твојот оглас „{title}“ е одобрен и објавен.", "Пораките за него можеш да ги следиш во делот „Пораки“."], "Види го огласот"),
+        "sq": ("Shpallja është publikuar: {title}", ["Përshëndetje {name},", "Lajm i mirë: shpallja jote “{title}” u miratua dhe u publikua.", "Mesazhet për të mund t'i ndjekësh te “Mesazhet”."], "Shiko shpalljen"),
+        "sr": ("Оглас је објављен: {title}", ["Здраво {name},", "Добра вест: твој оглас „{title}“ је одобрен и објављен.", "Поруке о њему можеш да пратиш у одељку „Поруке“."], "Погледај оглас"),
+        "bs": ("Oglas je objavljen: {title}", ["Zdravo {name},", "Dobra vijest: tvoj oglas „{title}“ je odobren i objavljen.", "Poruke o njemu možeš pratiti u odjeljku „Poruke“."], "Pogledaj oglas"),
+        "bg": ("Обявата е публикувана: {title}", ["Здравей {name},", "Добра новина: обявата ти „{title}“ е одобрена и публикувана.", "Съобщенията за нея можеш да следиш в раздел „Съобщения“."], "Виж обявата"),
+        "el": ("Η αγγελία δημοσιεύτηκε: {title}", ["Γεια σου {name},", "Καλά νέα: η αγγελία σου «{title}» εγκρίθηκε και δημοσιεύτηκε.", "Μπορείς να βλέπεις τα μηνύματα στην ενότητα «Μηνύματα»."], "Δες την αγγελία"),
+    },
+    "shop_received": {
+        "tr": ("Mağaza başvurun alındı: {shop}", ["Merhaba {name},", "{shop} için mağaza başvurunu aldık. Ekibimiz iki iş günü içinde dönüş yapacak.", "Başvurunun durumunu panelinden takip edebilirsin."], "Panelime git"),
+        "en": ("We received your shop application: {shop}", ["Hi {name},", "We received your shop application for {shop}. Our team will reply within two business days.", "You can follow its status in your panel."], "Go to my panel"),
+        "mk": ("Ја примивме апликацијата за продавница: {shop}", ["Здраво {name},", "Ја примивме твојата апликација за продавницата {shop}. Тимот ќе одговори во рок од два работни дена.", "Статусот можеш да го следиш во твојот панел."], "Мојот панел"),
+        "sq": ("E morëm aplikimin për dyqan: {shop}", ["Përshëndetje {name},", "E morëm aplikimin tënd për dyqanin {shop}. Ekipi ynë do të përgjigjet brenda dy ditëve pune.", "Statusin mund ta ndjekësh te paneli yt."], "Paneli im"),
+        "sr": ("Примили смо пријаву за радњу: {shop}", ["Здраво {name},", "Примили смо твоју пријаву за радњу {shop}. Наш тим ће одговорити у року од два радна дана.", "Статус можеш да пратиш у свом панелу."], "Мој панел"),
+        "bs": ("Primili smo prijavu za trgovinu: {shop}", ["Zdravo {name},", "Primili smo tvoju prijavu za trgovinu {shop}. Naš tim će odgovoriti u roku od dva radna dana.", "Status možeš pratiti u svom panelu."], "Moj panel"),
+        "bg": ("Получихме заявката за магазин: {shop}", ["Здравей {name},", "Получихме заявката ти за магазин {shop}. Екипът ни ще отговори до два работни дни.", "Статуса можеш да следиш в своя панел."], "Моят панел"),
+        "el": ("Λάβαμε την αίτηση καταστήματος: {shop}", ["Γεια σου {name},", "Λάβαμε την αίτησή σου για το κατάστημα {shop}. Η ομάδα μας θα απαντήσει εντός δύο εργάσιμων ημερών.", "Μπορείς να δεις την κατάσταση στο πάνελ σου."], "Το πάνελ μου"),
+    },
+    "shop_approved": {
+        "tr": ("Mağazan onaylandı: {shop}", ["Merhaba {name},", "Tebrikler! {shop} onaylandı ve açıldı. İlk üç ay ücretsiz.", "Panelinden hemen ürün eklemeye başlayabilirsin."], "Ürün ekle"),
+        "en": ("Your shop is approved: {shop}", ["Hi {name},", "Congratulations! {shop} was approved and is now open. The first three months are free.", "You can start adding products from your panel right away."], "Add products"),
+        "mk": ("Продавницата е одобрена: {shop}", ["Здраво {name},", "Честитки! {shop} е одобрена и отворена. Првите три месеци се бесплатни.", "Веднаш можеш да додаваш производи од твојот панел."], "Додај производи"),
+        "sq": ("Dyqani u miratua: {shop}", ["Përshëndetje {name},", "Urime! {shop} u miratua dhe u hap. Tre muajt e parë janë falas.", "Mund të shtosh produkte menjëherë nga paneli yt."], "Shto produkte"),
+        "sr": ("Радња је одобрена: {shop}", ["Здраво {name},", "Честитамо! {shop} је одобрена и отворена. Прва три месеца су бесплатна.", "Одмах можеш да додајеш производе из свог панела."], "Додај производе"),
+        "bs": ("Trgovina je odobrena: {shop}", ["Zdravo {name},", "Čestitamo! {shop} je odobrena i otvorena. Prva tri mjeseca su besplatna.", "Odmah možeš dodavati proizvode iz svog panela."], "Dodaj proizvode"),
+        "bg": ("Магазинът е одобрен: {shop}", ["Здравей {name},", "Поздравления! {shop} е одобрен и отворен. Първите три месеца са безплатни.", "Веднага можеш да добавяш продукти от панела си."], "Добави продукти"),
+        "el": ("Το κατάστημα εγκρίθηκε: {shop}", ["Γεια σου {name},", "Συγχαρητήρια! Το {shop} εγκρίθηκε και άνοιξε. Οι πρώτοι τρεις μήνες είναι δωρεάν.", "Μπορείς να προσθέσεις προϊόντα αμέσως από το πάνελ σου."], "Προσθήκη προϊόντων"),
+    },
+    "order_paid": {
+        "tr": ("Siparişin alındı: #{n}", ["Merhaba {name},", "#{n} numaralı siparişini aldık. Satıcı hazırlayıp kargolayınca sana haber vereceğiz."], "Siparişlerim"),
+        "en": ("We received your order: #{n}", ["Hi {name},", "We received your order #{n}. We will let you know when the seller ships it."], "My orders"),
+        "mk": ("Ја примивме нарачката: #{n}", ["Здраво {name},", "Ја примивме твојата нарачка #{n}. Ќе те известиме кога продавачот ќе ја испрати."], "Мои нарачки"),
+        "sq": ("E morëm porosinë: #{n}", ["Përshëndetje {name},", "E morëm porosinë tënde #{n}. Do të të njoftojmë kur shitësi ta dërgojë."], "Porositë e mia"),
+        "sr": ("Примили смо поруџбину: #{n}", ["Здраво {name},", "Примили смо твоју поруџбину #{n}. Јавићемо ти када продавац пошаље пакет."], "Моје поруџбине"),
+        "bs": ("Primili smo narudžbu: #{n}", ["Zdravo {name},", "Primili smo tvoju narudžbu #{n}. Javit ćemo ti kada prodavač pošalje paket."], "Moje narudžbe"),
+        "bg": ("Получихме поръчката: #{n}", ["Здравей {name},", "Получихме поръчката ти #{n}. Ще ти кажем, когато продавачът я изпрати."], "Моите поръчки"),
+        "el": ("Λάβαμε την παραγγελία: #{n}", ["Γεια σου {name},", "Λάβαμε την παραγγελία σου #{n}. Θα σε ενημερώσουμε όταν ο πωλητής την αποστείλει."], "Οι παραγγελίες μου"),
+    },
+}
+for _ev in EVENTS.values():
+    for _c in ("hr", "cnr"):
+        _ev[_c] = _ev["bs"]

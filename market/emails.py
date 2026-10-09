@@ -37,23 +37,39 @@ def _site(path):
     return settings.SITE_URL.rstrip("/") + path
 
 
+def user_lang(user, fallback=None):
+    """Uyenin kayit oldugu dil (profilde saklanir); yoksa verilen ya da varsayilan dil."""
+    try:
+        code = user.profile.lang
+    except Exception:
+        code = ""
+    return code or fallback or settings.DEFAULT_LANG
+
+
+def event_mail(event, lang, to, name, cta_path, extra_paras=(), **fmt):
+    """Logolu, 10 dilli olay e-postasi. cta_path /dil-oneki olmadan verilir (orn. /panel/)."""
+    if not to:
+        return
+    from .mail_i18n import EVENTS, WELCOME, html_mail, pick
+    table = EVENTS[event]
+    subject, paras, cta = pick(table, lang)
+    fmt = dict(fmt, name=name)
+    subject = subject.format(**fmt)
+    paras = [p.format(**fmt) for p in paras] + list(extra_paras)
+    code = lang if lang in table else "en"
+    url = _site(f"/{code}{cta_path}")
+    foot = pick(WELCOME, lang)["foot"]
+    text = "\n\n".join(paras + [f"{cta}: {url}", foot])
+    _send(subject, text, to, html_mail(paras, cta, url, foot))
+
+
 # ---------------------------------------------------------------------------
 # Magaza basvurusu
 # ---------------------------------------------------------------------------
-def notify_application_received(application):
-    subject = f"[Balkan Baazar] Başvurun alındı — {application.shop_name}"
-    body = (
-        f"Merhaba {application.contact_name},\n\n"
-        f"\"{application.shop_name}\" için mağaza başvurun alındı. Ekibimiz iki iş günü "
-        f"içinde dönecek. Durumu buradan takip edebilirsin:\n{_site('/panel/')}\n\n"
-        "— Balkan Baazar\n\n"
-        "---\n\n"
-        f"Hi {application.contact_name},\n\n"
-        f"Your shop application for \"{application.shop_name}\" was received. We'll get "
-        f"back to you within two business days. Track its status here:\n{_site('/panel/')}\n\n"
-        "— Balkan Baazar"
-    )
-    _send(subject, body, application.email)
+def notify_application_received(application, lang=None):
+    user = application.applicant
+    event_mail("shop_received", lang or user_lang(user), application.email, application.contact_name or user.username,
+               "/panel/", shop=application.shop_name)
 
 
 def notify_staff_new_application(application):
@@ -69,19 +85,9 @@ def notify_staff_new_application(application):
 
 
 def notify_application_approved(application, shop):
-    subject = f"[Balkan Baazar] Mağazan onaylandı — {shop.name}"
-    body = (
-        f"Merhaba {application.contact_name},\n\n"
-        f"\"{shop.name}\" onaylandı ve açıldı — ilk üç ay ücretsiz. Panelinden ürün "
-        f"yüklemeye hemen başlayabilirsin:\n{_site('/panel/')}\n\n"
-        "— Balkan Baazar\n\n"
-        "---\n\n"
-        f"Hi {application.contact_name},\n\n"
-        f"\"{shop.name}\" has been approved and is now open — first three months free. "
-        f"You can start uploading products right away:\n{_site('/panel/')}\n\n"
-        "— Balkan Baazar"
-    )
-    _send(subject, body, application.email)
+    user = application.applicant
+    event_mail("shop_approved", user_lang(user), application.email, application.contact_name or user.username,
+               "/panel/urun/yeni/", shop=shop.name)
 
 
 def notify_application_rejected(application):
@@ -129,18 +135,11 @@ def notify_new_message(message):
 # Siparis
 # ---------------------------------------------------------------------------
 def notify_order_paid_buyer(order):
-    subject = f"[Balkan Baazar] Siparişin alındı — #{order.pk}"
-    lines = "\n".join(f"- {it.title} × {it.qty} — € {it.line_total_eur:.0f}" for it in order.items.all())
-    body = (
-        f"Merhaba {order.full_name or order.buyer.username},\n\n"
-        f"#{order.pk} numaralı siparişin ödendi. İçerik:\n{lines}\n\nToplam: € {order.total_eur:.0f}\n\n"
-        f"Siparişlerin:\n{_site('/siparislerim/')}\n\n— Balkan Baazar\n\n"
-        "---\n\n"
-        f"Hi {order.full_name or order.buyer.username},\n\n"
-        f"Order #{order.pk} has been paid. Items:\n{lines}\n\nTotal: € {order.total_eur:.0f}\n\n"
-        f"Your orders:\n{_site('/siparislerim/')}\n\n— Balkan Baazar"
-    )
-    _send(subject, body, order.buyer.email)
+    lines = [f"{it.title} × {it.qty} — € {it.line_total_eur:.0f}" for it in order.items.all()]
+    lines.append(f"€ {order.total_eur:.0f}")
+    user = order.buyer
+    event_mail("order_paid", user_lang(user), user.email, order.full_name or user.username, "/siparislerim/",
+               extra_paras=["\n".join(lines)], n=order.pk)
 
 
 def notify_order_paid_sellers(order):
@@ -209,10 +208,18 @@ def notify_staff_new_user(user):
 
 def welcome_user(user, lang=None):
     """Hos geldin e-postasi: uyenin dilinde, logolu, 'ilk ilanini ver' dugmeli."""
+    from .models import UserProfile
+    lang = lang or settings.DEFAULT_LANG
+    try:
+        prof, _ = UserProfile.objects.get_or_create(user=user)
+        if prof.lang != lang:
+            prof.lang = lang
+            prof.save(update_fields=["lang"])
+    except Exception:
+        log.exception("Dil kaydedilemedi")
     if not user.email:
         return
     from .mail_i18n import WELCOME, html_mail, pick
-    lang = lang or settings.DEFAULT_LANG
     t = pick(WELCOME, lang)
     name = user.first_name or user.username
     code = lang if lang in WELCOME else "en"
@@ -251,14 +258,20 @@ def _listing_owner_email(listing):
     return (owner.email, owner) if owner and owner.email else (None, owner)
 
 
-def notify_listing_approved(listing):
-    to, _ = _listing_owner_email(listing)
+def notify_listing_received(listing, lang=None):
+    to, owner = _listing_owner_email(listing)
     if not to:
         return
-    link = _site(f"/ilan/{listing.pk}/{listing.slug}/")
-    _send(f"[Balkan Baazar] Ilanin yayinda: {listing.title}",
-          f"Merhaba,\n\n\"{listing.title}\" ilanin onaylandi ve yayinlandi:\n{link}\n\n— Balkan Baazar\n\n---\n\n"
-          f"Your listing \"{listing.title}\" was approved and is now live:\n{link}\n\n— Balkan Baazar", [to])
+    event_mail("listing_received", lang or user_lang(owner), to, owner.first_name or owner.username,
+               "/ilanlarim/", title=listing.title)
+
+
+def notify_listing_approved(listing):
+    to, owner = _listing_owner_email(listing)
+    if not to:
+        return
+    event_mail("listing_approved", user_lang(owner), to, owner.first_name or owner.username,
+               f"/ilan/{listing.pk}/{listing.slug}/", title=listing.title)
 
 
 def notify_listing_rejected(listing, reason=""):

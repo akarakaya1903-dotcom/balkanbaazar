@@ -60,7 +60,7 @@ def shop_apply(request):
         # Magaza yonetici onayina kadar acilmaz (Shop kaydi onayda olusur).
         from .tracking import bb_event
         bb_event(request, "SubmitApplication")
-        emails.notify_application_received(application)
+        emails.notify_application_received(application, emails.lang_of(request))
         emails.notify_staff_new_application(application)
         messages.success(request, msg(request, "apply_received"))
         return render(request, "market/account/apply_done.html", {"application": application})
@@ -126,6 +126,7 @@ def panel_product_form(request, pk=None):
             saved_item.pending_review = True
             saved_item.save(update_fields=["is_active", "pending_review"])
             emails.notify_staff_pending_listing(saved_item)
+            emails.notify_listing_received(saved_item, emails.lang_of(request))
         images = formset.save(commit=False)
         for img in images:
             img.listing = saved_item
