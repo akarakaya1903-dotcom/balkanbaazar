@@ -114,7 +114,22 @@ def listing_jsonld(context, item):
     }
     if item.image:
         data["image"] = [request.build_absolute_uri(item.image.url)]
-    return mark_safe('<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + "</script>")
+    scripts = [data]
+    # Gezinti yolu (Ana sayfa > Kategori > Alt kategori > Ilan): aramada ilan adresinin ustunde yol gorunur
+    try:
+        lang = context.get("lang") or "en"
+        root = item.category.parent or item.category
+        crumbs = [("Balkan Baazar", request.build_absolute_uri("/" + lang + "/"))]
+        crumbs.append((root.name(lang), request.build_absolute_uri("/" + lang + seo_url(item.mode, root.slug))))
+        if item.category.parent:
+            crumbs.append((item.category.name(lang), request.build_absolute_uri("/" + lang + seo_url(item.mode, root.slug, item.category.slug))))
+        crumbs.append((item.title, url))
+        scripts.append({"@context": "https://schema.org", "@type": "BreadcrumbList",
+                        "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": u}
+                                            for i, (n, u) in enumerate(crumbs)]})
+    except Exception:
+        pass
+    return mark_safe("".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False).replace("</", "<\\/") + "</script>" for d in scripts))
 
 
 @register.filter
