@@ -27,7 +27,8 @@ class Command(BaseCommand):
                     sub = Category.objects.filter(parent=root, slug=p.get("sub")).first() if p.get("sub") else None
                     qs = qs.filter(category=sub) if sub else qs.filter(Q(category=root) | Q(category__parent=root))
             if p.get("q"):
-                qs = qs.filter(Q(title__icontains=p["q"]) | Q(description__icontains=p["q"]))
+                qs = A.apply_text(qs, p["q"])
+            qs = A.apply_extra(qs, p)
             if p.get("city"):
                 qs = qs.filter(city__name=p["city"])
             if p.get("cond") in {"new", "used"}:

@@ -38,7 +38,9 @@ def _current_country(request):
 # ---------------------------------------------------------------------------
 @login_required
 def my_listings(request):
-    items = Listing.objects.filter(owner=request.user, mode=Mode.USED).select_related("category", "city")
+    from django.db.models import Count
+    items = (Listing.objects.filter(owner=request.user, mode=Mode.USED).select_related("category", "city")
+             .annotate(n_favs=Count("favorited_by", distinct=True), n_convs=Count("conversations", distinct=True)))
     return render(request, "market/mylistings/list.html", {"items": items})
 
 
@@ -672,10 +674,71 @@ def renew_listing(request, pk):
     item = get_object_or_404(Listing, pk=pk, owner=request.user)
     if request.method == "POST" and not item.pending_review:
         item.is_active = True
+        item.sold = False
+        item.expiry_warned = False
         item.created_at = timezone.now()
-        item.save(update_fields=["is_active", "created_at"])
+        item.save(update_fields=["is_active", "created_at", "sold", "expiry_warned"])
         messages.success(request, msg(request, "m_listing_renewed"))
     return redirect("market:my_listings")
+
+
+@login_required
+def toggle_listing(request, pk):
+    """Ilan sahibi: yayindan kaldir (pause), yeniden yayinla (activate) ya da satildi isaretle (sold)."""
+    item = get_object_or_404(Listing, pk=pk, owner=request.user, mode=Mode.USED)
+    action = request.POST.get("action", "")
+    if request.method == "POST" and not item.pending_review:
+        if action == "pause":
+            item.is_active = False
+        elif action == "sold":
+            item.is_active, item.sold = False, True
+        elif action == "activate":
+            item.is_active, item.sold = True, False
+            if item.days_left == 0:
+                item.created_at = timezone.now()
+                item.expiry_warned = False
+        else:
+            return redirect("market:my_listings")
+        item.save(update_fields=["is_active", "sold", "created_at", "expiry_warned"])
+        messages.success(request, msg(request, "m_listing_" + action))
+    return redirect("market:my_listings")
+
+
+@login_required
+def make_offer(request, listing_id):
+    """Alici teklif verir: teklif, satici ile olan sohbete hazir bir mesaj olarak duser."""
+    from datetime import timedelta
+    from .i18n import tr
+    listing = get_object_or_404(Listing, pk=listing_id, pending_review=False, is_active=True, mode=Mode.USED)
+    back = redirect("market:listing_detail", pk=listing.pk, slug=listing.slug)
+    other = _listing_owner(listing)
+    if request.method != "POST" or not other or other == request.user or listing.sold:
+        messages.error(request, msg(request, "m_msg_unavailable"))
+        return back
+    if _is_blocked(request.user, other):
+        messages.error(request, msg(request, "m_cannot_msg"))
+        return back
+    try:
+        amount = Decimal(request.POST.get("amount", "").strip().replace(",", ".").replace(" ", ""))
+    except Exception:
+        amount = Decimal(0)
+    if not (Decimal(0) < amount < Decimal(1000000000)):
+        messages.error(request, msg(request, "m_offer_bad"))
+        return back
+    if Message.objects.filter(sender=request.user, created_at__gte=timezone.now() - timedelta(seconds=60)).count() >= 8:
+        messages.error(request, msg(request, "m_msg_rate"))
+        return back
+    a, b = sorted([request.user, other], key=lambda u: u.pk)
+    conversation, _ = Conversation.objects.get_or_create(listing=listing, participant_a=a, participant_b=b)
+    body = msg(request, "m_offer_text").format(amount=Listing._fmt(amount, listing.currency_symbol()))
+    message = Message.objects.create(conversation=conversation, sender=request.user, body=body)
+    Conversation.objects.filter(pk=conversation.pk).update(updated_at=timezone.now())
+    from . import push
+    push.notify_new_message(message)
+    emails.notify_new_message(message)
+    Message.objects.filter(pk=message.pk).update(notified=True)
+    messages.success(request, msg(request, "m_offer_sent"))
+    return redirect("market:message_thread", pk=conversation.pk)
 
 
 def seller_profile(request, pk):

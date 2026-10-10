@@ -183,3 +183,25 @@ EVENTS = {
 for _ev in EVENTS.values():
     for _c in ("hr", "cnr"):
         _ev[_c] = _ev["bs"]
+
+
+EVENTS["price_drop"] = {
+    "tr": ("Fiyatı düştü: {title}", ["Merhaba {name},", "Favorilerindeki “{title}” ilanının fiyatı {old} değerinden {new} değerine düştü."], "İlanı gör"),
+    "en": ("Price drop: {title}", ["Hi {name},", "The price of “{title}” in your favorites dropped from {old} to {new}."], "View the ad"),
+    "mk": ("Намалена цена: {title}", ["Здраво {name},", "Цената на огласот „{title}“ од твоите омилени падна од {old} на {new}."], "Види го огласот"),
+    "sq": ("Çmimi ra: {title}", ["Përshëndetje {name},", "Çmimi i shpalljes “{title}” në të preferuarat e tua ra nga {old} në {new}."], "Shiko shpalljen"),
+    "sr": ("Снижена цена: {title}", ["Здраво {name},", "Цена огласа „{title}“ из твојих омиљених пала је са {old} на {new}."], "Погледај оглас"),
+    "bs": ("Snižena cijena: {title}", ["Zdravo {name},", "Cijena oglasa „{title}“ iz tvojih favorita pala je sa {old} na {new}."], "Pogledaj oglas"),
+    "bg": ("Намалена цена: {title}", ["Здравей {name},", "Цената на обявата „{title}“ от любимите ти падна от {old} на {new}."], "Виж обявата"),
+    "el": ("Μείωση τιμής: {title}", ["Γεια σου {name},", "Η τιμή της αγγελίας «{title}» στα αγαπημένα σου έπεσε από {old} σε {new}."], "Δες την αγγελία"),
+}
+EVENTS["expiring"] = {
+    "tr": ("İlanının süresi doluyor: {title}", ["Merhaba {name},", "“{title}” ilanının yayın süresi {n} gün içinde dolacak.", "İlanı tek tuşla yenileyebilirsin."], "İlanlarım"),
+    "en": ("Your ad is expiring: {title}", ["Hi {name},", "Your ad “{title}” expires in {n} days.", "You can renew it with one tap."], "My ads"),
+    "mk": ("Огласот истекува: {title}", ["Здраво {name},", "Твојот оглас „{title}“ истекува за {n} дена.", "Можеш да го обновиш со еден клик."], "Мои огласи"),
+    "sq": ("Shpallja po skadon: {title}", ["Përshëndetje {name},", "Shpallja jote “{title}” skadon pas {n} ditësh.", "Mund ta rinovosh me një klik."], "Shpalljet e mia"),
+    "sr": ("Оглас истиче: {title}", ["Здраво {name},", "Твој оглас „{title}“ истиче за {n} дана.", "Можеш га обновити једним кликом."], "Моји огласи"),
+    "bs": ("Oglas ističe: {title}", ["Zdravo {name},", "Tvoj oglas „{title}“ ističe za {n} dana.", "Možeš ga obnoviti jednim klikom."], "Moji oglasi"),
+    "bg": ("Обявата изтича: {title}", ["Здравей {name},", "Обявата ти „{title}“ изтича след {n} дни.", "Можеш да я подновиш с едно натискане."], "Моите обяви"),
+    "el": ("Η αγγελία λήγει: {title}", ["Γεια σου {name},", "Η αγγελία σου «{title}» λήγει σε {n} ημέρες.", "Μπορείς να την ανανεώσεις με ένα πάτημα."], "Οι αγγελίες μου"),
+}

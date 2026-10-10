@@ -169,7 +169,8 @@ def listings(request, _o=None):
 
     q = request.GET.get("q", "").strip()
     if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
+        qs = ATTR.apply_text(qs, q)
+    qs = ATTR.apply_extra(qs, request.GET)
     city = o.get("city") or request.GET.get("city", "")
     if city:
         qs = qs.filter(city__name=city)
@@ -212,7 +213,9 @@ def listings(request, _o=None):
         "nav_mode": mode,
         "root": root, "sub": sub, "cities": City.objects.filter(country=country),
         "f": {"q": q, "city": city, "cond": cond, "deliv": deliv,
-              "min": pmin, "max": pmax, "sort": sort},
+              "min": pmin, "max": pmax, "sort": sort,
+              "photo": request.GET.get("photo", ""), "video": request.GET.get("video", ""),
+              "since": request.GET.get("since", "")},
         "featured_shops": Shop.objects.listed().filter(country=country,
                                               **({"category": root} if root else {}))[:4]
         if mode == Mode.SHOP else [],
@@ -223,7 +226,8 @@ def listings(request, _o=None):
     }
     from urllib.parse import urlencode as _ue
     _p = {"mode": mode, "cat": cat_slug if root else "", "sub": sub_slug if sub else "", "city": city, "q": q,
-          "cond": cond, "deliv": deliv, "min": pmin, "max": pmax}
+          "cond": cond, "deliv": deliv, "min": pmin, "max": pmax,
+          "photo": ctx["f"]["photo"], "video": ctx["f"]["video"], "since": ctx["f"]["since"]}
     _p = {k: v for k, v in _p.items() if v}
     _p.update(dict(ctx["attr_pairs"]))
     ctx["search_qs"] = _ue(_p)

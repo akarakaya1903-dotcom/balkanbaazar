@@ -8,12 +8,14 @@
     <div class="thumb" style="{{ item.hue|tile }}">{{ item.icon }}</div>
     {% endif %}
     {% if item.is_boosted %}<span class="badge boost">★ {{ t.featured_badge }}</span>
+    {% elif item.price_dropped %}<span class="badge o">↓ −{{ item.drop_pct }}%</span>
     {% elif item.free_shipping %}<span class="badge g">{{ t.free }}</span>
     {% elif item.mode == 'used' and item.condition == 'new' %}<span class="badge o">{{ t.cnew }}</span>{% endif %}
   </div>
   <div class="cbody">
     <span class="tt">{{ item.title }}</span>
-    <span class="pr">{% price item country %}</span>
+    <span class="pr">{% price item country %}{% if item.price_dropped %} <s class="oldpr">{{ item.old_display_price }}</s>{% endif %}</span>
+    {% if item.mode == 'used' %}{% card_specs item lang as sp %}{% if sp %}<span class="spec">{{ sp|join:" · " }}</span>{% endif %}{% endif %}
     {% if country.currency != 'EUR' %}<span class="eur">≈ {% eur item %}</span>{% endif %}
     <span class="mt"><span>{{ item.city.name }}{% if item.shop.verified %} <span class="vok" title="{{ t.verified }}">✔</span>{% endif %}</span>
       <span>{% if item.mode == 'shop' %}{% if item.rating %}<span class="star">★</span> {{ item.rating }}{% else %}<span class="vok">{{ t.new_label }}</span>{% endif %}{% else %}{% if item.age_days == 0 %}{{ t.ago_today }}{% else %}{{ item.age_days }} {{ t.ago_days }}{% endif %}{% endif %}</span></span>

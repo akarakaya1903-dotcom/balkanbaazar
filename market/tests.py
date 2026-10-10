@@ -116,6 +116,42 @@ class FeatureTests(TestCase):
             self.assertContains(r, 'data-pane="pLoc"')
             self.assertContains(r, 'id="cmpBtn"')
 
+    def test_card_specs_and_extra_filters(self):
+        from types import SimpleNamespace as NS
+        from . import attributes as A
+        car = NS(category=NS(slug="vasita", parent_id=None, parent=None),
+                 attrs={"year": 2013, "km": 170000, "fuel": "petrol", "gearbox": "manual"})
+        self.assertEqual(A.card_specs(car, "tr"), ["2013", "170.000 km", "Benzin"])
+        from .models import Listing, Mode
+        qs = Listing.objects.filter(mode=Mode.USED)
+        for params in [{"photo": "1"}, {"video": "1"}, {"since": "7"}, {"since": "x"}]:
+            self.assertGreaterEqual(A.apply_extra(qs, params).count(), 0)
+        self.assertGreaterEqual(A.apply_text(qs, "iphone 256 gb").count(), 0)
+        for qsx in ["?mode=used&photo=1&since=7&video=1", "?mode=used&q=a+b"]:
+            self.assertEqual(self.client.get("/ilanlar/" + qsx).status_code, 200)
+
+    def test_price_drop_tracking(self):
+        from decimal import Decimal
+        from .models import Listing, Mode
+        it = Listing.objects.filter(mode=Mode.USED, is_active=True, pending_review=False).first()
+        if not it:
+            return
+        old = it.price_eur
+        it.price_eur = old - Decimal("10")
+        it.save()
+        it.refresh_from_db()
+        self.assertEqual(it.old_price_eur, old)
+        self.assertTrue(it.price_dropped)
+        self.assertGreater(it.drop_pct, 0)
+        it.price_eur = old + Decimal("5")
+        it.save()
+        it.refresh_from_db()
+        self.assertIsNone(it.old_price_eur)
+
+    def test_offer_and_toggle_need_login(self):
+        self.assertEqual(self.client.post("/ilan/1/teklif/", {"amount": "5"}).status_code, 302)
+        self.assertEqual(self.client.post("/ilanlarim/1/durum/", {"action": "sold"}).status_code, 302)
+
     def test_vehicle_form_has_equipment_checkboxes(self):
         r = self.client.get("/ilanlar/?mode=used&cat=vasita")
         self.assertEqual(r.status_code, 200)
@@ -607,7 +643,7 @@ class EventMailTests(TestCase):
         from .mail_i18n import EVENTS
         for event in EVENTS:
             for lang in ("tr", "en", "mk", "sq", "sr", "bs", "hr", "cnr", "bg", "el"):
-                emails.event_mail(event, lang, "a@example.com", "Ada", "/panel/", title="Telefon", shop="Dukjan", n=7)
+                emails.event_mail(event, lang, "a@example.com", "Ada", "/panel/", title="Telefon", shop="Dukjan", n=7, old="100 €", new="90 €")
         self.assertEqual(len(mail.outbox), len(EVENTS) * 10)
         for m in mail.outbox:
             self.assertTrue(m.alternatives)

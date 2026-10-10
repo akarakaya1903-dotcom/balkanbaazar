@@ -70,6 +70,16 @@
             <option value="hand" {% if f.deliv == 'hand' %}selected{% endif %}>{{ t.hand }}</option>
           </select>
         </label>
+        <label class="field"><span>{{ t.f_since }}</span>
+          <select name="since">
+            <option value="">{{ t.f_any }}</option>
+            <option value="1" {% if f.since == '1' %}selected{% endif %}>{{ t.f_1 }}</option>
+            <option value="7" {% if f.since == '7' %}selected{% endif %}>{{ t.f_7 }}</option>
+            <option value="30" {% if f.since == '30' %}selected{% endif %}>{{ t.f_30 }}</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" name="photo" value="1" {% if f.photo == '1' %}checked{% endif %}> {{ t.f_photo }}</label>
+        <label class="chk"><input type="checkbox" name="video" value="1" {% if f.video == '1' %}checked{% endif %}> {{ t.f_video }}</label>
         <input type="hidden" name="sort" value="{{ f.sort }}">
         <button class="btn-sea" type="submit">{{ t.apply }}</button>
         <a class="btn-line" style="margin-top:8px"
@@ -110,6 +120,9 @@
         <input type="hidden" name="deliv" value="{{ f.deliv }}">
         <input type="hidden" name="min" value="{{ f.min }}">
         <input type="hidden" name="max" value="{{ f.max }}">
+        <input type="hidden" name="since" value="{{ f.since }}">
+        {% if f.photo %}<input type="hidden" name="photo" value="1">{% endif %}
+        {% if f.video %}<input type="hidden" name="video" value="1">{% endif %}
         {% for k, v in attr_pairs %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
         <select name="sort" onchange="this.form.submit()" aria-label="{{ t.sort }}">
           <option value="new" {% if f.sort == 'new' %}selected{% endif %}>{{ t.s_new }}</option>
@@ -118,15 +131,20 @@
           <option value="pop" {% if f.sort == 'pop' %}selected{% endif %}>{{ t.s_pop }}</option>
         </select>
       </form>
+      <span class="vtoggle"><button type="button" data-v="grid" class="on">▦ {{ t.v_grid }}</button><button type="button" data-v="list">☰ {{ t.v_list }}</button></span>
     </div>
 
-    <div class="grid">
+    <div class="grid" id="lgrid">
       {% for item in page_obj %}{% include "market/_card.html" %}{% empty %}
       <div class="empty"><h3>{{ t.none }}</h3><p>{{ t.noneH }}</p>
         <p style="margin-top:14px"><b>{{ t.first_cta }}</b></p>
         <p>{% if mode == "shop" %}<a class="btn-sea" href="{% url 'market:shop_apply' %}">{{ t.openshop }}</a>{% else %}<a class="btn-sea" href="{% url 'market:my_listing_new' %}">{{ t.post }}</a>{% endif %}</p></div>{% endfor %}
     </div>
 
+    <script>(function(){var g=document.getElementById("lgrid"),bs=document.querySelectorAll(".vtoggle button");if(!g){return;}
+    function set(v){g.classList.toggle("listmode",v==="list");bs.forEach(function(b){b.classList.toggle("on",b.dataset.v===v);});try{localStorage.setItem("bbview",v);}catch(e){}}
+    bs.forEach(function(b){b.addEventListener("click",function(){set(b.dataset.v);});});
+    try{var v=localStorage.getItem("bbview");if(v==="list"){set("list");}}catch(e){}})();</script>
     {% if page_obj.has_other_pages %}
     <div class="pager">
       {% if page_obj.has_previous %}<a href="{% qs page=page_obj.previous_page_number %}">{{ t.prev }}</a>{% endif %}

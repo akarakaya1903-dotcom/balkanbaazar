@@ -206,3 +206,59 @@ def param_pairs(root, params):
             if params.get(n):
                 pairs.append((n, params.get(n)))
     return pairs
+
+
+CARD_PRIORITY = {"vasita": ["year", "km", "fuel", "gearbox"], "emlak": ["rooms", "m2", "floor"],
+                 "elektronik": ["storage_gb", "ram_gb", "color", "condition"],
+                 "giyim": ["size", "brand", "condition"], "moda": ["size", "brand", "condition"]}
+_UNITS = {"km": " km", "m2": " m²", "storage_gb": " GB", "ram_gb": " GB RAM", "power_hp": " hp"}
+
+
+def _fmt_value(key, kind, value, lang):
+    if kind == "number":
+        text = f"{int(value):,}".replace(",", ".") if key in ("km", "m2") else str(value)
+        return text + _UNITS.get(key, "")
+    if kind == "select":
+        return choice_label(str(value), lang)
+    return str(value)
+
+
+def card_specs(item, lang, n=3):
+    """Liste kartinda gosterilecek en onemli 2-3 ozellik (orn. 2013 · 170.000 km · Benzin)."""
+    root = root_slug(item.category)
+    attrs = item.attrs or {}
+    fields = {k: (kind, ch) for k, kind, ch in fields_for(root)}
+    keys = [k for k in CARD_PRIORITY.get(root, []) if k in fields]
+    keys += [k for k in fields if k not in keys and fields[k][0] != "multi"]
+    out = []
+    for key in keys:
+        value = attrs.get(key)
+        if value in (None, "", []):
+            continue
+        out.append(_fmt_value(key, fields[key][0], value, lang))
+        if len(out) >= n:
+            break
+    return out
+
+
+def apply_text(qs, q):
+    """Cok kelimeli arama: her kelime baslikta ya da aciklamada gecmeli."""
+    from django.db.models import Q
+    for word in (q or "").split()[:6]:
+        qs = qs.filter(Q(title__icontains=word) | Q(description__icontains=word))
+    return qs
+
+
+def apply_extra(qs, params):
+    """Gelismis arama: sadece fotografli (photo=1), sadece videolu (video=1), ilan tarihi (since=1|7|30 gun)."""
+    from datetime import timedelta
+    from django.db.models import Q
+    from django.utils import timezone
+    if params.get("photo") == "1":
+        qs = qs.filter(Q(image__gt="") | Q(gallery__isnull=False)).distinct()
+    if params.get("video") == "1":
+        qs = qs.filter(video__gt="")
+    since = params.get("since", "")
+    if since in ("1", "7", "30"):
+        qs = qs.filter(created_at__gte=timezone.now() - timedelta(days=int(since)))
+    return qs

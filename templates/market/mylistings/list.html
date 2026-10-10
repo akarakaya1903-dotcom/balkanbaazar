@@ -15,13 +15,18 @@
         <div class="cbody"><span class="tt">{{ item.title }}</span>
           <span class="pr">{% eur item %}</span>
           <span class="mt"><span>{{ item.city.name|default:"" }}</span>
-            <span>{% if item.pending_review %}<b style="color:#8A5A0E">⏳ {{ t.stat_pending }}</b>{% elif item.is_active %}{{ t.stat_active }}{% else %}—{% endif %}</span></span></div>
+            <span>{% if item.pending_review %}<b style="color:#8A5A0E">⏳ {{ t.stat_pending }}</b>{% elif item.sold %}<b>🏷 {{ t.d_sold }}</b>{% elif item.is_active %}{{ t.stat_active }}{% else %}—{% endif %}</span></span>
+          <span class="spec">👁 {{ item.views }} · ♥ {{ item.n_favs }} · ✉ {{ item.n_convs }}{% if item.is_active %} · {{ t.my_left }}: {{ item.days_left }}{% endif %}</span></div>
       </a>
       <div style="display:flex;gap:8px;padding:0 11px 12px;flex-wrap:wrap">
         <a class="btn-line" style="flex:1;padding:7px" href="{% url 'market:my_listing_edit' item.pk %}">{{ t.edit }}</a>
         <a class="btn-line" style="flex:1;padding:7px;color:#9C3C1B;border-color:#9C3C1B"
            href="{% url 'market:my_listing_delete' item.pk %}">{{ t.delete }}</a>
-        {% if not item.is_active and not item.pending_review %}<form method="post" action="{% url 'market:renew_listing' item.pk %}" style="flex:1 0 100%">{% csrf_token %}<button class="btn-sea" type="submit" style="width:100%;padding:7px">↻ {{ t.renew }}</button></form>{% endif %}
+        {% if not item.pending_review and not item.sold and not item.is_active or item.is_active and item.days_left <= 10 %}<form method="post" action="{% url 'market:renew_listing' item.pk %}" style="flex:1 0 100%">{% csrf_token %}<button class="btn-sea" type="submit" style="width:100%;padding:7px">↻ {{ t.renew }}</button></form>{% endif %}
+        {% if not item.pending_review %}<form method="post" action="{% url 'market:toggle_listing' item.pk %}" style="flex:1 0 100%;display:flex;gap:6px;flex-wrap:wrap">{% csrf_token %}
+          {% if item.is_active %}<button class="btn-line" name="action" value="sold" type="submit" style="flex:1;padding:7px">🏷 {{ t.my_sold }}</button>
+          <button class="btn-line" name="action" value="pause" type="submit" style="flex:1;padding:7px">⏸ {{ t.my_pause }}</button>
+          {% else %}<button class="btn-line" name="action" value="activate" type="submit" style="flex:1;padding:7px">▶ {{ t.my_activate }}</button>{% endif %}</form>{% endif %}
         {% if item.pending_review %}<p style="flex:1 0 100%;margin:0;font-size:12px;color:#8A5A0E">{{ t.pending_note }}</p>
         {% else %}<a class="btn-line" style="flex:1 0 100%;padding:7px;color:#8A5A0E;border-color:var(--amber)"
            href="{% url 'market:boost_options' item.pk %}">★ {{ t.boost_cta }}</a>{% endif %}

@@ -335,3 +335,11 @@ def notify_verification_result(vr):
         tr = f"{vr.shop.name} mağazanın doğrulama başvurusu onaylanamadı.{why} Belgeni yeniden yükleyebilirsin."
         en = f"Your verification request for {vr.shop.name} could not be approved.{(' Note: ' + vr.admin_note) if vr.admin_note else ''} You can upload a new document."
     _send("Balkan Baazar - Mağaza doğrulama / Shop verification", f"{tr}\n\n---\n\n{en}\n", owner.email)
+
+
+def notify_listing_expiring(listing, days_left):
+    to, owner = _listing_owner_email(listing)
+    if not to:
+        return
+    event_mail("expiring", user_lang(owner), to, owner.first_name or owner.username, "/ilanlarim/",
+               title=listing.title, n=days_left)

@@ -99,7 +99,7 @@ def build():
 
 
 DATA.update({
-"d_tab_info": ("İlan Bilgileri", "Listing info", "Информации", "Të dhënat", "Podaci", "Podaci", "Информация", "Στοιχεία"),
+"d_tab_info": ("İlan Bilgileri", "Listing info", "Информации", "Të dhënat", "Подаци", "Podaci", "Информация", "Στοιχεία"),
 "d_tab_loc": ("Konumu", "Location", "Локација", "Vendndodhja", "Локација", "Lokacija", "Местоположение", "Τοποθεσία"),
 "d_tab_tech": ("Teknik Bilgiler", "Technical info", "Технички информации", "Të dhëna teknike", "Техничке информације", "Tehničke informacije", "Технически данни", "Τεχνικά στοιχεία"),
 "d_no": ("İlan No", "Listing no.", "Број на оглас", "Nr. i shpalljes", "Број огласа", "Broj oglasa", "Номер на обявата", "Αρ. αγγελίας"),
@@ -114,4 +114,36 @@ DATA.update({
 "d_cmp_go": ("Karşılaştırmaya git", "Open comparison", "Отвори споредба", "Hap krahasimin", "Отвори поређење", "Otvori usporedbu", "Към сравнението", "Άνοιγμα σύγκρισης"),
 "d_price": ("Fiyat", "Price", "Цена", "Çmimi", "Цена", "Cijena", "Цена", "Τιμή"),
 "d_city": ("Şehir", "City", "Град", "Qyteti", "Град", "Grad", "Град", "Πόλη"),
+})
+
+
+DATA.update({
+'m_listing_pause': ('İlan yayından kaldırıldı.', 'Listing unpublished.', 'Огласот е симнат од објава.', 'Shpallja u hoq nga publikimi.', 'Оглас је скинут са објаве.', 'Oglas je skinut s objave.', 'Обявата е свалена от публикация.', 'Η αγγελία αποσύρθηκε.'),
+'m_listing_activate': ('İlan yeniden yayında.', 'Listing is live again.', 'Огласот повторно е објавен.', 'Shpallja u publikua përsëri.', 'Оглас је поново објављен.', 'Oglas je ponovo objavljen.', 'Обявата отново е публикувана.', 'Η αγγελία δημοσιεύτηκε ξανά.'),
+'m_listing_sold': ('İlan satıldı olarak işaretlendi.', 'Listing marked as sold.', 'Огласот е означен како продаден.', 'Shpallja u shënua si e shitur.', 'Оглас је означен као продат.', 'Oglas je označen kao prodat.', 'Обявата е означена като продадена.', 'Η αγγελία σημειώθηκε ως πουλημένη.'),
+'m_offer_bad': ('Geçerli bir tutar yaz.', 'Enter a valid amount.', 'Внеси важечки износ.', 'Shkruaj një shumë të vlefshme.', 'Унеси важећи износ.', 'Unesi važeći iznos.', 'Въведи валидна сума.', 'Γράψε ένα έγκυρο ποσό.'),
+'m_offer_sent': ('Teklifin satıcıya iletildi.', 'Your offer was sent to the seller.', 'Понудата е испратена до продавачот.', 'Oferta u dërgua te shitësi.', 'Понуда је послата продавцу.', 'Ponuda je poslana prodavaču.', 'Офертата е изпратена на продавача.', 'Η προσφορά στάλθηκε στον πωλητή.'),
+'m_offer_text': ('💰 Teklifim: {amount}', '💰 My offer: {amount}', '💰 Моја понуда: {amount}', '💰 Oferta ime: {amount}', '💰 Моја понуда: {amount}', '💰 Moja ponuda: {amount}', '💰 Моята оферта: {amount}', '💰 Η προσφορά μου: {amount}'),
+'d_offer': ('Teklif ver', 'Make an offer', 'Дај понуда', 'Bëj ofertë', 'Дај понуду', 'Daj ponudu', 'Направи оферта', 'Κάνε προσφορά'),
+'d_offer_amount': ('Teklifin', 'Your offer', 'Твојата понуда', 'Oferta jote', 'Твоја понуда', 'Tvoja ponuda', 'Твоята оферта', 'Η προσφορά σου'),
+'d_send': ('Gönder', 'Send', 'Испрати', 'Dërgo', 'Пошаљи', 'Pošalji', 'Изпрати', 'Αποστολή'),
+'d_dropped': ('Fiyatı düştü', 'Price dropped', 'Цената падна', 'Çmimi ra', 'Цена снижена', 'Cijena snižena', 'Цената падна', 'Μείωση τιμής'),
+'d_sold': ('Satıldı', 'Sold', 'Продадено', 'E shitur', 'Продато', 'Prodano', 'Продадено', 'Πουλήθηκε'),
+'d_paused': ('Bu ilan yayında değil.', 'This listing is not available.', 'Овој оглас не е достапен.', 'Kjo shpallje nuk është e disponueshme.', 'Овај оглас није доступан.', 'Ovaj oglas nije dostupan.', 'Тази обява не е налична.', 'Αυτή η αγγελία δεν είναι διαθέσιμη.'),
+'f_photo': ('Sadece fotoğraflı', 'With photos only', 'Само со фотографии', 'Vetëm me foto', 'Само са фотографијама', 'Samo s fotografijama', 'Само със снимки', 'Μόνο με φωτογραφίες'),
+'f_video': ('Sadece videolu', 'With video only', 'Само со видео', 'Vetëm me video', 'Само са видеом', 'Samo s videom', 'Само с видео', 'Μόνο με βίντεο'),
+'f_since': ('İlan tarihi', 'Posted', 'Објавено', 'Postuar', 'Објављено', 'Objavljeno', 'Публикувано', 'Δημοσιεύτηκε'),
+'f_any': ('Hepsi', 'Any time', 'Секогаш', 'Kurdo', 'Било када', 'Bilo kada', 'По всяко време', 'Οποτεδήποτε'),
+'f_1': ('Son 24 saat', 'Last 24 hours', 'Последни 24 часа', '24 orët e fundit', 'Последња 24 сата', 'Posljednja 24 sata', 'Последните 24 часа', 'Τελευταίες 24 ώρες'),
+'f_7': ('Son 7 gün', 'Last 7 days', 'Последни 7 дена', '7 ditët e fundit', 'Последњих 7 дана', 'Posljednjih 7 dana', 'Последните 7 дни', 'Τελευταίες 7 ημέρες'),
+'f_30': ('Son 30 gün', 'Last 30 days', 'Последни 30 дена', '30 ditët e fundit', 'Последњих 30 дана', 'Posljednjih 30 dana', 'Последните 30 дни', 'Τελευταίες 30 ημέρες'),
+'v_list': ('Liste', 'List', 'Листа', 'Listë', 'Листа', 'Lista', 'Списък', 'Λίστα'),
+'v_grid': ('Kutu', 'Grid', 'Мрежа', 'Rrjet', 'Мрежа', 'Mreža', 'Мрежа', 'Πλέγμα'),
+'my_pause': ('Yayından kaldır', 'Unpublish', 'Симни од објава', 'Hiq nga publikimi', 'Скини са објаве', 'Skini s objave', 'Свали от публикация', 'Απόσυρση'),
+'my_activate': ('Yeniden yayınla', 'Publish again', 'Објави повторно', 'Publiko përsëri', 'Објави поново', 'Objavi ponovo', 'Публикувай отново', 'Δημοσίευση ξανά'),
+'my_sold': ('Satıldı işaretle', 'Mark as sold', 'Означи како продадено', 'Shëno si të shitur', 'Означи као продато', 'Označi kao prodano', 'Маркирай като продадено', 'Σήμανση ως πουλημένο'),
+'my_left': ('Kalan süre (gün)', 'Days left', 'Преостанати дена', 'Ditë të mbetura', 'Преостало дана', 'Preostalo dana', 'Оставащи дни', 'Ημέρες που απομένουν'),
+'v_views': ('Görüntülenme', 'Views', 'Прегледи', 'Shikime', 'Прегледи', 'Pregledi', 'Прегледи', 'Προβολές'),
+'v_favs': ('Favori', 'Favorites', 'Омилени', 'Të preferuara', 'Омиљени', 'Favoriti', 'Любими', 'Αγαπημένα'),
+'v_msgs': ('Mesaj', 'Messages', 'Пораки', 'Mesazhe', 'Поруке', 'Poruke', 'Съобщения', 'Μηνύματα'),
 })

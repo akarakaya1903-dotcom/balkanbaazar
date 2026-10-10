@@ -272,6 +272,11 @@ class Listing(models.Model):
     video = models.FileField("Video (mp4/webm, en fazla 50 MB)", upload_to="listings/video/", blank=True, null=True)
     video_processed = models.BooleanField(default=False, editable=False)  # sunucuda kucultuldu mu
     attrs = models.JSONField(default=dict, blank=True)  # kategoriye ozel alanlar (marka, yil, km, oda sayisi ...)
+    old_price_eur = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, editable=False)
+    old_price_input = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, editable=False)
+    price_dropped_at = models.DateTimeField(null=True, blank=True, editable=False)
+    sold = models.BooleanField("Satildi", default=False)
+    expiry_warned = models.BooleanField(default=False, editable=False)
     featured_until = models.DateTimeField(null=True, blank=True, db_index=True)
     track_stock = models.BooleanField(default=False, help_text="Acilirsa stok adedi tukeninceye kadar satisa acik kalir")
     stock = models.PositiveIntegerField(null=True, blank=True, help_text="track_stock acikken gecerli")
@@ -304,9 +309,62 @@ class Listing(models.Model):
         if self.video and not getattr(self.video, "_committed", True):
             self.video_processed = False
         new_image = bool(self.image) and not getattr(self.image, "_committed", True)
+        dropped_from = None
+        if self.pk and kwargs.get("update_fields") is None:
+            prev = Listing.objects.filter(pk=self.pk).values("price_eur", "price_input").first()
+            if prev and prev["price_eur"] != self.price_eur:
+                if self.price_eur < prev["price_eur"]:
+                    self.old_price_eur = prev["price_eur"]
+                    self.old_price_input = prev["price_input"]
+                    self.price_dropped_at = timezone.now()
+                    dropped_from = prev["price_eur"]
+                else:
+                    self.old_price_eur = self.old_price_input = self.price_dropped_at = None
         super().save(*args, **kwargs)
         if new_image:
             make_thumb(self.image)
+        if dropped_from is not None and self.is_active and not self.pending_review and self.mode == Mode.USED:
+            try:
+                from .notify_price import notify_price_drop
+                notify_price_drop(self, dropped_from)
+            except Exception:
+                pass
+
+    def currency_symbol(self):
+        """Ilan fiyatinin yazildigi para biriminin simgesi (teklif mesajinda kullanilir)."""
+        if self.price_input is not None and self.price_currency:
+            if self.price_currency == "EUR":
+                return "€"
+            c = self.country
+            return c.symbol if c.currency == self.price_currency else self.price_currency
+        return self.country.symbol
+
+    @property
+    def price_dropped(self):
+        return bool(self.old_price_eur and self.old_price_eur > self.price_eur and self.price_dropped_at
+                    and (timezone.now() - self.price_dropped_at).days < 30)
+
+    @property
+    def drop_pct(self):
+        if not self.price_dropped:
+            return 0
+        return int(round((self.old_price_eur - self.price_eur) / self.old_price_eur * 100))
+
+    def old_display_price(self, viewer=None):
+        """Eski fiyat, simdiki fiyatla ayni bicimde (ustu cizili gosterim icin)."""
+        if not self.old_price_eur:
+            return ""
+        if self.price_input is not None and self.price_currency and self.old_price_input is not None:
+            if self.price_currency == "EUR":
+                return self._fmt(self.old_price_input, "€")
+            c = self.country
+            return self._fmt(self.old_price_input, c.symbol if c.currency == self.price_currency else self.price_currency)
+        return (viewer or self.country).format_price(self.old_price_eur)
+
+    @property
+    def days_left(self):
+        from django.conf import settings as _s
+        return max(0, getattr(_s, "LISTING_DAYS", 60) - self.age_days)
 
     @property
     def parent_category(self):
