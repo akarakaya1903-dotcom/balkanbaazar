@@ -83,6 +83,27 @@ class FeatureTests(TestCase):
         self.assertIn("color", keys)
         self.assertNotIn("eq_safety", keys)
 
+    def test_all_categories_have_detail_fields(self):
+        from types import SimpleNamespace as NS
+        from . import attributes as A
+        for root in ["elektronik", "ev-yasam", "ev-mobilya", "giyim", "moda", "anne-bebek", "hobi-spor", "spor",
+                     "kitap-hobi", "is-sanayi", "is-ilanlari", "hayvanlar", "evcil-hayvan", "kozmetik", "market",
+                     "oto-yapi", "emlak"]:
+            with self.subTest(root=root):
+                fields = A.fields_for(root)
+                self.assertGreaterEqual(len(fields), 4)
+                for lang in ["tr", "en", "mk", "sq", "sr", "bg", "el", "bs", "hr", "cnr"]:
+                    attrs = {}
+                    for key, kind, ch in fields:
+                        attrs[key] = [ch[0]] if kind == "multi" else (ch[0] if kind == "select" else (5 if kind == "number" else "x"))
+                    item = NS(category=NS(slug=root, parent_id=None, parent=None), attrs=attrs)
+                    secs = A.display_sections(item, lang)
+                    self.assertTrue(secs)
+        item = NS(category=NS(slug="elektronik", parent_id=None, parent=None),
+                  attrs={"brand": "Apple", "os": "os_ios", "warranty_type": "w_importer"})
+        self.assertEqual(A.display_sections(item, "tr")[0][2],
+                         [("Marka", "Apple"), ("İşletim sistemi", "iOS"), ("Garanti", "İthalatçı garantili")])
+
     def test_vehicle_form_has_equipment_checkboxes(self):
         r = self.client.get("/ilanlar/?mode=used&cat=vasita")
         self.assertEqual(r.status_code, 200)

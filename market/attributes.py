@@ -2,16 +2,7 @@
 """Kategoriye ozel ilan alanlari (arac: marka/model/yil/km, emlak: oda/m2 vb.), formlar ve filtreler icin."""
 
 # alan: (anahtar, tur, secenekler)  tur: text | number | select
-SCHEMA = {
-    "vasita": [],  # attributes_vehicle.py ile doldurulur
-    "emlak": [("deal", "select", ["sale", "rent"]), ("rooms", "select", ["1+0", "1+1", "2+1", "3+1", "4+1", "5+"]),
-              ("m2", "number", None), ("floor", "number", None)],
-    "elektronik": [("brand", "text", None), ("model", "text", None)],
-    "giyim": [("brand", "text", None), ("size", "text", None)],
-    "moda": [("brand", "text", None), ("size", "text", None)],
-    "is-ilanlari": [("job_type", "select", ["fulltime", "parttime", "remote"])],
-    "oto-yapi": [("brand", "text", None)],
-}
+SCHEMA = {}
 
 LANGS = ["tr", "en", "mk", "sq", "sr", "bg", "el", "bs"]
 _L = lambda *v: dict(zip(LANGS, v))
@@ -48,11 +39,16 @@ CHOICES = {
 _FALL = {"hr": "bs", "cnr": "bs"}
 
 from . import attributes_vehicle as _V  # noqa: E402
+from . import attributes_more as _M  # noqa: E402
 SCHEMA["vasita"] = _V.SCHEMA_VASITA
+SCHEMA.update(_M.SCHEMA)
+LABELS.update({k: v for k, v in _M.LABELS.items() if k not in LABELS})
+CHOICES.update({k: v for k, v in _M.CHOICES.items() if k not in CHOICES})
 LABELS.update({k: v for k, v in _V.LABELS.items() if k not in LABELS})
 CHOICES.update({k: v for k, v in _V.CHOICES.items() if k not in CHOICES})
-GROUPS = {"vasita": _V.GROUPS}
-FILTER_OFF = {k for g, keys, ok in _V.GROUPS if not ok for k in keys}  # filtre cubugunda gosterilmeyenler
+GROUPS = dict(_M.groups())
+GROUPS["vasita"] = _V.GROUPS
+FILTER_OFF = {k for g, keys, ok in _V.GROUPS if not ok for k in keys} | _M.FILTER_OFF  # filtre cubugunda gosterilmeyenler
 
 
 def _pick(table, key, lang):
