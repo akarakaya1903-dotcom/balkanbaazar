@@ -1,4 +1,4 @@
 <script>(function(){var sel=document.getElementById("id_category");if(!sel){return;}
 var map={{ form.cat_roots_json|safe }},inputs=[].slice.call(document.querySelectorAll("[data-cats]"));
-function apply(){var root=map[sel.value]||"";inputs.forEach(function(i){var show=i.dataset.cats.split(" ").indexOf(root)>-1,l=i.closest("label");if(l){l.style.display=show?"":"none";}i.disabled=!show;});}
+function apply(){var root=map[sel.value]||"";inputs.forEach(function(i){var show=i.dataset.cats.split(" ").indexOf(root)>-1,l=i.closest(".field");if(l){l.style.display=show?"":"none";}i.disabled=!show;});}
 sel.addEventListener("change",apply);apply();})();</script>

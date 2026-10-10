@@ -3,9 +3,7 @@
 
 # alan: (anahtar, tur, secenekler)  tur: text | number | select
 SCHEMA = {
-    "vasita": [("brand", "text", None), ("model", "text", None), ("year", "number", None), ("km", "number", None),
-               ("fuel", "select", ["petrol", "diesel", "lpg", "hybrid", "electric"]),
-               ("gearbox", "select", ["manual", "automatic"])],
+    "vasita": [],  # attributes_vehicle.py ile doldurulur
     "emlak": [("deal", "select", ["sale", "rent"]), ("rooms", "select", ["1+0", "1+1", "2+1", "3+1", "4+1", "5+"]),
               ("m2", "number", None), ("floor", "number", None)],
     "elektronik": [("brand", "text", None), ("model", "text", None)],
@@ -49,6 +47,13 @@ CHOICES = {
 }
 _FALL = {"hr": "bs", "cnr": "bs"}
 
+from . import attributes_vehicle as _V  # noqa: E402
+SCHEMA["vasita"] = _V.SCHEMA_VASITA
+LABELS.update({k: v for k, v in _V.LABELS.items() if k not in LABELS})
+CHOICES.update({k: v for k, v in _V.CHOICES.items() if k not in CHOICES})
+GROUPS = {"vasita": _V.GROUPS}
+FILTER_OFF = {k for g, keys, ok in _V.GROUPS if not ok for k in keys}  # filtre cubugunda gosterilmeyenler
+
 
 def _pick(table, key, lang):
     d = table.get(key, {})
@@ -88,6 +93,11 @@ def clean_attrs(root, data):
     attrs = {}
     for key, kind, choices in fields_for(root):
         value = data.get("attr_" + key)
+        if kind == "multi":
+            vals = [v for v in (value or []) if v in (choices or [])]
+            if vals:
+                attrs[key] = vals
+            continue
         if value in (None, ""):
             continue
         attrs[key] = int(value) if kind == "number" else str(value).strip()
@@ -100,16 +110,43 @@ def display_rows(item, lang):
     rows = []
     for key, kind, choices in fields_for(root):
         value = (item.attrs or {}).get(key)
-        if value in (None, ""):
+        if value in (None, "") or kind == "multi":
             continue
         rows.append((label(key, lang), choice_label(str(value), lang) if kind == "select" else value))
     return rows
+
+
+def display_sections(item, lang):
+    """Ilan sayfasi icin bolumler: [(baslik, "table"|"tags", [(etiket, deger)] | [etiket])]."""
+    root = root_slug(item.category)
+    attrs = item.attrs or {}
+    fields = {k: (kind, ch) for k, kind, ch in fields_for(root)}
+    groups = GROUPS.get(root) or [("attrs_title", [k for k in fields], True)]
+    tables, tags_out = [], []
+    for title_key, keys, _ok in groups:
+        rows = []
+        for key in keys:
+            kind, ch = fields[key]
+            value = attrs.get(key)
+            if value in (None, "", []):
+                continue
+            if kind == "multi":
+                tags = [choice_label(str(v), lang) for v in value if v in (ch or [])]
+                if tags:
+                    tags_out.append((label(key, lang), "tags", tags))
+            else:
+                rows.append((label(key, lang), choice_label(str(value), lang) if kind == "select" else value))
+        if rows:
+            tables.append((label(title_key, lang), "table", rows))
+    return tables + tags_out
 
 
 def filter_specs(root, params, lang):
     """Kenar cubuk filtreleri icin alan tanimlari ve mevcut degerler."""
     specs = []
     for key, kind, choices in fields_for(root):
+        if kind == "multi" or key in FILTER_OFF:
+            continue
         spec = {"key": key, "kind": kind, "label": label(key, lang)}
         if kind == "select":
             spec["choices"] = [(c, choice_label(c, lang)) for c in choices]
@@ -126,6 +163,8 @@ def filter_specs(root, params, lang):
 def apply_filters(qs, root, params):
     """a_<anahtar>, a_<anahtar>_min / _max parametrelerini sorguya uygular."""
     for key, kind, choices in fields_for(root):
+        if kind == "multi" or key in FILTER_OFF:
+            continue
         if kind == "number":
             for suffix, op in (("min", "gte"), ("max", "lte")):
                 raw = params.get("a_%s_%s" % (key, suffix), "")
@@ -145,6 +184,8 @@ def param_pairs(root, params):
     """Siralama formunda filtrelerin korunmasi icin gizli alanlar."""
     pairs = []
     for key, kind, choices in fields_for(root):
+        if kind == "multi" or key in FILTER_OFF:
+            continue
         names = ["a_%s_min" % key, "a_%s_max" % key] if kind == "number" else ["a_" + key]
         for n in names:
             if params.get(n):

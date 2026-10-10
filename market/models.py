@@ -693,6 +693,8 @@ class SiteSettings(models.Model):
                                     help_text="Ornek: https://www.instagram.com/balkanbaazar")
     viber_url = models.URLField("Viber baglantisi", max_length=200, blank=True,
                                 help_text="Viber toplulugu veya hesap baglantisi (https://...). Bos birakirsan gorunmez.")
+    viber_number = models.CharField("Viber telefon numarasi", max_length=20, blank=True,
+                                    help_text="Ulke koduyla yaz, ornek: +38970123456. Sitede GOSTERILMEZ; Viber dugmesine tiklayan kisi dogrudan sana yazar. Doluysa Viber baglantisindan once bu kullanilir.")
     whatsapp_url = models.URLField("WhatsApp kanali baglantisi", max_length=200, blank=True,
                                    help_text="Ornek: https://whatsapp.com/channel/... Bos birakirsan gorunmez.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,

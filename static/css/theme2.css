@@ -124,3 +124,10 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .combo-list li.none{color:var(--ink-3);cursor:default}
 
 .cookiebar .cbtns{display:flex;gap:8px;flex:0 0 auto}.cookiebar .cno{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+
+.attrtags{margin:12px 0}.attrtags b{display:block;margin-bottom:6px}
+.attrtags ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.attrtags li{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.fgroup h4{margin:18px 0 2px;padding-top:10px;border-top:1px solid var(--line);font-size:16px}
+.fmulti{display:block}.fmulti ul,.fmulti>div{display:flex;flex-wrap:wrap;gap:6px 14px}
+.fmulti label{font-weight:400;display:inline-flex;gap:6px;align-items:center}

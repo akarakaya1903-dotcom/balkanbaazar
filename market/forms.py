@@ -61,16 +61,22 @@ class AttrFormMixin:
     def _init_attrs(self):
         import json
         from . import attributes as A
+        heads = {keys[0]: gkey for gkey, keys, _ok in A.GROUPS.get("vasita", [])}
         for key, (kind, choices, cats) in A.all_keys().items():
             widget_attrs = {"data-cats": " ".join(cats)}
             if kind == "number":
                 field = forms.IntegerField(required=False, min_value=0, widget=forms.NumberInput(attrs=widget_attrs))
+            elif kind == "multi":
+                field = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple(attrs=widget_attrs),
+                                                  choices=[(c, A.choice_label(c, "tr")) for c in choices])
             elif kind == "select":
                 field = forms.ChoiceField(required=False, widget=forms.Select(attrs=widget_attrs),
                                           choices=[("", "—")] + [(c, A.choice_label(c, "tr")) for c in choices])
             else:
                 field = forms.CharField(required=False, max_length=60, widget=forms.TextInput(attrs=widget_attrs))
             field.label = A.label(key, "tr")
+            if key in heads:
+                field.group_title = A.label(heads[key], "tr")
             self.fields["attr_" + key] = field
             self.initial["attr_" + key] = (self.instance.attrs or {}).get(key, "")
         self.cat_roots_json = json.dumps({c.pk: A.root_slug(c) for c in self.fields["category"].queryset})

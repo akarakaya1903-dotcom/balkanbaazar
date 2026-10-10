@@ -325,3 +325,19 @@ def seo_listing(request, mode, cat, sub=None, city=None):
     title, desc = seo_text(lang, mode, cat_name, place, t.get("brand", "Balkan Baazar"))
     override["seo"] = {"title": title, "description": desc, "h1": f"{cat_name} · {mode_label} · {place}"}
     return listings(request, override)
+
+
+def viber_chat(request):
+    """Viber dugmesi: numara sayfada gorunmez, tiklayan kisi dogrudan site sahibiyle Viber sohbeti acar."""
+    import re
+    from django.http import HttpResponse
+    from .models import SiteSettings
+    ss = SiteSettings.objects.first()
+    digits = re.sub(r"\D", "", ss.viber_number) if ss and ss.viber_number else ""
+    if not (7 <= len(digits) <= 15):
+        raise Http404
+    resp = HttpResponse(status=302)  # viber:// semasi HttpResponseRedirect'te engelli
+    resp["Location"] = "viber://chat?number=%2B" + digits
+    resp["Cache-Control"] = "no-store"
+    resp["X-Robots-Tag"] = "noindex, nofollow"
+    return resp

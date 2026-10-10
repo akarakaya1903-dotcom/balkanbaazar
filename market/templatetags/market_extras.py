@@ -176,6 +176,12 @@ def seo_url(mode, cat, sub=None, city=None):
 
 
 @register.simple_tag
+def attr_sections(item, lang):
+    from market import attributes
+    return attributes.display_sections(item, lang)
+
+
+@register.simple_tag
 def attr_rows(item, lang):
     from market import attributes
     return attributes.display_rows(item, lang)

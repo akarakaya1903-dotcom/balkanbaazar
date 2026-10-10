@@ -68,6 +68,25 @@ class FeatureTests(TestCase):
         self.assertEqual(A.clean_attrs("olmayan", {"attr_year": "2018"}), {})
         self.assertEqual(A.choice_label("diesel", "mk"), "Дизел")
 
+    def test_vehicle_full_sections(self):
+        from types import SimpleNamespace as NS
+        from . import attributes as A
+        got = A.clean_attrs("vasita", {"attr_color": "col_black", "attr_eq_safety": ["e_abs", "bogus"], "attr_p_hood": "pt_painted"})
+        self.assertEqual(got, {"color": "col_black", "p_hood": "pt_painted", "eq_safety": ["e_abs"]})
+        cat = NS(slug="vasita", parent_id=None, parent=None)
+        item = NS(category=cat, attrs={**got, "brand": "VW", "year": 2013})
+        for lang in ["tr", "en", "mk", "sq", "sr", "bg", "el", "bs", "hr", "cnr"]:
+            secs = A.display_sections(item, lang)
+            self.assertEqual([x[1] for x in secs], ["table", "table", "tags"])
+        self.assertEqual(A.display_sections(item, "tr")[2][2], ["ABS"])
+        keys = [x["key"] for x in A.filter_specs("vasita", {}, "tr")]
+        self.assertIn("color", keys)
+        self.assertNotIn("eq_safety", keys)
+
+    def test_vehicle_form_has_equipment_checkboxes(self):
+        r = self.client.get("/ilanlar/?mode=used&cat=vasita")
+        self.assertEqual(r.status_code, 200)
+
     def test_attribute_filter_pages_open(self):
         for qs in ["?mode=used&cat=vasita&a_year_min=2010&a_km_max=200000", "?mode=used&cat=emlak&a_rooms=2%2B1&a_m2_min=50"]:
             with self.subTest(qs=qs):
@@ -617,3 +636,20 @@ class FooterSocialTests(TestCase):
         body = self.client.get("/mk/").content.decode()
         for url in ("facebook.com/balkanbaazar", "instagram.com/balkanbaazar", "invite.viber.com", "whatsapp.com/channel/test"):
             self.assertIn(url, body)
+
+
+class ViberChatTests(TestCase):
+    def test_number_hidden_in_html_but_redirects(self):
+        from market.models import SiteSettings
+        SiteSettings.objects.update_or_create(pk=1, defaults={"viber_number": "+389 70 123 456", "viber_url": ""})
+        body = self.client.get("/mk/").content.decode()
+        self.assertIn("/viber/", body)
+        self.assertNotIn("389", body.replace("1389", ""))
+        r = self.client.get("/mk/viber/")
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(r["Location"], "viber://chat?number=%2B38970123456")
+
+    def test_no_number_404(self):
+        from market.models import SiteSettings
+        SiteSettings.objects.update_or_create(pk=1, defaults={"viber_number": ""})
+        self.assertEqual(self.client.get("/mk/viber/").status_code, 404)

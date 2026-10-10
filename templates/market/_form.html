@@ -1,9 +1,14 @@
 {% if form.non_field_errors %}<div class="formerr">{{ form.non_field_errors }}</div>{% endif %}
 {% for field in form %}
-{% if field.name != skip %}<label class="field">
+{% if field.name != skip %}{% if field.field.group_title %}<div class="field fgroup" data-cats="vasita"><h4>{{ field.field.group_title }}</h4></div>{% endif %}
+{% if field.field.widget.allow_multiple_selected %}<div class="field fmulti">
+  <span>{{ field.label }}</span>
+  {{ field }}
+  {% if field.errors %}<em class="ferr">{{ field.errors|striptags }}</em>{% endif %}
+</div>{% else %}<label class="field">
   <span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>
   {{ field }}
   {% if field.help_text %}<em class="fhelp">{{ field.help_text|safe }}</em>{% endif %}
   {% if field.errors %}<em class="ferr">{{ field.errors|striptags }}</em>{% endif %}
-</label>{% endif %}
+</label>{% endif %}{% endif %}
 {% endfor %}
