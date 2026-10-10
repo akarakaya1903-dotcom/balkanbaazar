@@ -687,6 +687,14 @@ class SiteSettings(models.Model):
                                       help_text="Ornek: ca-pub-1234567890123456. AdSense onayi gelince girilir. Bos birakirsan Google reklami gosterilmez.")
     adsense_slot = models.CharField("AdSense yan sutun reklam birimi kimligi", max_length=20, blank=True,
                                     help_text="160x600 dikey reklam biriminin sayisal kimligi. Yan sutunlarda kendi banner'in yoksa bu gosterilir.")
+    facebook_url = models.URLField("Facebook sayfasi baglantisi", max_length=200, blank=True,
+                                   help_text="Ornek: https://www.facebook.com/balkanbaazar . Bos birakirsan alt bilgide gorunmez.")
+    instagram_url = models.URLField("Instagram hesabi baglantisi", max_length=200, blank=True,
+                                    help_text="Ornek: https://www.instagram.com/balkanbaazar")
+    viber_url = models.URLField("Viber baglantisi", max_length=200, blank=True,
+                                help_text="Viber toplulugu veya hesap baglantisi (https://...). Bos birakirsan gorunmez.")
+    whatsapp_url = models.URLField("WhatsApp kanali baglantisi", max_length=200, blank=True,
+                                   help_text="Ornek: https://whatsapp.com/channel/... Bos birakirsan gorunmez.")
     company_name = models.CharField("Sirket adi", max_length=160, blank=True,
                                     help_text="Alt bilgide (c) satirinda gorunur.")
     address = models.TextField("Adres", blank=True)

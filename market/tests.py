@@ -602,3 +602,18 @@ class AccountMsgsI18nTests(TestCase):
         url = reverse("market:password_reset")
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+
+
+class FooterSocialTests(TestCase):
+    def test_links_show_only_when_set(self):
+        from market.models import SiteSettings
+        SiteSettings.objects.update_or_create(pk=1, defaults={"facebook_url": "", "instagram_url": "", "viber_url": "", "whatsapp_url": ""})
+        self.assertNotIn('class="fsoc"', self.client.get("/mk/").content.decode())
+        SiteSettings.objects.update_or_create(pk=1, defaults={
+            "facebook_url": "https://www.facebook.com/balkanbaazar",
+            "instagram_url": "https://www.instagram.com/balkanbaazar",
+            "viber_url": "https://invite.viber.com/?g2=test",
+            "whatsapp_url": "https://whatsapp.com/channel/test"})
+        body = self.client.get("/mk/").content.decode()
+        for url in ("facebook.com/balkanbaazar", "instagram.com/balkanbaazar", "invite.viber.com", "whatsapp.com/channel/test"):
+            self.assertIn(url, body)
