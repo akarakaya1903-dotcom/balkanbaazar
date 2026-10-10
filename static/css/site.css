@@ -694,6 +694,13 @@ header.top{background:var(--hdr-bg)!important;color:var(--hdr-fg);border-bottom:
 .fgroup h4{margin:18px 0 2px;padding-top:10px;border-top:1px solid var(--line);font-size:16px}
 .fmulti{display:block}.fmulti ul,.fmulti>div{display:flex;flex-wrap:wrap;gap:6px 14px}
 .fmulti label{font-weight:400;display:inline-flex;gap:6px;align-items:center}
+.dtabs{display:flex;gap:6px;margin:12px 0 4px}
+.dtabs button{flex:1;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:600;cursor:pointer;color:var(--ink)}
+.dtabs button.on{background:#FFC800;border-color:#E6B400;color:#1a1a1a}
+.dpane{display:none}.dpane.on{display:block}
+.sellerbox{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin:10px 0}
+.sellerbox .av{width:46px;height:46px;border-radius:50%;background:var(--sea);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:0 0 auto}
+.cmptbl th{width:14%}.cmptbl td{vertical-align:top;min-width:150px}
 .ft-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:0 0 22px}
 .ft{background:#fff;border:1px solid #DDE6EA;border-radius:6px;overflow:hidden;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .ft-top{padding:20px 12px 16px;color:#fff}

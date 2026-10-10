@@ -182,6 +182,12 @@ def attr_sections(item, lang):
 
 
 @register.simple_tag
+def attr_split(item, lang):
+    from market import attributes
+    return attributes.display_split(item, lang)
+
+
+@register.simple_tag
 def attr_rows(item, lang):
     from market import attributes
     return attributes.display_rows(item, lang)

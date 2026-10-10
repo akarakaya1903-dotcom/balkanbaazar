@@ -256,6 +256,7 @@ class Listing(models.Model):
     price_currency = models.CharField(max_length=3, blank=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="listings")
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    district = models.CharField("Ilce / mahalle", max_length=80, blank=True)
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="listings",
         help_text="Alt kategori secilir",

@@ -56,6 +56,7 @@ urlpatterns = [
     path("uyelik/sifre-sifirla/<uidb64>/<token>/", views_account.PwResetConfirm.as_view(), name="password_reset_confirm"),
     path("uyelik/sifre-degistir/", login_required(views_account.PwChange.as_view()), name="password_change"),
     path("viber/", views.viber_chat, name="viber_chat"),
+    path("karsilastir/", views.compare_listings, name="compare"),
     path("uyelik/google/", views_google.google_login, name="google_login"),
     path("uyelik/google/geri/", views_google.google_callback, name="google_callback"),
     path("uyelik/sifre-sifirla/tamam/", auth_views.PasswordResetCompleteView.as_view(

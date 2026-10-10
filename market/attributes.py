@@ -137,6 +137,25 @@ def display_sections(item, lang):
     return tables + tags_out
 
 
+def display_split(item, lang):
+    """(ilan bilgileri satirlari, teknik bolumler): ilk tablo ilan bilgisi, kalanlar teknik sekmesine gider."""
+    secs = display_sections(item, lang)
+    if secs and secs[0][1] == "table":
+        return secs[0][2], secs[1:]
+    return [], secs
+
+
+def flat_rows(item, lang):
+    """Karsilastirma icin duz [(etiket, deger)] listesi (etiketli donanimlar virgulle birlesir)."""
+    out = []
+    for title, kind, rows in display_sections(item, lang):
+        if kind == "table":
+            out.extend(rows)
+        else:
+            out.append((title, ", ".join(rows)))
+    return out
+
+
 def filter_specs(root, params, lang):
     """Kenar cubuk filtreleri icin alan tanimlari ve mevcut degerler."""
     specs = []

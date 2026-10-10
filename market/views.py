@@ -341,3 +341,27 @@ def viber_chat(request):
     resp["Cache-Control"] = "no-store"
     resp["X-Robots-Tag"] = "noindex, nofollow"
     return resp
+
+
+def compare_listings(request):
+    """Ilan karsilastirma: ?ids=1,2,3 (en fazla 4 ilan)."""
+    lang, country = _current(request)
+    ids = []
+    for raw in request.GET.get("ids", "").split(","):
+        if raw.strip().isdigit() and int(raw) not in ids:
+            ids.append(int(raw))
+    ids = ids[:4]
+    found = {x.pk: x for x in Listing.objects.filter(pk__in=ids, is_active=True, pending_review=False)
+             .select_related("city", "category", "category__parent", "country")}
+    items = [found[i] for i in ids if i in found]
+    per, labels = [], []
+    for it in items:
+        d = {}
+        for k, v in ATTR.flat_rows(it, lang):
+            d[k] = v
+            if k not in labels:
+                labels.append(k)
+        per.append(d)
+    rows = [(lab, [d.get(lab, "—") for d in per]) for lab in labels]
+    cols = [{"item": it, "rm": ",".join(str(i.pk) for i in items if i.pk != it.pk)} for it in items]
+    return render(request, "market/compare.html", {"cols": cols, "rows": rows})

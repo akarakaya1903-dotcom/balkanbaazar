@@ -269,10 +269,11 @@ class IndividualListingForm(PriceCurrencyMixin, CityAddMixin, AttrFormMixin, Vid
 
     class Meta:
         model = Listing
-        fields = ("title", "category", "price_input", "price_currency", "city", "condition", "delivery",
+        fields = ("title", "category", "price_input", "price_currency", "city", "district", "condition", "delivery",
                   "description", "image", "video", "seller_phone")
-        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
-        labels = {"price_input": "Fiyat"}
+        widgets = {"description": forms.Textarea(attrs={"rows": 4}),
+                   "district": forms.TextInput(attrs={"placeholder": "orn. Karpos, Tantavi Mah."})}
+        labels = {"price_input": "Fiyat", "district": "İlçe / mahalle (haritada gösterilir)"}
 
     def __init__(self, *args, country=None, **kwargs):
         super().__init__(*args, **kwargs)

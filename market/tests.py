@@ -104,6 +104,18 @@ class FeatureTests(TestCase):
         self.assertEqual(A.display_sections(item, "tr")[0][2],
                          [("Marka", "Apple"), ("İşletim sistemi", "iOS"), ("Garanti", "İthalatçı garantili")])
 
+    def test_compare_page_and_detail_tabs(self):
+        self.assertEqual(self.client.get("/karsilastir/").status_code, 200)
+        from .models import Listing, Mode
+        it = Listing.objects.filter(mode=Mode.USED, is_active=True, pending_review=False).first()
+        if it:
+            r = self.client.get(f"/karsilastir/?ids={it.pk},abc,{it.pk}")
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, it.title)
+            r = self.client.get(f"/ilan/{it.pk}/{it.slug}/")
+            self.assertContains(r, 'data-pane="pLoc"')
+            self.assertContains(r, 'id="cmpBtn"')
+
     def test_vehicle_form_has_equipment_checkboxes(self):
         r = self.client.get("/ilanlar/?mode=used&cat=vasita")
         self.assertEqual(r.status_code, 200)

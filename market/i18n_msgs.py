@@ -96,3 +96,22 @@ def build():
             out[code][key] = text
         out["hr"][key] = out["cnr"][key] = out["bs"][key]
     return out
+
+
+DATA.update({
+"d_tab_info": ("İlan Bilgileri", "Listing info", "Информации", "Të dhënat", "Podaci", "Podaci", "Информация", "Στοιχεία"),
+"d_tab_loc": ("Konumu", "Location", "Локација", "Vendndodhja", "Локација", "Lokacija", "Местоположение", "Τοποθεσία"),
+"d_tab_tech": ("Teknik Bilgiler", "Technical info", "Технички информации", "Të dhëna teknike", "Техничке информације", "Tehničke informacije", "Технически данни", "Τεχνικά στοιχεία"),
+"d_no": ("İlan No", "Listing no.", "Број на оглас", "Nr. i shpalljes", "Број огласа", "Broj oglasa", "Номер на обявата", "Αρ. αγγελίας"),
+"d_joined": ("Hesap açma tarihi", "Member since", "Член од", "Anëtar që nga", "Члан од", "Član od", "Член от", "Μέλος από"),
+"d_other_ads": ("Satıcının diğer ilanları", "Seller's other listings", "Други огласи на продавачот", "Shpalljet e tjera të shitësit", "Остали огласи продавца", "Ostali oglasi prodavača", "Други обяви на продавача", "Άλλες αγγελίες του πωλητή"),
+"d_compare": ("İlan karşılaştır", "Compare listings", "Спореди огласи", "Krahaso shpalljet", "Упореди огласе", "Usporedi oglase", "Сравни обяви", "Σύγκριση αγγελιών"),
+"d_district": ("İlçe / mahalle", "District / neighborhood", "Општина / населба", "Lagjja / zona", "Општина / насеље", "Općina / naselje", "Район / квартал", "Περιοχή / γειτονιά"),
+"d_map_note": ("Harita yaklaşık bölgeyi gösterir; tam adres paylaşılmaz.", "The map shows the approximate area; the exact address is not shared.", "Мапата ја прикажува приближната област; точната адреса не се споделува.", "Harta tregon zonën përafërsisht; adresa e saktë nuk ndahet.", "Мапа приказује приближну област; тачна адреса се не дели.", "Karta prikazuje okvirno područje; tačna adresa se ne dijeli.", "Картата показва приблизителния район; точният адрес не се споделя.", "Ο χάρτης δείχνει την ευρύτερη περιοχή· η ακριβής διεύθυνση δεν κοινοποιείται."),
+"d_cmp_empty": ("Karşılaştırılacak ilan yok. Bir ilan sayfasında \"İlan karşılaştır\"a bas.", "No listings to compare. Use \"Compare listings\" on a listing page.", "Нема огласи за споредба. Користи „Спореди огласи“ на страница на оглас.", "S'ka shpallje për krahasim. Përdor „Krahaso shpalljet“ në faqen e një shpalljeje.", "Нема огласа за поређење. Користи „Упореди огласе“ на страници огласа.", "Nema oglasa za usporedbu. Koristi „Usporedi oglase“ na stranici oglasa.", "Няма обяви за сравнение. Използвай „Сравни обяви“ на страницата на обява.", "Δεν υπάρχουν αγγελίες για σύγκριση. Χρησιμοποίησε το «Σύγκριση αγγελιών» σε μια αγγελία."),
+"d_cmp_remove": ("Çıkar", "Remove", "Отстрани", "Hiq", "Уклони", "Ukloni", "Премахни", "Αφαίρεση"),
+"d_cmp_added": ("Karşılaştırmaya eklendi", "Added to comparison", "Додадено во споредба", "U shtua në krahasim", "Додато у поређење", "Dodano u usporedbu", "Добавено", "Προστέθηκε"),
+"d_cmp_go": ("Karşılaştırmaya git", "Open comparison", "Отвори споредба", "Hap krahasimin", "Отвори поређење", "Otvori usporedbu", "Към сравнението", "Άνοιγμα σύγκρισης"),
+"d_price": ("Fiyat", "Price", "Цена", "Çmimi", "Цена", "Cijena", "Цена", "Τιμή"),
+"d_city": ("Şehir", "City", "Град", "Qyteti", "Град", "Grad", "Град", "Πόλη"),
+})

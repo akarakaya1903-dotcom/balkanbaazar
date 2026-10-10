@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load market_extras %}
+{% block title %}{{ t.d_compare }} — {{ t.brand }}{% endblock %}
+{% block robots_meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="wrap"><section class="sect">
+  <h1>{{ t.d_compare }}</h1>
+  {% if not cols %}<p>{{ t.d_cmp_empty }}</p>{% else %}
+  <div style="overflow-x:auto">
+  <table class="attrtbl cmptbl">
+    <tr><th></th>{% for c in cols %}<td><a href="{% url 'market:listing_detail' c.item.pk c.item.slug %}">{% if c.item.image %}<img src="{{ c.item.image.url }}" alt="" style="width:100%;max-width:180px;border-radius:10px;display:block;margin-bottom:6px">{% endif %}{{ c.item.title }}</a>
+      <div><a class="small" href="?ids={{ c.rm }}">✕ {{ t.d_cmp_remove }}</a></div></td>{% endfor %}</tr>
+    <tr><th>{{ t.d_price }}</th>{% for c in cols %}{% with item=c.item %}<td>{% price item country %}</td>{% endwith %}{% endfor %}</tr>
+    <tr><th>{{ t.d_city }}</th>{% for c in cols %}<td>{{ c.item.city.name|default:"—" }}{% if c.item.district %}, {{ c.item.district }}{% endif %}</td>{% endfor %}</tr>
+    {% for label, vals in rows %}<tr><th>{{ label }}</th>{% for v in vals %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}
+  </table></div>
+  {% endif %}
+</section></div>
+{% endblock %}

@@ -77,8 +77,34 @@
         <h1 style="font-size:24px">{{ item.title }}</h1>
         {% if item.shop %}<div style="margin:2px 0 8px;font-size:13px"><a href="{% url 'market:shop_detail' item.shop.slug %}" style="color:var(--sea);font-weight:600">🏪 {{ item.shop.name }}</a> {% if item.shop.verified %}<span class="vok">✔ {{ t.verified }}</span>{% endif %} {% if item.shop.rating %}<span class="star">★</span> {{ item.shop.rating }}{% endif %}</div>{% endif %}
         {% if item.owner and not item.shop %}{% user_verified item.owner as uv %}{% if uv %}<div style="font-size:12.5px;color:#0F766E;margin-bottom:6px">✔ {{ t.verified_user }}</div>{% endif %}{% seller_rating_of item.owner as sr %}{% if sr.1 %}<div style="font-size:13px;margin-bottom:6px"><span class="star">★</span> {{ sr.0 }} ({{ sr.1 }})</div>{% endif %}{% endif %}
+        {% if item.mode == 'used' %}
+        {% attr_split item lang as asp %}
+        <div class="dtabs" role="tablist">
+          <button type="button" class="on" data-pane="pInfo">{{ t.d_tab_info }}</button>
+          <button type="button" data-pane="pLoc">{{ t.d_tab_loc }}</button>
+          {% if asp.1 %}<button type="button" data-pane="pTech">{{ t.d_tab_tech }}</button>{% endif %}
+        </div>
+        <div class="dpane on" id="pInfo">
+          <table class="attrtbl"><tr><th>{{ t.date }}</th><td>{{ item.created_at|date:"d.m.Y" }}</td></tr><tr><th>{{ t.d_no }}</th><td style="color:#8B1E1E">{{ item.pk }}</td></tr>{% for k, v in asp.0 %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}</table>
+        </div>
+        <div class="dpane" id="pLoc">
+          <p style="margin:8px 0"><b>📍 {{ item.city.name }}{% if item.district %}, {{ item.district }}{% endif %}</b></p>
+          <div id="mapBox" data-q="{% if item.district %}{{ item.district }}, {% endif %}{{ item.city.name }}" data-cc="{{ item.country.code|lower }}" style="height:260px;border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line)"></div>
+          <p class="small" style="margin:6px 0">{{ t.d_map_note }}</p>
+        </div>
+        {% if asp.1 %}<div class="dpane" id="pTech">{% for title, kind, rows in asp.1 %}{% if kind == "table" %}<table class="attrtbl"><caption>{{ title }}</caption>{% for k, v in rows %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}</table>{% else %}<div class="attrtags"><b>{{ title }}</b><ul>{% for tg in rows %}<li>✓ {{ tg }}</li>{% endfor %}</ul></div>{% endif %}{% endfor %}</div>{% endif %}
+        <script>(function(){var tabs=document.querySelectorAll(".dtabs button"),box=document.getElementById("mapBox"),loaded=false;
+        function loadMap(){if(loaded||!box){return;}loaded=true;
+          fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes="+encodeURIComponent(box.dataset.cc)+"&q="+encodeURIComponent(box.dataset.q)).then(function(r){return r.json();}).then(function(j){
+            if(!j||!j[0]){box.textContent="—";return;}var la=parseFloat(j[0].lat),lo=parseFloat(j[0].lon),d=0.012;
+            box.innerHTML='<iframe title="map" style="width:100%;height:100%;border:0" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox='+(lo-d)+'%2C'+(la-d)+'%2C'+(lo+d)+'%2C'+(la+d)+'&layer=mapnik&marker='+la+'%2C'+lo+'"></iframe>';
+          }).catch(function(){box.textContent="—";});}
+        tabs.forEach(function(b){b.addEventListener("click",function(){tabs.forEach(function(x){x.classList.toggle("on",x===b);});
+          document.querySelectorAll(".dpane").forEach(function(p){p.classList.toggle("on",p.id===b.dataset.pane);});if(b.dataset.pane==="pLoc"){loadMap();}});});})();</script>
+        {% else %}
         {% attr_sections item lang as asecs %}{% for title, kind, rows in asecs %}{% if kind == "table" %}<table class="attrtbl"><caption>{{ title }}</caption>{% for k, v in rows %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}</table>{% else %}<div class="attrtags"><b>{{ title }}</b><ul>{% for tg in rows %}<li>✓ {{ tg }}</li>{% endfor %}</ul></div>{% endif %}{% endfor %}
-        {% if item.owner and not item.shop %}<div style="margin:2px 0 8px;font-size:13px"><a href="{% url 'market:seller_profile' item.owner.pk %}" style="color:var(--sea);font-weight:600">👤 {{ item.owner.first_name|default:item.owner.username }}</a></div>{% endif %}
+        {% endif %}
+        {% if item.owner and not item.shop %}<div class="sellerbox"><span class="av">{{ item.owner.first_name|default:item.owner.username|slice:":1"|upper }}</span><div><a href="{% url 'market:seller_profile' item.owner.pk %}"><b>{{ item.owner.first_name|default:item.owner.username }}</b></a><div class="small">{{ t.d_joined }}: {{ item.owner.date_joined|date:"F Y" }}</div><a class="small" href="{% url 'market:seller_profile' item.owner.pk %}">{{ t.d_other_ads }} ›</a></div></div>{% endif %}
         <div class="dprice" style="margin-top:10px">{% price item country %}</div>
         {% if item.price_input and item.price_currency %}{% price_alt item as palt %}{% if palt %}<div class="eur">{{ palt }}</div>{% endif %}{% elif country.currency != 'EUR' %}<div class="eur">≈ {% eur item %}</div>{% endif %}
         {% if item.mode == 'shop' and item.review_count %}
@@ -138,10 +164,14 @@
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
           {% if item.seller_phone %}<a class="btn-line" style="color:#128C7E;border-color:#128C7E" data-track="Contact" target="_blank" rel="noopener" href="https://wa.me/{{ item.seller_phone|digits }}?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">💬 {{ t.wa_btn }}</a>{% endif %}
+          {% if item.mode == "used" %}<button class="btn-line" type="button" id="cmpBtn" data-id="{{ item.pk }}" data-url="{% url 'market:compare' %}">⇄ {{ t.d_compare }}</button>{% endif %}
           <button class="btn-line" type="button" id="shareBtn">↗ {{ t.share_btn }}</button>
           <a class="btn-line" data-track="Contact" target="_blank" rel="noopener" href="https://wa.me/?text={{ item.title|urlencode }}%20-%20https%3A%2F%2Fbalkanbaazar.com{{ request.path|urlencode }}">WhatsApp</a>
         </div>
         <script>document.getElementById("shareBtn").addEventListener("click",function(){var d={title:document.title,url:location.href};if(navigator.share){navigator.share(d).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(location.href);this.textContent="✓";}});</script>
+        <script>(function(){var b=document.getElementById("cmpBtn");if(!b){return;}b.addEventListener("click",function(){var k="bbcmp",a=[];try{a=JSON.parse(localStorage.getItem(k)||"[]");}catch(e){}
+          var id=b.dataset.id;a=a.filter(function(x){return x!==id;});a.push(id);a=a.slice(-4);try{localStorage.setItem(k,JSON.stringify(a));}catch(e){}
+          location.href=b.dataset.url+"?ids="+a.join(",");});})();</script>
         {% if user.is_authenticated %}
         <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--ink-3);font-size:13px">⚑ {{ t.report_btn }}</summary>
           <form method="post" action="{% url 'market:report_listing' item.pk %}" style="margin-top:8px">{% csrf_token %}
